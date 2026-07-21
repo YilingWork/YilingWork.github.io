@@ -273,7 +273,9 @@ section{padding:66px 0;scroll-margin-top:70px}
 @media(max-width:820px){.teach-grid{grid-template-columns:1fr;gap:30px}}
 
 /* CERTS */
-.cert-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cert-group+.cert-group{margin-top:28px}
+.cert-cat{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
 .cert{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 16px;text-align:center;box-shadow:var(--shadow)}
 .cert .seal{width:46px;height:46px;margin:0 auto 12px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);
   display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:18px;background:var(--gold-wash)}
@@ -343,7 +345,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
   <div class="cell"><div class="n tnum">5</div><div class="l"><span class="zh">期刊論文</span><span class="en">Journal articles</span></div></div>
   <div class="cell"><div class="n tnum">7</div><div class="l"><span class="zh">研究計畫</span><span class="en">Research projects</span></div></div>
   <div class="cell"><div class="n tnum">11</div><div class="l"><span class="zh">指導論文/專題</span><span class="en">Theses &amp; projects</span></div></div>
-  <div class="cell"><div class="n tnum">5</div><div class="l"><span class="zh">專業證照</span><span class="en">Certifications</span></div></div>
+  <div class="cell"><div class="n tnum">6</div><div class="l"><span class="zh">專業證照</span><span class="en">Certifications</span></div></div>
 </div>
 </div></header>
 
@@ -503,7 +505,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
         </div>
       </div>
       <p class="icap-note"><span class="zh">★「醫藥行銷學」於 2026 年 4 月獲<strong>勞動部勞動力發展署 iCAP 職能導向課程認證</strong>（效期至 2029/04/22）。 <a href="https://icap.wda.gov.tw/Resources/resources_Class_List_Detail.aspx?K=W&amp;C=115-0138" target="_blank" rel="noopener">查看認證 →</a></span><span class="en">★ "Pharmaceutical Marketing" earned <strong>iCAP competency-based course accreditation</strong> from the Workforce Development Agency, Ministry of Labor (Apr 2026, valid to Apr 2029). <a href="https://icap.wda.gov.tw/Resources/resources_Class_List_Detail.aspx?K=W&amp;C=115-0138" target="_blank" rel="noopener">View →</a></span></p>
-      <p class="sub" style="margin-top:14px;font-size:14px"><span class="zh">指導學生專題多次於全國專題競賽獲獎，並延伸為國際研討會發表與期刊論文。</span><span class="en">Mentored projects have won national competition awards and grown into international presentations and journal articles.</span></p>
+      <p class="sub" style="margin-top:14px;font-size:14px"><span class="zh">指導學生專題多次於專題競賽獲獎，並延伸為國際研討會發表與期刊論文。</span><span class="en">Mentored projects have won competition awards and grown into international presentations and journal articles.</span></p>
     </div>
     <div class="reveal">
       <span class="kicker" style="color:var(--faint)"><span class="zh">指導學生</span><span class="en">Mentored students</span></span>
@@ -528,12 +530,21 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
     <span class="kicker">Credentials · 專業證照</span>
     <h2><span class="zh">專業證照</span><span class="en">Professional Certifications</span></h2>
   </div>
-  <div class="cert-grid reveal">
-    <div class="cert"><div class="seal">藥</div><div class="cn"><span class="zh">藥師執照</span><span class="en">Pharmacist License</span></div><div class="co"><span class="zh">行政院衛生署（現衛福部）</span><span class="en">Dept. of Health / MOHW</span></div></div>
-    <div class="cert"><div class="seal">AI</div><div class="cn"><span class="zh">AI 應用規劃師－初級</span><span class="en">AI Application Planner — Associate</span></div><div class="co"><span class="zh">經濟部產業人才能力鑑定</span><span class="en">MOEA iPAS</span></div></div>
-    <div class="cert"><div class="seal">G</div><div class="cn">Gemini Certified Educator</div><div class="co">Google for Education</div></div>
-    <div class="cert"><div class="seal">再</div><div class="cn"><span class="zh">再生醫療藥師課程完訓</span><span class="en">Regenerative Medicine for Pharmacists</span></div><div class="co"><span class="zh">藥師公會全國聯合會</span><span class="en">Federation of Taiwan Pharmacists</span></div></div>
-    <div class="cert"><div class="seal">動</div><div class="cn"><span class="zh">動物用藥品管理訓練結業</span><span class="en">Veterinary Medicine Management</span></div><div class="co"><span class="zh">中華民國基層藥師協會</span><span class="en">Grassroots Pharmacists Assoc.</span></div></div>
+  <div class="cert-group reveal">
+    <div class="cert-cat"><span class="zh">藥學專業</span><span class="en">Pharmacy</span></div>
+    <div class="cert-grid">
+      <div class="cert"><div class="seal">藥</div><div class="cn"><span class="zh">藥師執照</span><span class="en">Pharmacist License</span></div><div class="co"><span class="zh">行政院衛生署（現衛福部）</span><span class="en">Dept. of Health / MOHW</span></div></div>
+      <div class="cert"><div class="seal">再</div><div class="cn"><span class="zh">再生醫療藥師課程完訓</span><span class="en">Regenerative Medicine for Pharmacists</span></div><div class="co"><span class="zh">藥師公會全國聯合會</span><span class="en">Federation of Taiwan Pharmacists</span></div></div>
+      <div class="cert"><div class="seal">動</div><div class="cn"><span class="zh">動物用藥品管理訓練結業</span><span class="en">Veterinary Medicine Management</span></div><div class="co"><span class="zh">中華民國基層藥師協會</span><span class="en">Grassroots Pharmacists Assoc.</span></div></div>
+    </div>
+  </div>
+  <div class="cert-group reveal">
+    <div class="cert-cat"><span class="zh">人工智慧</span><span class="en">Artificial Intelligence</span></div>
+    <div class="cert-grid">
+      <div class="cert"><div class="seal">AI</div><div class="cn"><span class="zh">AI 應用規劃師－初級</span><span class="en">AI Application Planner — Associate</span></div><div class="co"><span class="zh">經濟部產業人才能力鑑定</span><span class="en">MOEA iPAS</span></div></div>
+      <div class="cert"><div class="seal">G</div><div class="cn">Gemini Certified Educator</div><div class="co">Google for Education</div></div>
+      <div class="cert"><div class="seal">生</div><div class="cn"><span class="zh">CCS 生成式 AI 人工智慧核心能力國際認證</span><span class="en">CCS Generative AI Foundations</span></div><div class="co"><span class="zh">Certiport（Pearson）</span><span class="en">Certiport · Pearson</span></div></div>
+    </div>
   </div>
 </div></section>
 
