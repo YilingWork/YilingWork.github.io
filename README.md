@@ -2,6 +2,13 @@
 
 這個 `site/` 資料夾就是可上線的完整網站。
 
+## 正式網址（2026-07-29 起）
+
+- **https://yilingtsai.tw**（`www.yilingtsai.tw` 與舊網址 `yilingwork.github.io` 均自動轉向）
+- 域名購自 PChome 買網址（10 年期，2036-07 到期）；DNS 在 PChome 代管後台設定（4 筆 A 紀錄指 GitHub Pages IP＋www CNAME）
+- 根目錄的 `CNAME` 檔案是 GitHub Pages 自訂網域設定，**勿刪除**
+- HTTPS 由 GitHub 自動簽發與續簽，已開啟強制 HTTPS
+
 ## 內容
 ```
 site/
