@@ -247,7 +247,7 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
         <h3>Transformer（2017）</h3>
         <ul style="font-size:22px;">
           <li>自然語言處理（Natural Language Processing, NLP）的<b>共同架構</b></li>
-          <li>核心是<b>注意力機制</b>（attention）：處理每個詞時，同時衡量句中其他詞與它的關聯</li>
+          <li>核心是<b>注意力機制</b>（attention）：編碼器側處理每個詞時，同時衡量句中其他詞與它的關聯</li>
           <li>因此接得住長距離語意：「服藥後兩天出現皮疹」</li>
         </ul>
       </div></div>
@@ -272,7 +272,7 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
     </div>
     <div class="note-box" style="font-size:23px;">兩種用法，正好對應上一頁的判別式／生成式。第二部丹麥 PHAIR 的技術描述，寫的就是「transformers、BERT」</div>
   </div>
-  <div class="src">來源：Vaswani et al. 2017《Attention Is All You Need》；Devlin et al. 2018 BERT 原始論文</div>
+  <div class="src">來源：Vaswani et al. 2017《Attention Is All You Need》；Devlin et al. 2018／2019 BERT 原始論文</div>
   <div class="footer">7 / 48</div>
 </section>
 
@@ -1103,12 +1103,13 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
           <tr><td><b>FDA</b></td><td>美國食品藥物管理局</td></tr>
           <tr><td><b>GDPR</b></td><td>General Data Protection Regulation 歐盟一般資料保護規則</td></tr>
           <tr><td><b>GVP</b></td><td>Good Pharmacovigilance Practices 藥物警戒優良規範</td></tr>
-          <tr><td><b>HMA</b></td><td>Heads of Medicines Agencies 歐洲各國藥政首長協會</td></tr>
+          <tr><td><b>HMA</b></td><td>Heads of Medicines Agencies 歐洲經濟區各國藥品主管機關首長組成的協調網絡（涵蓋人用與動物用藥品）</td></tr>
           <tr><td><b>ICSR</b></td><td>Individual Case Safety Report 個案安全報告</td></tr>
         </table>
       </div>
     </div>
   </div>
+  <div class="src" style="right:120px;">機關英文／原文全稱：AEMPS＝Agencia Española de Medicamentos y Productos Sanitarios；DKMA＝Danish Medicines Agency</div>
   <div class="footer">47 / 48</div>
 </section>
 
@@ -1141,11 +1142,12 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
           <tr><td><b>RMP</b></td><td>Risk Management Plan 藥品風險評估及管控計畫</td></tr>
           <tr><td><b>SUSAR</b></td><td>Suspected Unexpected Serious Adverse Reaction 疑似非預期嚴重不良反應</td></tr>
           <tr><td><b>UMC</b></td><td>Uppsala Monitoring Centre 烏普薩拉監測中心</td></tr>
-          <tr><td><b>VAERS</b></td><td>Vaccine Adverse Event Reporting System 美國疫苗不良事件通報系統</td></tr>
+          <tr><td><b>VAERS</b></td><td>Vaccine Adverse Event Reporting System 美國疫苗不良事件通報系統（CDC 與 FDA 共管）</td></tr>
         </table>
       </div>
     </div>
   </div>
+  <div class="src" style="right:120px;font-size:19px;">機關英文／原文全稱：MAUDE＝Manufacturer and User Facility Device Experience；MPA＝Swedish Medical Products Agency；PEI＝Paul-Ehrlich-Institut；PMDA＝Pharmaceuticals and Medical Devices Agency</div>
   <div class="footer">48 / 48</div>
 </section>
 
@@ -1182,8 +1184,7 @@ const _show=show;
 show=function(i){_show(i);pgno.textContent=(cur+1)+' / '+slides.length;hint.classList.add('gone');};
 fit();
 show(parseInt(location.hash.slice(1))-1||0);
-hint.classList.remove('gone');
-setTimeout(()=>hint.classList.add('gone'),9000);
+if(cur===0){hint.classList.remove('gone');setTimeout(()=>hint.classList.add('gone'),9000);}
 </script>
 </body>
 </html>
