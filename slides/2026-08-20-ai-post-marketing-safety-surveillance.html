@@ -94,14 +94,14 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
 /* ---------- 導覽提示與翻頁鍵（網頁瀏覽用，簡報投影時自動淡出） ---------- */
 #nav{position:fixed;inset:0;pointer-events:none;z-index:20;}
 #nav button{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:96px;border:none;border-radius:10px;
-  background:rgba(0,32,96,.55);color:#fff;font-size:34px;line-height:1;cursor:pointer;opacity:.3;transition:opacity .25s;pointer-events:auto;}
-#nav button:hover{opacity:1;}
+  background:rgba(255,255,255,.16);color:#fff;font-size:34px;line-height:1;cursor:pointer;opacity:.75;transition:opacity .25s,background .25s;pointer-events:auto;}
+#nav button:hover{opacity:1;background:rgba(255,255,255,.34);}
 #prev{left:14px;} #next{right:14px;}
-#hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:21;
-  background:rgba(0,32,96,.88);color:#fff;font-size:19px;letter-spacing:.5px;padding:10px 22px;border-radius:999px;
-  transition:opacity .6s;pointer-events:none;}
+#hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:21;
+  background:rgba(255,255,255,.92);color:#002060;font-weight:700;font-size:19px;letter-spacing:.5px;padding:10px 24px;border-radius:999px;
+  box-shadow:0 4px 18px rgba(0,0,0,.45);transition:opacity .6s;pointer-events:none;}
 #hint.gone{opacity:0;}
-#pgno{position:fixed;right:18px;top:14px;z-index:21;background:rgba(0,32,96,.75);color:#fff;
+#pgno{position:fixed;right:18px;top:14px;z-index:21;background:rgba(255,255,255,.85);color:#002060;font-weight:700;
   font-size:18px;padding:5px 14px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none;}
 #nav:hover ~ #pgno,#pgno.show{opacity:1;}
 @media print{#nav,#hint,#pgno{display:none !important;}}
@@ -1177,14 +1177,14 @@ addEventListener('click',e=>{
 document.getElementById('prev').onclick=e=>{e.stopPropagation();show(cur-1);};
 document.getElementById('next').onclick=e=>{e.stopPropagation();show(cur+1);};
 const hint=document.getElementById('hint'), pgno=document.getElementById('pgno');
-setTimeout(()=>hint.classList.add('gone'),5000);
+setTimeout(()=>hint.classList.add('gone'),9000);
 let t; addEventListener('mousemove',()=>{pgno.classList.add('show');clearTimeout(t);t=setTimeout(()=>pgno.classList.remove('show'),1800);});
 const _show=show;
 show=function(i){_show(i);pgno.textContent=(cur+1)+' / '+slides.length;hint.classList.add('gone');};
 fit();
 show(parseInt(location.hash.slice(1))-1||0);
 hint.classList.remove('gone');
-setTimeout(()=>hint.classList.add('gone'),5000);
+setTimeout(()=>hint.classList.add('gone'),9000);
 </script>
 </body>
 </html>
