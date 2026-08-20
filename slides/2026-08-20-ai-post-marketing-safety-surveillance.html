@@ -91,6 +91,20 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
 .quote .q{font-size:40px;line-height:1.5;color:var(--navy);font-weight:700;}
 .quote .q .r{font-size:inherit;}
 .quote .a{font-size:24px;color:var(--muted);margin-top:26px;}
+/* ---------- 導覽提示與翻頁鍵（網頁瀏覽用，簡報投影時自動淡出） ---------- */
+#nav{position:fixed;inset:0;pointer-events:none;z-index:20;}
+#nav button{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:96px;border:none;border-radius:10px;
+  background:rgba(0,32,96,.55);color:#fff;font-size:34px;line-height:1;cursor:pointer;opacity:.3;transition:opacity .25s;pointer-events:auto;}
+#nav button:hover{opacity:1;}
+#prev{left:14px;} #next{right:14px;}
+#hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:21;
+  background:rgba(0,32,96,.88);color:#fff;font-size:19px;letter-spacing:.5px;padding:10px 22px;border-radius:999px;
+  transition:opacity .6s;pointer-events:none;}
+#hint.gone{opacity:0;}
+#pgno{position:fixed;right:18px;top:14px;z-index:21;background:rgba(0,32,96,.75);color:#fff;
+  font-size:18px;padding:5px 14px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none;}
+#nav:hover ~ #pgno,#pgno.show{opacity:1;}
+@media print{#nav,#hint,#pgno{display:none !important;}}
 @media print{
   html,body{background:#fff;}
   #stage{position:static;}
@@ -102,6 +116,9 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
 </head>
 <body>
 <div id="bar"></div>
+<div id="nav"><button id="prev" aria-label="上一頁">‹</button><button id="next" aria-label="下一頁">›</button></div>
+<div id="pgno"></div>
+<div id="hint">← → 或點畫面左右兩側翻頁　·　全 48 頁</div>
 <div id="stage"><div id="deck">
 
 <!-- 1 封面 -->
@@ -1137,12 +1154,12 @@ table.t tr:nth-child(even) td{background:#f7f9fc;}
 <script>
 const slides=[...document.querySelectorAll('.slide')];
 let cur=0;
-function show(i){
+var show=function show(i){
   cur=Math.max(0,Math.min(slides.length-1,i));
   slides.forEach((s,j)=>s.classList.toggle('active',j===cur));
   document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
   location.hash='#'+(cur+1);
-}
+};
 function fit(){
   const s=Math.min(innerWidth/1280,innerHeight/720);
   document.getElementById('deck').style.transform='scale('+s+')';
@@ -1157,8 +1174,17 @@ addEventListener('keydown',e=>{
 addEventListener('click',e=>{
   if(e.clientX>innerWidth*0.5)show(cur+1);else show(cur-1);
 });
+document.getElementById('prev').onclick=e=>{e.stopPropagation();show(cur-1);};
+document.getElementById('next').onclick=e=>{e.stopPropagation();show(cur+1);};
+const hint=document.getElementById('hint'), pgno=document.getElementById('pgno');
+setTimeout(()=>hint.classList.add('gone'),5000);
+let t; addEventListener('mousemove',()=>{pgno.classList.add('show');clearTimeout(t);t=setTimeout(()=>pgno.classList.remove('show'),1800);});
+const _show=show;
+show=function(i){_show(i);pgno.textContent=(cur+1)+' / '+slides.length;hint.classList.add('gone');};
 fit();
 show(parseInt(location.hash.slice(1))-1||0);
+hint.classList.remove('gone');
+setTimeout(()=>hint.classList.add('gone'),5000);
 </script>
 </body>
 </html>
