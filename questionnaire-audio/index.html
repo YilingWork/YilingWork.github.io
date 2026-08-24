@@ -1,0 +1,441 @@
+<title>電子仿單問卷台語朗讀版</title>
+<style>
+  :root{
+    --bg:#faf8f5; --card:#ffffff; --border:#e4ddd2; --text:#2b2620; --muted:#7a7267;
+    --accent:#7a5c3e; --accent-ink:#ffffff; --section:#f1ece2; --note:#a15c2c;
+    --playing:#eef3ea; --playing-border:#7d9d6c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1c1a17; --card:#26231f; --border:#3a352d; --text:#ece7de; --muted:#a89e8f;
+      --accent:#c9a877; --accent-ink:#1c1a17; --section:#2f2b25; --note:#e0a86f;
+      --playing:#243024; --playing-border:#6f9a5e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1c1a17; --card:#26231f; --border:#3a352d; --text:#ece7de; --muted:#a89e8f;
+    --accent:#c9a877; --accent-ink:#1c1a17; --section:#2f2b25; --note:#e0a86f;
+    --playing:#243024; --playing-border:#6f9a5e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei",sans-serif;
+    margin:0; padding:0 0 4rem; line-height:1.7; -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:1.2rem 1rem;}
+  header{position:sticky; top:0; background:var(--bg); z-index:10; padding:0.9rem 1rem 0.7rem; border-bottom:1px solid var(--border);}
+  header h1{font-size:1.05rem; margin:0 0 0.3rem; font-weight:700;}
+  header p{margin:0; font-size:0.8rem; color:var(--muted);}
+  .toc{display:flex; gap:0.4rem; overflow-x:auto; padding:0.6rem 0 0; -webkit-overflow-scrolling:touch;}
+  .toc a{
+    flex:none; font-size:0.75rem; padding:0.35rem 0.7rem; border-radius:999px; background:var(--section);
+    color:var(--text); text-decoration:none; border:1px solid var(--border); white-space:nowrap;
+  }
+  section.part{margin-top:1.6rem;}
+  .part-title{
+    font-size:0.95rem; font-weight:700; background:var(--section); padding:0.6rem 0.9rem; border-radius:10px;
+    margin-bottom:0.7rem; scroll-margin-top:6.5rem;
+  }
+  .seg{
+    background:var(--card); border:1px solid var(--border); border-radius:14px; padding:0.9rem 1rem;
+    margin-bottom:0.65rem; display:flex; gap:0.8rem; align-items:flex-start;
+  }
+  .seg.playing{background:var(--playing); border-color:var(--playing-border);}
+  .seg .btn{
+    flex:none; width:2.6rem; height:2.6rem; border-radius:50%; border:none; background:var(--accent); color:var(--accent-ink);
+    font-size:1.1rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .seg .btn:active{opacity:0.75;}
+  .seg .body{flex:1; min-width:0;}
+  .seg .label{font-size:0.72rem; color:var(--muted); margin-bottom:0.15rem; font-weight:600;}
+  .seg .text{font-size:0.95rem; white-space:pre-line;}
+  .seg .skip{font-size:0.78rem; color:var(--note); margin-top:0.35rem; font-weight:600;}
+  .seg.pending{opacity:0.6;}
+  .seg.pending .btn{background:var(--muted);}
+  .pending-badge{
+    display:inline-block; font-size:0.68rem; background:var(--note); color:#fff; padding:0.1rem 0.5rem;
+    border-radius:999px; margin-left:0.4rem; vertical-align:middle;
+  }
+  footer{max-width:760px; margin:2rem auto 0; padding:1rem; font-size:0.75rem; color:var(--muted); text-align:center;}
+</style>
+
+<header>
+  <h1>電子仿單問卷台語朗讀版</h1>
+  <p>助理現場操作用：依序點播每段音檔，方便台語朗讀給受訪者聽</p>
+  <div class="toc">
+    <a href="#part-intro">研究說明</a>
+    <a href="#part1">第一部分</a>
+    <a href="#part2">第二部分</a>
+    <a href="#part3">第三部分</a>
+    <a href="#part3b">仿單取得方式</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section class="part" id="part-intro">
+  <div class="part-title">研究說明</div>
+
+  <div class="seg" data-audio="audio/01_您好.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">開場白</div>
+      <div class="text">您好：
+本問卷調查研究旨在瞭解您對於將傳統「紙本藥品仿單（說明書）」轉換為「電子仿單（掃描QR Code閱讀）」的看法與需求。您的意見將提供給衛生主管機關與醫院，作為改善用藥資訊服務的重要參考。</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/02_電子仿單.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">名詞說明</div>
+      <div class="text">電子仿單（電子結構化仿單）是將傳統藥品說明書轉為標準化格式的數位版本，讓民眾掃描藥盒上的 QR Code 或直接輸入下列網址就能連結到「藥品電子結構化仿單平台」，即時查閱用藥資訊。</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/03_藥品電子結構化.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">平台說明</div>
+      <div class="text">「藥品電子結構化仿單平台」（http://mcp.fda.gov.tw/）是衛生福利部食品藥物管理署建立的平台，點選「西藥品仿單資料查詢」，選擇欲查詢之藥品許可證，如該張藥品許可證有電子結構化仿單，點選「電子仿單」即可直接進入電子結構化仿單頁面。</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/04_接下來.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">填答說明</div>
+      <div class="text">接下來的問卷將詢問您對於「使用電子仿單」的看法，如果您使用過電子仿單，請根據實際經驗回答。如果您沒使用過電子仿單，請根據上述說明，想像使用情境來回答。</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/05_請依照.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">填答說明</div>
+      <div class="text">請依照您的真實想法作答，沒有對錯之分。✍️問卷填答約需5-10分鐘，完全匿名，不會蒐集任何可辨識個人身分的資訊。您的參與完全自願，可隨時停止，不會影響您的醫療服務與權益。為感謝您協助研究，完成問卷後將致謝小禮物。🎁</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/06_若您選擇.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">同意聲明</div>
+      <div class="text">若您選擇繼續填寫問卷，即表示您已閱讀並同意參與本研究。感謝您的協助🙏！若有任何疑問，歡迎聯絡研究團隊。</div>
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part1">
+  <div class="part-title">第一部分：基本資料與數位能力</div>
+
+  <div class="seg" data-audio="audio/07_第1題_年齡.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第1題</div>
+      <div class="text">請問您的年齡（實歲）？
+□18–29歲 □30–39歲 □40–49歲 □50–59歲 □60-64歲 □65-69歲 □70-79歲 □80歲以上</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/08_第2題_性別.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第2題</div>
+      <div class="text">請問您的生理性別？
+□生理男性 □生理女性 □其他</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/09_第3題_教育程度.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第3題</div>
+      <div class="text">請問您的最高教育程度？
+□小學以下 □國中 □高中職 □專科 □大學 □碩士以上（含博士）</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/10_第4題_醫藥工作.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第4題</div>
+      <div class="text">請問您是否從事醫療或藥學相關工作？
+□是（如：醫師、藥師、護理師、醫技人員等）
+□否
+□已退休，但過去曾從事醫療或藥學相關工作</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/11_第5題_溝通語言.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第5題</div>
+      <div class="text">請問您主要使用的溝通語言？
+□中文 □英文English □印尼文Bahasa Indonesia □越南文Tiếng Việt □其他 ________</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/12_第6題_中文吃力.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第6題</div>
+      <div class="text">請問對您來說，自己閱讀中文資訊（如報紙、藥袋）是否感到吃力？
+□非常吃力 □有點吃力 □普通 □容易 □非常容易</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/13_第7題_母語.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第7題</div>
+      <div class="text">請問您中文是否為您的母語？
+□是 □否</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/14_第8題_慢性病.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第8題</div>
+      <div class="text">請問您是否有慢性病史（如高血壓、糖尿病、心臟病等需長期追蹤治療的疾病），或需要長期規律用藥（連續用藥三個月以上，或定期回診領藥）？
+□是 □否</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/15_第9題_手機頻率.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第9題</div>
+      <div class="text">請問您使用智慧型手機的頻率？
+□每天多次 □每天1次 □每週數次 □每月數次 □幾乎不用</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/16_第10題_QR頻率.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第10題</div>
+      <div class="text">請問您掃描QR Code取得資訊的頻率？
+□經常（每週1次以上） □有時（每月1至3次） □偶爾（每幾個月1次） □很少（一年不到幾次） □從未使用
+（備註：QR Code指的是這樣類型的圖形，可準備範例給受訪者看）</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/17_第11題_讀過仿單.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第11題</div>
+      <div class="text">請問您是否曾經閱讀過藥品仿單（即藥品說明書）？
+□是 □否</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/18_第12題_查詢平台經驗.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第12題</div>
+      <div class="text">請問您使用衛福部食藥署的藥品查詢網站「藥品仿單查詢平台」的經驗？
+□使用過多次（5次以上） □使用過數次（2至4次） □使用過1次 □聽過但未使用 □不知道此平台</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/19_第13題_藥袋小字困難.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第13題</div>
+      <div class="text">請問在您平常就醫或領藥時的狀態，閱讀藥袋或仿單上的小字是否困難？
+□非常困難 □困難 □普通 □容易 □非常容易</div>
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part2">
+  <div class="part-title">第二部分：現行用藥資訊閱讀習慣</div>
+
+  <div class="seg" data-audio="audio/20_第14題_閱讀紙本仿單.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第14題</div>
+      <div class="text">當您拿到醫師開的藥品時，您會閱讀藥盒內的紙本仿單嗎？（仿單是「藥品說明書」的意思）
+□每次都會看 □大多數時候會看（約十次中有七至八次） □偶爾會看（約十次中有三至五次） □很少看（約十次中有一至兩次） □從來不看（請跳至第14-2題回答）</div>
+      <div class="skip">⚠ 若選「從來不看」，跳至第14-2題</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/21_第14-1題_什麼情況看仿單.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第14-1題</div>
+      <div class="text">承上題，在什麼情況下您會閱讀紙本仿單？（可複選，回答後請跳至第15題）
+□拿到沒用過的新藥時 □出現不舒服或懷疑有副作用時 □想確認用法用量時 □藥品外觀或包裝改變時 □每次領藥都會看 □其他 ________</div>
+      <div class="skip">⚠ 回答後跳至第15題（第一部分結束）</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/22_第14-2題_不看仿單原因.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第14-2題</div>
+      <div class="text">承上題，若您不看紙本仿單，主要原因為何？（可複選）
+□字體太小看不清楚 □仿單內容太難看不懂 □已經有醫療人員說明了 □紙張太大張折疊很麻煩 □習慣直接上網查 □藥袋上已有足夠資訊 □沒有拿到仿單 □其他 ________</div>
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part3">
+  <div class="part-title">第三部分：對電子仿單的接受度與看法</div>
+
+  <div class="seg" data-audio="audio/23_第三部分引言.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">填答說明</div>
+      <div class="text">以下題目請您根據對電子仿單的認知與想法回答。
+電子仿單（電子結構化仿單）是將傳統藥品說明書轉為標準化格式的數位版本，讓民眾掃描藥盒上的QR Code或直接輸入網址連結到「藥品電子結構化仿單平台」，即時查閱用藥資訊。
+「藥品電子結構化仿單平台」是衛生福利部食品藥物管理署建立的平台，點選「西藥品仿單資料查詢」，選擇欲查詢之藥品許可證，如該張藥品許可證有電子結構化仿單，點選「電子仿單」即可直接進入電子結構化仿單頁面。</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/24_量表計分說明.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">計分說明</div>
+      <div class="text">👉請在每題中選擇最符合您想法的選項：
+5=非常同意, 4=同意, 3=普通, 2=不同意, 1=非常不同意</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/25_第15題_手機查詢習慣.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q15</div><div class="text">我平時已習慣使用手機或平板連接網路，進行線上查詢健康資訊</div></div></div>
+  <div class="seg" data-audio="audio/26_第16題_快速找到資訊.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q16</div><div class="text">我認為電子仿單可以幫助我更快速找到需要的藥品資訊</div></div></div>
+  <div class="seg" data-audio="audio/27_第17題_家人朋友建議.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q17</div><div class="text">我的家人或朋友的建議，會影響我是否使用電子仿單</div></div></div>
+  <div class="seg" data-audio="audio/28_第18題_學會查詢簡單.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q18</div><div class="text">我覺得要學會怎麼查電子仿單是簡單的</div></div></div>
+  <div class="seg" data-audio="audio/29_第19題_手機查詢仿單.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q19</div><div class="text">我會使用手機掃描QR Code或直接上網到「藥品電子結構化仿單平台」查詢電子仿單</div></div></div>
+  <div class="seg" data-audio="audio/30_第20題_信任政府醫療.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q20</div><div class="text">我信任由政府或醫療院所提供的電子仿單資訊</div></div></div>
+  <div class="seg" data-audio="audio/31_第21題_手機自在.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q21</div><div class="text">我覺得使用手機掃描查閱藥品資訊的過程讓我感到自在</div></div></div>
+  <div class="seg" data-audio="audio/32_第22題_花時間值得.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q22</div><div class="text">我覺得花時間去查電子仿單是值得的</div></div></div>
+  <div class="seg" data-audio="audio/33_第23題_優先選電子仿單.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q23</div><div class="text">若可以選擇使用電子或紙本仿單，我願意優先選擇使用電子仿單查詢藥品資訊</div></div></div>
+  <div class="seg" data-audio="audio/34_第24題_字體放大.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q24</div><div class="text">若電子仿單提供字體放大功能，有助於滿足我閱讀藥品資訊的需求</div></div></div>
+  <div class="seg" data-audio="audio/35_第25題_仍要紙本仿單.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q25</div><div class="text">即使有電子仿單可供查詢，我仍希望依照現況提供紙本仿單給我</div></div></div>
+  <div class="seg" data-audio="audio/36_第26題_使用更困惑.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q26</div><div class="text">我認為使用電子仿單讓我對藥品用法與副作用感到更困惑</div></div></div>
+  <div class="seg" data-audio="audio/37_第27題_數位取代紙本.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q27</div><div class="text">我常使用數位工具取代紙本資料進行閱讀</div></div></div>
+  <div class="seg" data-audio="audio/38_第28題_醫師藥師建議.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q28</div><div class="text">醫師或藥師的建議，會影響我是否使用電子仿單</div></div></div>
+  <div class="seg" data-audio="audio/39_第29題_找到資訊困難.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q29</div><div class="text">對我來說，透過電子仿單找到需要的藥品資訊很困難</div></div></div>
+  <div class="seg" data-audio="audio/40_第30題_擁有設備.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q30</div><div class="text">我擁有使用電子仿單所需的設備（如智慧型手機、平板和網路環境）</div></div></div>
+  <div class="seg" data-audio="audio/41_第31題_誤入非官方網站.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q31</div><div class="text">我擔心掃描 QR Code 取得電子仿單會誤入非官方網站取得錯誤資訊</div></div></div>
+  <div class="seg" data-audio="audio/42_第32題_喜歡呈現方式.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q32</div><div class="text">相比於閱讀紙本的文字，我更喜歡電子仿單的呈現方式</div></div></div>
+  <div class="seg" data-audio="audio/43_第33題_願意改變習慣.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q33</div><div class="text">為了電子仿單帶來的好處，我願意改變閱讀習慣</div></div></div>
+  <div class="seg" data-audio="audio/44_第34題_主要資訊來源.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q34</div><div class="text">我願意以電子仿單作為主要的藥品資訊來源</div></div></div>
+  <div class="seg" data-audio="audio/45_第35題_語音朗讀功能.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q35</div><div class="text">若提供語音朗讀功能，將提升我使用電子仿單的意願</div></div></div>
+  <div class="seg" data-audio="audio/46_第36題_紙本索取服務.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q36</div><div class="text">我希望醫療院所提供紙本仿單的索取服務</div></div></div>
+  <div class="seg" data-audio="audio/47_第37題_提升用藥安全.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q37</div><div class="text">我認為電子仿單有助於提升我的用藥安全</div></div></div>
+  <div class="seg" data-audio="audio/48_第38題_搜尋麻煩費力.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q38</div><div class="text">對我來說，使用手機搜尋資訊是一件麻煩且費力的事</div></div></div>
+  <div class="seg" data-audio="audio/49_第39題_政府推動宣導.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q39</div><div class="text">政府推動/宣導電子仿單的做法，會影響我是否使用電子仿單</div></div></div>
+  <div class="seg" data-audio="audio/50_第40題_操作容易理解.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q40</div><div class="text">我認為電子仿單查詢系統操作流程應該容易理解</div></div></div>
+  <div class="seg" data-audio="audio/51_第41題_遇到問題協助.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q41</div><div class="text">若使用電子仿單系統遇到問題，我能夠獲得協助</div></div></div>
+  <div class="seg" data-audio="audio/52_第42題_保護個資安全.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q42</div><div class="text">我相信電子仿單系統會保護我的個人資料安全</div></div></div>
+  <div class="seg" data-audio="audio/53_第43題_數位化吸引力.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q43</div><div class="text">我覺得電子仿單的數位化呈現方式比傳統紙本更具吸引力</div></div></div>
+  <div class="seg" data-audio="audio/54_第44題_更有幫助.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q44</div><div class="text">相較於取得紙本仿單，我覺得電子仿單對我更有幫助</div></div></div>
+  <div class="seg" data-audio="audio/55_第45題_推薦親友.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q45</div><div class="text">我會推薦親友使用電子仿單</div></div></div>
+  <div class="seg" data-audio="audio/56_第46題_多語版本.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q46</div><div class="text">我認為若電子仿單提供多語版本，將有助於不同族群使用</div></div></div>
+  <div class="seg" data-audio="audio/57_第47題_沒有紙本不安.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q47</div><div class="text">我會因為沒有紙本仿單而感到不安</div></div></div>
+  <div class="seg" data-audio="audio/58_第48題_電子為主紙本索取.mp3"><button class="btn" aria-label="播放">▶</button><div class="body"><div class="label">Q48</div><div class="text">若未來就醫提供用藥仿單的方式改成「電子仿單為主、紙本需主動索取」，我可以接受這樣的方式。</div></div></div>
+</section>
+
+<section class="part" id="part3b">
+  <div class="part-title">仿單取得方式與開放題</div>
+
+  <div class="seg" data-audio="audio/59_第49題_取得方式.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第49題</div>
+      <div class="text">拿藥時您偏好的仿單取得方式：
+□直接提供紙本仿單
+□自行掃描QR Code取得電子仿單，需要時可索取紙本
+□自行掃描QR Code取得電子仿單，不用索取紙本
+□無所謂</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/60_第49-1題_取得紙本情況.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第49-1題</div>
+      <div class="text">在什麼情況下您會希望取得紙本仿單？（可複選）
+□拿到沒用過的新藥時 □藥品有較多注意事項或副作用時 □需要提供給家人或照顧者閱讀時 □手邊沒有手機或網路不方便時 □藥品需要長期服用，想留存紙本備查時 □我都不需要紙本仿單 □其他 ________</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/61_第50題_建議疑慮.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第50題（開放題，非必填）</div>
+      <div class="text">您對於推動電子仿單有什麼建議或疑慮？</div>
+    </div>
+  </div>
+
+  <div class="seg" data-audio="audio/62_第51題_配套措施.mp3">
+    <button class="btn" aria-label="播放">▶</button>
+    <div class="body">
+      <div class="label">第51題（開放題，非必填）</div>
+      <div class="text">如果紙本仿單全面改為電子化,您希望提供哪些配套措施？</div>
+    </div>
+  </div>
+
+  <div class="seg pending">
+    <button class="btn" aria-label="尚未生成" disabled>▶</button>
+    <div class="body">
+      <div class="label">結尾語<span class="pending-badge">音檔待補</span></div>
+      <div class="text">😊問卷到此結束，非常感謝您的寶貴意見😊</div>
+    </div>
+  </div>
+
+</section>
+
+</div>
+
+<footer>電子仿單接受度研究・台語朗讀版問卷・僅供研究助理現場協助使用</footer>
+
+<script>
+(function(){
+  var segs = Array.prototype.slice.call(document.querySelectorAll('.seg[data-audio]'));
+  var audios = {};
+  var current = null;
+
+  segs.forEach(function(seg){
+    var src = seg.getAttribute('data-audio');
+    var btn = seg.querySelector('.btn');
+    var audio = new Audio();
+    audio.preload = 'none';
+    audio.src = src;
+    audios[src] = audio;
+
+    btn.addEventListener('click', function(){
+      if (current && current !== audio){
+        current.pause();
+        current.currentTime = 0;
+      }
+      document.querySelectorAll('.seg.playing').forEach(function(s){
+        if (s !== seg) { s.classList.remove('playing'); }
+      });
+      document.querySelectorAll('.btn').forEach(function(b){ if (b !== btn) b.textContent = '▶'; });
+
+      if (audio.paused){
+        audio.play();
+        seg.classList.add('playing');
+        btn.textContent = '⏸';
+        current = audio;
+      } else {
+        audio.pause();
+        seg.classList.remove('playing');
+        btn.textContent = '▶';
+      }
+    });
+
+    audio.addEventListener('ended', function(){
+      seg.classList.remove('playing');
+      btn.textContent = '▶';
+      audio.currentTime = 0;
+    });
+  });
+})();
+</script>
