@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>115 年度提升處方藥可近性試辦計畫　試辦方案簡報</title>
+<style>
+*{box-sizing:border-box}
+:root{
+ --u:calc(min(100vw, 177.78vh) * 0.0172);
+ --ink:#16283c; --sub:#4a5c6e; --mut:#7d8b98; --line:#dde4ea;
+ --ac:#0e6a63; --ac2:#e7f1f0; --bg:#f2f4f6; --paper:#ffffff;
+ --red:#b8392c; --amber:#c1860f; --green:#2c7a4f; --grey:#7b8794;
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+ font-family:"PingFang TC","Microsoft JhengHei","微軟正黑體","Noto Sans TC",sans-serif;
+ -webkit-font-smoothing:antialiased}
+#deck{display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;overflow:hidden}
+.slide{display:none;width:min(100vw,177.78vh);height:min(56.25vw,100vh);background:var(--paper);
+ position:relative;padding:calc(var(--u)*2.4) calc(var(--u)*3) calc(var(--u)*3.4);
+ box-shadow:0 0 calc(var(--u)*2) rgba(0,0,0,.10);
+ flex-direction:column;justify-content:center}
+.slide.on{display:flex}
+.slide.cover-slide.on{display:block}
+.kicker{font-size:calc(var(--u)*.86);letter-spacing:.08em;color:var(--ac);font-weight:600;margin-bottom:calc(var(--u)*.5)}
+h2.title{font-size:calc(var(--u)*1.75);line-height:1.3;margin:0 0 calc(var(--u)*.9);font-weight:700;letter-spacing:.01em}
+h2.title:after{content:"";display:block;width:calc(var(--u)*3.2);height:calc(var(--u)*.16);background:var(--ac);margin-top:calc(var(--u)*.7)}
+.body{font-size:calc(var(--u)*.95)}
+ul.bl{margin:0;padding:0;list-style:none}
+ul.bl>li{position:relative;padding-left:calc(var(--u)*1.05);margin-bottom:calc(var(--u)*.62);
+ line-height:1.62;font-size:calc(var(--u)*.95);color:var(--sub)}
+ul.bl>li:before{content:"";position:absolute;left:0;top:calc(var(--u)*.62);width:calc(var(--u)*.34);
+ height:calc(var(--u)*.34);background:var(--ac);border-radius:50%}
+ul.bl.sm>li{font-size:calc(var(--u)*.82);margin-bottom:calc(var(--u)*.4);line-height:1.5}
+ul.bl.sm>li:before{top:calc(var(--u)*.5);width:calc(var(--u)*.26);height:calc(var(--u)*.26)}
+b{color:var(--ink);font-weight:700}
+.foot{position:absolute;left:calc(var(--u)*3);right:calc(var(--u)*3);bottom:calc(var(--u)*1.05);
+ display:flex;justify-content:space-between;align-items:center;font-size:calc(var(--u)*.62);
+ color:var(--mut);border-top:1px solid var(--line);padding-top:calc(var(--u)*.5)}
+.pg{font-variant-numeric:tabular-nums}
+
+/* 封面 */
+.cover-slide{background:#14293c;color:#fff}
+.cover{height:100%;display:flex;flex-direction:column;justify-content:center}
+.cv-rule{width:calc(var(--u)*4);height:calc(var(--u)*.22);background:#4fb3a5;margin-bottom:calc(var(--u)*1.6)}
+.cv-plan{font-size:calc(var(--u)*1);color:#9fc0cd;letter-spacing:.06em}
+.cv-title{font-size:calc(var(--u)*3.4);margin:calc(var(--u)*.4) 0 calc(var(--u)*.5);font-weight:700;letter-spacing:.04em}
+.cv-sub{font-size:calc(var(--u)*1.25);color:#d6e4ea}
+.cv-meta{margin-top:calc(var(--u)*2.6);font-size:calc(var(--u)*.8);color:#a8bfcb;line-height:2}
+.cover-slide .foot{border-top:1px solid rgba(255,255,255,.18);color:#8ba5b4}
+
+/* 三模式 */
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*.7);margin-bottom:calc(var(--u)*1.1)}
+.mode{border:1px solid var(--line);border-radius:calc(var(--u)*.25);padding:calc(var(--u)*.75) calc(var(--u)*.85);background:#fafbfc}
+.mode-hi{border-color:var(--ac);background:var(--ac2)}
+.mode-h{font-size:calc(var(--u)*.95);font-weight:700;margin-bottom:calc(var(--u)*.32)}
+.mode-hi .mode-h{color:var(--ac)}
+.mode-b{font-size:calc(var(--u)*.78);color:var(--sub);line-height:1.55}
+.tag{display:inline-block;margin-left:calc(var(--u)*.35);padding:0 calc(var(--u)*.35);border-radius:calc(var(--u)*.6);
+ background:var(--ac);color:#fff;font-size:calc(var(--u)*.62);vertical-align:middle}
+
+/* 流程 */
+.flow{display:flex;align-items:stretch;gap:calc(var(--u)*.55);margin-bottom:calc(var(--u)*.9)}
+.stagebox{border:1px solid var(--line);border-radius:calc(var(--u)*.25);padding:calc(var(--u)*.55);background:#fafbfc;flex:1}
+.stagebox.wide{flex:4.2}
+.stage-h{font-size:calc(var(--u)*.72);font-weight:700;color:var(--ac);margin-bottom:calc(var(--u)*.5);letter-spacing:.05em}
+.steps{display:flex;gap:calc(var(--u)*.5)}
+.step{flex:1;background:#fff;border:1px solid var(--line);border-radius:calc(var(--u)*.2);padding:calc(var(--u)*.55)}
+.sn{font-size:calc(var(--u)*1.15);color:var(--ac);font-weight:700;line-height:1}
+.st{font-size:calc(var(--u)*.88);font-weight:700;margin:calc(var(--u)*.3) 0 calc(var(--u)*.22)}
+.sd{font-size:calc(var(--u)*.68);color:var(--sub);line-height:1.5}
+.arrow{display:flex;align-items:center;color:var(--mut);font-size:calc(var(--u)*.9)}
+.cond{border-left:calc(var(--u)*.18) solid var(--ac);background:#f6f9f9;padding:calc(var(--u)*.5) calc(var(--u)*.75);
+ font-size:calc(var(--u)*.76);color:var(--sub);line-height:1.6;margin-top:calc(var(--u)*.55)}
+.cond.alt{border-left-color:var(--amber);background:#fdf8ee}
+
+/* 四類處置 */
+.triage{display:flex;flex-direction:column;gap:calc(var(--u)*.5)}
+.tr{display:flex;gap:calc(var(--u)*.7);align-items:flex-start;border:1px solid var(--line);
+ border-radius:calc(var(--u)*.25);padding:calc(var(--u)*.62) calc(var(--u)*.85);background:#fafbfc}
+.tr .dot{width:calc(var(--u)*.9);height:calc(var(--u)*.9);border-radius:50%;flex:none;margin-top:calc(var(--u)*.15)}
+.tr-red{border-left:calc(var(--u)*.3) solid var(--red)} .tr-red .dot{background:var(--red)}
+.tr-amber{border-left:calc(var(--u)*.3) solid var(--amber)} .tr-amber .dot{background:var(--amber)}
+.tr-green{border-left:calc(var(--u)*.3) solid var(--green)} .tr-green .dot{background:var(--green)}
+.tr-grey{border-left:calc(var(--u)*.3) solid var(--grey)} .tr-grey .dot{background:var(--grey)}
+.tn{font-size:calc(var(--u)*1.02);font-weight:700;margin-bottom:calc(var(--u)*.18)}
+.td{font-size:calc(var(--u)*.8);color:var(--sub);line-height:1.55}
+
+/* 年齡 */
+.ages{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*.7);margin-bottom:calc(var(--u)*1)}
+.age{border:1px solid var(--line);border-top:calc(var(--u)*.22) solid var(--ac);border-radius:calc(var(--u)*.22);
+ padding:calc(var(--u)*.7) calc(var(--u)*.8);background:#fafbfc}
+.age-out{border-top-color:var(--grey);background:#f4f5f6}
+.ah{font-size:calc(var(--u)*.95);font-weight:700;margin-bottom:calc(var(--u)*.32)}
+.ab{font-size:calc(var(--u)*.78);color:var(--sub);line-height:1.6}
+
+/* 統計條 */
+.stats{display:flex;gap:calc(var(--u)*.7);margin-bottom:calc(var(--u)*.95)}
+.stat{flex:1;background:var(--ac2);border-radius:calc(var(--u)*.22);padding:calc(var(--u)*.6) calc(var(--u)*.8)}
+.sv{font-size:calc(var(--u)*1.7);font-weight:700;color:var(--ac);line-height:1.15}
+.sl{font-size:calc(var(--u)*.72);color:var(--sub);margin-top:calc(var(--u)*.2)}
+
+/* 欄位 */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1.4)}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.1)}
+.cols2.tight{gap:calc(var(--u)*1)}
+.ch{font-size:calc(var(--u)*.9);font-weight:700;color:var(--ac);padding-bottom:calc(var(--u)*.35);
+ border-bottom:1px solid var(--line);margin-bottom:calc(var(--u)*.6)}
+
+/* 時間軸 */
+.tl{border-left:calc(var(--u)*.12) solid var(--line);padding-left:calc(var(--u)*.85);margin-left:calc(var(--u)*.3)}
+.tli{position:relative;margin-bottom:calc(var(--u)*.85)}
+.tli:before{content:"";position:absolute;left:calc(var(--u)*-1.13);top:calc(var(--u)*.3);
+ width:calc(var(--u)*.42);height:calc(var(--u)*.42);background:var(--ac);border-radius:50%}
+.tlk{font-size:calc(var(--u)*.74);color:var(--ac);font-weight:700}
+.tlb{font-size:calc(var(--u)*.82);color:var(--sub);line-height:1.6;margin-top:calc(var(--u)*.15)}
+.note-in{font-size:calc(var(--u)*.7);color:var(--mut)}
+
+/* 指標卡 */
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*.62)}
+.kc{border:1px solid var(--line);border-radius:calc(var(--u)*.22);padding:calc(var(--u)*.62) calc(var(--u)*.8);background:#fafbfc}
+.kh{font-size:calc(var(--u)*.92);font-weight:700;margin-bottom:calc(var(--u)*.42)}
+.kn{display:inline-block;background:var(--ac);color:#fff;font-size:calc(var(--u)*.66);
+ padding:0 calc(var(--u)*.42);border-radius:calc(var(--u)*.6);margin-right:calc(var(--u)*.42);vertical-align:middle}
+
+/* 課程表 */
+table.ct{width:100%;border-collapse:collapse;font-size:calc(var(--u)*.82)}
+table.ct th,table.ct td{border-bottom:1px solid var(--line);padding:calc(var(--u)*.42) calc(var(--u)*.5);text-align:left}
+table.ct th{background:var(--ac2);color:var(--ac);font-size:calc(var(--u)*.74);letter-spacing:.05em}
+table.ct td{color:var(--sub)}
+table.ct td.r,table.ct th.r{text-align:right;white-space:nowrap}
+table.ct tr.sum td{font-weight:700;color:var(--ink);border-bottom:none;background:#f7f9fa}
+
+/* 講稿 */
+#notes{position:fixed;left:0;right:0;bottom:0;background:#14293c;color:#dbe6ec;
+ padding:calc(var(--u)*.8) calc(var(--u)*1.4);font-size:calc(var(--u)*.72);line-height:1.7;display:none;z-index:9}
+#notes.on{display:block}
+#notes .nh{color:#6fc3b5;font-weight:700;margin-bottom:calc(var(--u)*.25);font-size:calc(var(--u)*.66);letter-spacing:.06em}
+#nav{position:fixed;right:calc(var(--u)*.6);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;
+ gap:calc(var(--u)*.35);z-index:10;opacity:.18;transition:opacity .25s}
+#nav:hover{opacity:1}
+#nav button{border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:calc(var(--u)*.2);
+ width:calc(var(--u)*1.7);height:calc(var(--u)*1.4);font-size:calc(var(--u)*.8);cursor:pointer}
+#nav button:hover{border-color:var(--ac);color:var(--ac)}
+#hint{position:fixed;top:calc(var(--u)*.7);left:50%;transform:translateX(-50%);
+ font-size:calc(var(--u)*.6);color:#7f8c99;background:rgba(255,255,255,.94);border:1px solid var(--line);
+ border-radius:calc(var(--u)*.8);padding:calc(var(--u)*.22) calc(var(--u)*.8);z-index:10;
+ transition:opacity .6s;pointer-events:none}
+#hint.off{opacity:0}
+
+/* 密碼閘 */
+#gate{position:fixed;inset:0;background:#14293c;color:#fff;display:flex;align-items:center;justify-content:center;z-index:99}
+#gate .gbox{width:min(86vw,calc(var(--u)*22));text-align:left}
+#gate .grule{width:calc(var(--u)*3.2);height:calc(var(--u)*.2);background:#4fb3a5;margin-bottom:calc(var(--u)*1.2)}
+#gate h1{font-size:calc(var(--u)*1.5);margin:0 0 calc(var(--u)*.5);font-weight:700}
+#gate p{font-size:calc(var(--u)*.8);color:#a8bfcb;margin:0 0 calc(var(--u)*1.2);line-height:1.7}
+#gate .row{display:flex;gap:calc(var(--u)*.5)}
+#gate input{flex:1;font-size:calc(var(--u)*.9);padding:calc(var(--u)*.55) calc(var(--u)*.7);border:1px solid #3d5a70;
+ border-radius:calc(var(--u)*.22);background:#1d3547;color:#fff;font-family:inherit}
+#gate button{font-size:calc(var(--u)*.9);padding:calc(var(--u)*.55) calc(var(--u)*1.4);border:none;
+ border-radius:calc(var(--u)*.22);background:#0e6a63;color:#fff;cursor:pointer;font-family:inherit}
+#gate .err{font-size:calc(var(--u)*.75);color:#ffb4a8;margin-top:calc(var(--u)*.6);min-height:calc(var(--u)*1.1)}
+body.locked #deck,body.locked #nav,body.locked #hint,body.locked #notes{display:none !important}
+@media print{#gate{display:none !important}}
+
+@media print{
+ @page{size:A4 landscape;margin:0}
+ html,body{background:#fff}
+ #deck{display:block;height:auto;width:auto;overflow:visible}
+ .slide{display:block !important;width:297mm;height:167mm;box-shadow:none;page-break-after:always;
+  padding:12mm 16mm 10mm}
+ :root{--u:3.55mm}
+ #nav,#hint,#notes{display:none !important}
+}
+
+body{overflow:auto}
+.page{max-width:calc(var(--u)*40);margin:0 auto;padding:calc(var(--u)*3) calc(var(--u)*2)}
+.hd .k{font-size:calc(var(--u)*.8);color:var(--ac);font-weight:600;letter-spacing:.08em}
+.hd h1{font-size:calc(var(--u)*2);margin:calc(var(--u)*.4) 0 calc(var(--u)*.5);font-weight:700}
+.hd p{font-size:calc(var(--u)*.85);color:var(--sub);line-height:1.8;margin:0}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*.8);margin:calc(var(--u)*2) 0}
+.card{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);
+ border-radius:calc(var(--u)*.3);padding:calc(var(--u)*1) calc(var(--u)*1.1);transition:.2s}
+.card:hover{border-color:var(--ac);box-shadow:0 calc(var(--u)*.2) calc(var(--u)*.8) rgba(14,106,99,.10)}
+.ck{font-size:calc(var(--u)*.68);color:#fff;background:var(--ac);display:inline-block;
+ padding:0 calc(var(--u)*.45);border-radius:calc(var(--u)*.6)}
+.cn{font-size:calc(var(--u)*1.05);font-weight:700;margin:calc(var(--u)*.45) 0 calc(var(--u)*.3)}
+.cd{font-size:calc(var(--u)*.76);color:var(--sub);line-height:1.6}
+.cgo{font-size:calc(var(--u)*.76);color:var(--ac);margin-top:calc(var(--u)*.6);font-weight:600}
+.tips{font-size:calc(var(--u)*.75);color:var(--sub);line-height:1.9;border-top:1px solid var(--line);
+ padding-top:calc(var(--u)*1);}
+.tips b{color:var(--ink)}
+</style></head>
+<body class="locked">
+<div id="gate"><div class="gbox">
+  <div class="grule"></div>
+  <h1>115 年度提升處方藥可近性試辦計畫　試辦方案簡報</h1>
+  <p>四個場合版本之簡報索引頁<br>本頁為研究計畫工作資料，僅供受邀對象檢視。</p>
+  <div class="row"><input id="pw" type="password" placeholder="請輸入密碼" autocomplete="off"><button id="go">進入</button></div>
+  <div class="err" id="err"></div>
+</div></div>
+<div class="page">
+  <div class="hd">
+    <div class="k">研究計畫　│　方案版本：2026-08-29</div>
+    <h1>115 年度提升處方藥可近性試辦計畫　試辦方案簡報</h1>
+    <p>依報告場合分為四個版本，主幹十張內容完全一致，各版本另有三張場合補充頁。<br>
+    內容依據《整合版試辦方案（對外版）》，計畫主持人：蔡懿玲。</p>
+  </div>
+  <div class="cards"><a class="card" href="deck-a-tfda.html">
+      <div class="ck">版本 A</div><div class="cn">食藥署與主管機關</div>
+      <div class="cd">主幹 10 張＋場合補充 3 張，共 13 張；報告時間約 18 分鐘</div>
+      <div class="cgo">開啟簡報 ›</div></a><a class="card" href="deck-b-pharmacists.html">
+      <div class="ck">版本 B</div><div class="cn">藥師公會與社區藥師</div>
+      <div class="cd">主幹 10 張＋場合補充 3 張，共 13 張；報告時間約 18 分鐘</div>
+      <div class="cgo">開啟簡報 ›</div></a><a class="card" href="deck-c-public.html">
+      <div class="ck">版本 C</div><div class="cn">公聽會、家長團體與媒體</div>
+      <div class="cd">主幹 10 張＋場合補充 3 張，共 13 張；報告時間約 18 分鐘</div>
+      <div class="cgo">開啟簡報 ›</div></a><a class="card" href="deck-d-obgyn.html">
+      <div class="ck">版本 D</div><div class="cn">專家會議與婦產科醫界</div>
+      <div class="cd">主幹 10 張＋場合補充 3 張，共 13 張；報告時間約 18 分鐘</div>
+      <div class="cgo">開啟簡報 ›</div></a></div>
+  <div class="tips">
+    <b>操作方式</b>：左右方向鍵翻頁　│　按 N 顯示講稿註記　│　按 F 全螢幕　│　Ctrl／⌘ + P 可轉存 PDF（逐張分頁）<br>
+    <b>版本說明</b>：本簡報為試辦方案之工作資料，內容以主管機關公告為準。
+  </div>
+</div>
+<script>
+function sha256(ascii){
+ function rr(v,a){return (v>>>a)|(v<<(32-a));}
+ var mp=Math.pow, mw=mp(2,32), i,j, result='';
+ var words=[], bitLen=ascii.length*8;
+ var hash=sha256.h=sha256.h||[], k=sha256.k=sha256.k||[], pc=k.length;
+ var comp={};
+ for(var c=2; pc<64; c++){
+  if(!comp[c]){ for(i=0;i<313;i+=c){comp[i]=c;} hash[pc]=(mp(c,.5)*mw)|0; k[pc++]=(mp(c,1/3)*mw)|0; }
+ }
+ ascii+='\x80';
+ while(ascii.length%64-56) ascii+='\x00';
+ for(i=0;i<ascii.length;i++){ j=ascii.charCodeAt(i); if(j>>8) return; words[i>>2]|=j<<((3-i)%4)*8; }
+ words[words.length]=((bitLen/mw)|0); words[words.length]=(bitLen);
+ for(j=0;j<words.length;){
+  var w=words.slice(j,j+=16), oldHash=hash; hash=hash.slice(0,8);
+  for(i=0;i<64;i++){
+   var w15=w[i-15], w2=w[i-2], a=hash[0], e=hash[4];
+   var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]
+    +(w[i]=(i<16)?w[i]:( w[i-16] + (rr(w15,7)^rr(w15,18)^(w15>>>3)) + w[i-7] + (rr(w2,17)^rr(w2,19)^(w2>>>10)) )|0);
+   var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+   hash=[(t1+t2)|0].concat(hash); hash[4]=(hash[4]+t1)|0;
+  }
+  for(i=0;i<8;i++){hash[i]=(hash[i]+oldHash[i])|0;}
+ }
+ for(i=0;i<8;i++){ for(j=3;j+1;j--){ var b=(hash[i]>>(j*8))&255; result+=((b<16)?0:'')+b.toString(16); } }
+ return result;
+}
+var PWHASH="1d42824a044cb6e0c787511384c1363e3ab52107f59b31b4915f9deffe31a9fd";
+function unlock(){document.body.classList.remove('locked');var g=document.getElementById('gate');if(g)g.remove();if(window.afterUnlock)window.afterUnlock();}
+function tryPw(){
+ var v=document.getElementById('pw').value||'';
+ if(sha256(v)===PWHASH){try{sessionStorage.setItem('ecp_slides_ok','1')}catch(e){};unlock();}
+ else{document.getElementById('err').textContent='密碼不正確，請再試一次。';document.getElementById('pw').value='';}
+}
+document.getElementById('go').onclick=tryPw;
+document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')tryPw()});
+var ok=false;try{ok=sessionStorage.getItem('ecp_slides_ok')==='1'}catch(e){}
+if(ok){unlock()}else{document.getElementById('pw').focus()}
+</script>
+</body></html>
