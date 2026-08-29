@@ -48,10 +48,11 @@ b{color:var(--ink);font-weight:700}
 .cv-title{font-size:calc(var(--u)*3.4);margin:calc(var(--u)*.4) 0 calc(var(--u)*.5);font-weight:700;letter-spacing:.04em}
 .cv-sub{font-size:calc(var(--u)*1.25);color:#d6e4ea}
 .cv-meta{margin-top:calc(var(--u)*2.6);font-size:calc(var(--u)*.8);color:#a8bfcb;line-height:2}
-.cv-avatar{position:absolute;right:calc(var(--u)*4);top:50%;transform:translateY(-50%);
- width:calc(var(--u)*9.5);height:calc(var(--u)*9.5);border-radius:50%;object-fit:cover;
- box-shadow:0 0 0 calc(var(--u)*.16) rgba(255,255,255,.30)}
-.cv-avatar.big{width:calc(var(--u)*11.5);height:calc(var(--u)*11.5)}
+.cv-avatar{position:absolute;right:calc(var(--u)*3);bottom:calc(var(--u)*2.5);
+ height:calc(var(--u)*15);width:auto;
+ -webkit-mask-image:linear-gradient(to bottom,#000 82%,rgba(0,0,0,0) 100%);
+ mask-image:linear-gradient(to bottom,#000 82%,rgba(0,0,0,0) 100%)}
+.cv-avatar.big{height:calc(var(--u)*17)}
 .cover-slide .foot{border-top:1px solid rgba(255,255,255,.18);color:#8ba5b4}
 
 /* 三模式 */
