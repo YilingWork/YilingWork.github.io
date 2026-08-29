@@ -165,12 +165,15 @@ body.locked #deck,body.locked #nav,body.locked #hint,body.locked #notes{display:
 @media print{#gate{display:none !important}}
 
 @media print{
- @page{size:A4 landscape;margin:0}
+ @page{size:297mm 167mm;margin:0}
  html,body{background:#fff}
  #deck{display:block;height:auto;width:auto;overflow:visible}
- .slide{display:block !important;width:297mm;height:167mm;box-shadow:none;page-break-after:always;
-  padding:12mm 16mm 10mm}
- :root{--u:3.55mm}
+ .slide{display:flex !important;flex-direction:column;justify-content:center;
+  width:297mm;height:167mm;box-shadow:none;page-break-after:always;
+  overflow:hidden}
+ .slide.cover-slide{display:block !important}
+ .slide:last-child{page-break-after:auto}
+ :root{--u:5.11mm}
  #nav,#hint,#notes{display:none !important}
 }
 
