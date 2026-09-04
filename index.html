@@ -255,6 +255,11 @@ section{padding:66px 0;scroll-margin-top:70px}
 .cg-label::before{content:"";width:14px;height:2px;background:var(--brand-2);border-radius:2px;flex:none}
 .course-tags.past span{color:var(--muted);background:transparent;border-style:dashed}
 .course-tags .has-cert{display:inline-flex;align-items:center;gap:8px;border-color:var(--gold);background:var(--gold-wash)}
+.course-tags .person{padding:0;border-color:var(--brand-2);transition:border-color .18s,box-shadow .18s}
+.course-tags .person:hover{border-color:var(--brand);box-shadow:var(--shadow)}
+.course-tags .person > a{display:flex;align-items:center;gap:7px;padding:7px 12px;color:var(--ink-soft);text-decoration:none}
+.course-tags .person > a > span{border:0;background:none;padding:0;border-radius:0}
+.course-tags .person .arw{font-size:11px;font-weight:700;color:var(--brand-2)}
 .icap{font-size:10.5px;font-weight:700;color:#fff;background:var(--gold);border-radius:5px;padding:2px 7px;text-decoration:none;letter-spacing:.03em}
 :root[data-theme="dark"] .icap{color:#08201C}
 .icap:hover{filter:brightness(1.08)}
@@ -513,7 +518,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
       <div class="course-group">
         <div class="cg-label"><span class="zh">專任研究助理</span><span class="en">Research assistant</span></div>
         <div class="course-tags">
-          <span><span class="zh">蕭子芸</span><span class="en">Hsiao</span></span>
+          <span class="person"><a href="people/tzu-yun-hsiao/"><span class="zh">蕭子芸</span><span class="en">Tzu-Yun Hsiao</span><span class="arw">↗</span></a></span>
         </div>
       </div>
       <div class="course-group">
