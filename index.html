@@ -340,6 +340,8 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
   font-size:12.5px;line-height:1.5;box-shadow:var(--shadow);
   opacity:0;transform:translateX(6px);transition:opacity .45s ease,transform .45s ease}
 #guide .bubble.show{opacity:1;transform:none}
+#guide.totop .figs,#guide.totop .bubble{pointer-events:auto;cursor:pointer}
+#guide.totop .bubble:hover{color:var(--brand);border-color:var(--brand)}
 #guide .bubble::after{content:"";position:absolute;left:100%;bottom:13px;
   border:6px solid transparent;border-left-color:var(--line)}
 #guide .cue{position:absolute;right:calc(100% + 10px);bottom:24%;
@@ -702,7 +704,8 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
       talks:['我在這些場合分享過','Where I have spoken'],
       teaching:['我開的課在這裡','Courses I teach'],
       credentials:['證照與專業資歷','Credentials'],
-      contact:['歡迎與我聯絡','Get in touch']
+      contact:['歡迎與我聯絡','Get in touch'],
+      top:['點我回到網頁最上方','Click me to go back to top']
     };
     var IDS=['about','research','talks','teaching','credentials','contact'];
     var curKey='', curPose='';
@@ -729,7 +732,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
 
     if(!reduce){
       var H0=230,H1=152,MH0=150,MH1=110,ticking=false,stopTimer=null;
-      var CYCLE=['w1','w2'], step=0, stepTimer=null;
+      var CYCLE=['w1','w2'], step=0, stepTimer=null, secKey='hero';
       function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
       function idlePose(){ return curKey==='contact' ? 'back' : 'stand'; }
       function frame(){
@@ -746,7 +749,8 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
           var el=document.getElementById(IDS[i]);
           if(el && el.getBoundingClientRect().top+window.scrollY<=mid) key=IDS[i];
         }
-        say(key);
+        secKey=key;
+        if(!g.classList.contains('totop')) say(key);
       }
       function startWalk(){
         if(stepTimer) return;
@@ -757,15 +761,29 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
       }
       function onScroll(){
         if(!ticking){ ticking=true; requestAnimationFrame(frame); }
+        if(g.classList.contains('totop')){ g.classList.remove('totop'); say(secKey); }
         startWalk();
         clearTimeout(stopTimer);
         stopTimer=setTimeout(function(){
-          clearInterval(stepTimer); stepTimer=null; step=0; pose(idlePose());
+          clearInterval(stepTimer); stepTimer=null; step=0; pose(idlePose()); idle();
         }, 340);
       }
+      // 停下時：離開首頁區就改成「回到最上方」提示，人像與說話框可點
+      function idle(){
+        if(window.scrollY > window.innerHeight*0.5){ g.classList.add('totop'); say('top'); }
+        else { g.classList.remove('totop'); say(secKey); }
+      }
+      function goTop(){
+        if(!g.classList.contains('totop')) return;
+        var y0=window.scrollY;
+        window.scrollTo({top:0,behavior:'smooth'});
+        setTimeout(function(){ if(window.scrollY===y0) window.scrollTo(0,0); }, 400);
+      }
+      g.querySelector('.figs').addEventListener('click',goTop);
+      bubble.addEventListener('click',goTop);
       window.addEventListener('scroll',onScroll,{passive:true});
       window.addEventListener('resize',function(){ if(!ticking){ticking=true;requestAnimationFrame(frame);} });
-      frame();
+      frame(); idle();
     }
   })();
 })();
