@@ -118,6 +118,10 @@ img{max-width:100%;display:block}
   display:grid;grid-template-columns:repeat(7,1fr)}
 .ledger .cell{padding:22px 13px;border-right:1px solid var(--line-soft)}
 .ledger .cell:last-child{border-right:0}
+.ledger a.cell{color:inherit;text-decoration:none;transition:background .2s ease}
+.ledger a.cell:hover,.ledger a.cell:focus-visible{background:color-mix(in srgb,var(--brand) 7%,transparent)}
+.ledger a.cell:hover .l{color:var(--brand)}
+.anchor{scroll-margin-top:80px}
 .ledger .n{font-family:var(--font-display);font-size:31px;font-weight:600;color:var(--brand);line-height:1;display:flex;align-items:baseline;gap:2px}
 .ledger .n .u{font-size:14px;color:var(--gold);font-weight:600}
 .ledger .l{margin-top:8px;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.01em}
@@ -393,13 +397,13 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
 </div>
 
 <div class="ledger reveal">
-  <div class="cell"><div class="n tnum">15<span class="u">+</span></div><div class="l"><span class="zh">年產業經歷</span><span class="en">Yrs in industry</span></div></div>
-  <div class="cell"><div class="n tnum">16</div><div class="l"><span class="zh">場演講</span><span class="en">Invited talks</span></div></div>
-  <div class="cell"><div class="n tnum">9</div><div class="l"><span class="zh">國際研討會</span><span class="en">Intl. conferences</span></div></div>
-  <div class="cell"><div class="n tnum">5</div><div class="l"><span class="zh">期刊論文</span><span class="en">Journal articles</span></div></div>
-  <div class="cell"><div class="n tnum">7</div><div class="l"><span class="zh">研究計畫</span><span class="en">Research projects</span></div></div>
-  <div class="cell"><div class="n tnum">11</div><div class="l"><span class="zh">指導論文/專題</span><span class="en">Theses &amp; projects</span></div></div>
-  <div class="cell"><div class="n tnum">6</div><div class="l"><span class="zh">專業證照</span><span class="en">Certifications</span></div></div>
+  <a class="cell" href="#career"><div class="n tnum">15<span class="u">+</span></div><div class="l"><span class="zh">年產業經歷</span><span class="en">Yrs in industry</span></div></a>
+  <a class="cell" href="#talks"><div class="n tnum">16</div><div class="l"><span class="zh">場演講</span><span class="en">Invited talks</span></div></a>
+  <a class="cell" href="#conferences"><div class="n tnum">9</div><div class="l"><span class="zh">國際研討會</span><span class="en">Intl. conferences</span></div></a>
+  <a class="cell" href="#journals"><div class="n tnum">5</div><div class="l"><span class="zh">期刊論文</span><span class="en">Journal articles</span></div></a>
+  <a class="cell" href="#projects"><div class="n tnum">7</div><div class="l"><span class="zh">研究計畫</span><span class="en">Research projects</span></div></a>
+  <a class="cell" href="#mentored"><div class="n tnum">11</div><div class="l"><span class="zh">指導論文/專題</span><span class="en">Theses &amp; projects</span></div></a>
+  <a class="cell" href="#credentials"><div class="n tnum">6</div><div class="l"><span class="zh">專業證照</span><span class="en">Certifications</span></div></a>
 </div>
 </div></header>
 
@@ -430,7 +434,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
     </div>
   </div>
 
-  <div class="reveal" style="margin-top:46px">
+  <div class="reveal anchor" id="career" style="margin-top:46px">
     <span class="kicker" style="color:var(--faint)"><span class="zh">職涯歷程 · 產業 → 學術</span><span class="en">Career path · industry → academia</span></span>
     <div class="timeline" style="margin-top:22px">
       <div class="tl-item ind"><div class="yr">2005–07</div><div class="dot"></div><div class="org"><span class="zh">和信治癌中心醫院</span><span class="en">Sun Yat-Sen Cancer Center</span></div><div class="role"><span class="zh">藥師</span><span class="en">Pharmacist</span></div><div class="ph">Clinic</div></div>
@@ -457,7 +461,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
     <div class="pcard reveal"><div class="ico">賦</div><h3><span class="zh">病人賦權</span><span class="en">Patient Empowerment</span></h3><p><span class="zh">病人組織參與政策、用藥與健康識能量表、電子仿單（ePI）與多元族群資訊可近性。</span><span class="en">Patient participation in policy, medication/health literacy tools, and electronic package inserts (ePI) for diverse populations.</span></p></div>
   </div>
 
-  <div class="reveal">
+  <div class="reveal anchor" id="journals">
     <div class="subhead"><h3><span class="zh">期刊論文</span><span class="en">Journal Articles</span></h3><span class="count">5</span></div>
     <div class="pub"><div class="yr">2026</div><div><div class="t">A Dempster-Shafer Theory-Based Multi-Criteria Decision Model for Evaluating Sustainable Third-Party Logistics Providers</div><div class="meta"><em>Sustainability</em>, 18(10):4643 · SCIE, SSCI</div></div><span class="role co"><span class="zh">共同作者</span><span class="en">Co-author</span></span></div>
     <div class="pub"><div class="yr">2025</div><div><div class="t">Evaluation of Implementation of Patient Involvement in Taiwan's Pharmaceutical Reimbursement Decision-Making Process</div><div class="meta"><em>Int. J. of Technology Assessment in Health Care</em>, 41(1):e55 · SCIE</div></div><span class="role"><span class="zh">第一作者</span><span class="en">First author</span></span></div>
@@ -466,7 +470,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
     <div class="pub"><div class="yr">2017</div><div><div class="t">The Economic Burden of Advanced Gastric Cancer in Taiwan</div><div class="meta"><em>BMC Health Services Research</em>, 17:663 · SCIE</div></div><span class="role co"><span class="zh">共同作者</span><span class="en">Co-author</span></span></div>
   </div>
 
-  <div class="reveal">
+  <div class="reveal anchor" id="conferences">
     <div class="subhead"><h3><span class="zh">國際研討會發表</span><span class="en">International Conference Presentations</span></h3><span class="count">9</span></div>
     <p class="sub" style="margin:-6px 0 6px"><span class="zh">橫跨 HTAsiaLink／RAPS／ISPOR／ASCO／ESMO 五大國際舞台，多為第一或通訊作者。</span><span class="en">Across HTAsiaLink, RAPS, ISPOR, ASCO and ESMO — mostly first or corresponding author.</span></p>
     <div class="pub"><div class="yr">2026</div><div><div class="t">Assessing Patient Organization Participation and Perceived Policy Impact in Taiwan's National Health Insurance: A Health Democracy Index Approach</div><div class="meta">13th HTAsiaLink · Taipei · <span style="color:var(--brand);font-weight:700">🎤&nbsp;<span class="zh">口頭報告 Oral presentation</span><span class="en">Oral presentation</span></span></div></div><span class="role"><span class="zh">第一作者</span><span class="en">First</span></span></div>
@@ -480,7 +484,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
     <div class="pub"><div class="yr">2019</div><div><div class="t">Use of AUC in Oncology Survival Curve to Assess Cost in MEA Negotiation</div><div class="meta">ISPOR Annual Meeting · New Orleans</div></div><span class="role"><span class="zh">第一作者</span><span class="en">First</span></span></div>
   </div>
 
-  <div class="reveal">
+  <div class="reveal anchor" id="projects">
     <div class="subhead"><h3><span class="zh">研究計畫</span><span class="en">Research Projects</span></h3><span class="count">7</span></div>
     <div class="proj-cols">
       <div class="proj-col">
@@ -577,7 +581,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);f
           <span><span class="zh">黃峻煜</span><span class="en">Huang</span></span>
         </div>
       </div>
-      <span class="kicker" style="color:var(--faint);display:block;margin-top:34px"><span class="zh">過去指導學生</span><span class="en">Past mentored students</span></span>
+      <span class="kicker anchor" id="mentored" style="color:var(--faint);display:block;margin-top:34px"><span class="zh">過去指導學生</span><span class="en">Past mentored students</span></span>
       <div class="stu"><div class="top"><span class="yr">2026</span><span class="kind"><span class="zh">碩士論文</span><span class="en">Master's thesis</span></span></div><div class="t"><span class="zh">探索乳癌存活者追蹤期間使用輔助與替代療法之樣態與生活品質：橫斷式研究</span><span class="en">CAM Use & Quality of Life During Breast-Cancer Survivorship: A Cross-Sectional Study</span></div><div class="who"><span class="zh">謝允馨</span><span class="en">Hsieh</span></div></div>
       <div class="stu"><div class="top"><span class="yr">2026</span><span class="kind"><span class="zh">碩士論文</span><span class="en">Master's thesis</span></span></div><div class="t"><span class="zh">台灣成年民眾非處方藥物識能與醫療服務使用之相關性研究</span><span class="en">A Study on the Association Between Over the Counter Medication Literacy and Healthcare Utilization Among Adults in Taiwan</span></div><div class="who"><span class="zh">蕭子芸</span><span class="en">Hsiao</span></div><div class="badges"><span class="link-out">→ 13th HTAsiaLink 2026 · <span class="zh">海報</span><span class="en">Poster</span></span></div></div>
       <div class="stu"><div class="top"><span class="yr">2026</span><span class="kind"><span class="zh">碩士論文</span><span class="en">Master's thesis</span></span></div><div class="t"><span class="zh">病友組織參與台灣健保政策之影響力評估</span><span class="en">Assessment of the Influence of Patient Organizations on Taiwan's National Health Insurance Policy</span></div><div class="who"><span class="zh">蔡欣樺</span><span class="en">Tsai</span></div><div class="badges"><span class="link-out">→ 13th HTAsiaLink 2026 · <span class="zh">口頭報告</span><span class="en">Oral</span></span></div></div>
