@@ -293,8 +293,9 @@ section{padding:66px 0;scroll-margin-top:70px}
 .cert .seal{width:46px;height:46px;margin:0 auto 12px;border-radius:50%;border:2px solid var(--gold);color:var(--gold);
   display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:18px;background:var(--gold-wash)}
 .cert .seal-logo{height:46px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
-.cert .seal-logo img{max-height:46px;max-width:150px;width:auto;height:auto;display:block}
-.cert .seal-logo img.wide{max-width:200px}
+.cert .seal-logo img{max-height:46px;max-width:min(150px,100%);width:auto;height:auto;display:block}
+.cert .seal-logo img.wide{max-width:min(200px,100%)}
+.cert-grid > .cert{min-width:0}
 :root[data-theme="dark"] .cert .seal-logo img{background:#fff;padding:5px 9px;border-radius:8px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cert .seal-logo img{background:#fff;padding:5px 9px;border-radius:8px}}
 .cert .cn{font-weight:600;font-size:14px;line-height:1.35}
