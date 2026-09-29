@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>院長經營模擬</title>
+<style>
+:root{
+ --bg:#f4f6f7; --card:#ffffff; --line:#dde4ea; --ink:#16283c; --sub:#4a5c6e; --mut:#7d8b98;
+ --ac:#0e6a63; --ac2:#e7f1f0; --acink:#ffffff; --amber:#b87b0a; --amber2:#fdf6e7;
+ --pos:#2c7a4f; --pos2:#eaf6ee; --neg:#b8392c; --neg2:#fbeeec;
+}
+@media (prefers-color-scheme: dark){
+ :root:not([data-theme="light"]){
+  --bg:#12181e; --card:#1c242c; --line:#2f3b46; --ink:#e8eef2; --sub:#b7c3cc; --mut:#8595a2;
+  --ac:#4fb3a5; --ac2:#1d3533; --acink:#0f1a19; --amber:#e0a94a; --amber2:#2e2718;
+  --pos:#6cc38f; --pos2:#1b2e23; --neg:#e98173; --neg2:#352020;
+ }
+}
+:root[data-theme="dark"]{
+  --bg:#12181e; --card:#1c242c; --line:#2f3b46; --ink:#e8eef2; --sub:#b7c3cc; --mut:#8595a2;
+  --ac:#4fb3a5; --ac2:#1d3533; --acink:#0f1a19; --amber:#e0a94a; --amber2:#2e2718;
+  --pos:#6cc38f; --pos2:#1b2e23; --neg:#e98173; --neg2:#352020;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+ line-height:1.65;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0 12px;border-bottom:1px solid var(--line);margin-bottom:16px}
+header .t{font-weight:700;font-size:15px}
+header .g{font-size:13px;color:var(--mut)}
+.pill{display:inline-block;background:var(--ac);color:var(--acink);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+h1{font-size:22px;line-height:1.4;margin:6px 0 8px}
+h2{font-size:18px;line-height:1.45;margin:0 0 10px}
+p{margin:0 0 12px;color:var(--sub)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card.role{border-top:4px solid var(--ac)}
+.lbl{font-size:12px;color:var(--mut);letter-spacing:.06em;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.grid button{aspect-ratio:1;font-size:20px;font-weight:700}
+button{font-family:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer}
+button:active{transform:scale(.98)}
+.btn{display:block;width:100%;padding:14px;font-size:16px;font-weight:700;background:var(--ac);color:var(--acink);border:none;margin-top:6px}
+.btn.ghost{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+.choice{display:block;width:100%;text-align:left;padding:14px;margin-bottom:10px;font-size:15px;line-height:1.5}
+.choice b{display:block;font-size:16px;margin-bottom:2px}
+.choice span{color:var(--sub);font-size:13px}
+.choice.sel{border:2px solid var(--ac);background:var(--ac2)}
+.choice:disabled{cursor:default}
+.res{border-radius:10px;padding:14px;margin:4px 0 12px}
+.res.pos{background:var(--pos2)} .res.neg{background:var(--neg2)}
+.row{display:flex;justify-content:space-between;font-size:14px;color:var(--sub);padding:2px 0}
+.row.tot{font-weight:700;font-size:16px;color:var(--ink);border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.pos .row.tot b{color:var(--pos)} .neg .row.tot b{color:var(--neg)}
+.cmp{font-size:13px;color:var(--sub);margin-top:8px}
+.prog{display:flex;gap:6px;margin-bottom:12px}
+.prog i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.prog i.on{background:var(--ac)}
+.note{font-size:12px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:7px 5px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.q{display:flex;gap:10px;margin-bottom:10px;font-size:15px}
+.q span{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ac);color:var(--acink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.timer{font-size:44px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;color:var(--ac);margin:4px 0}
+.timer.low{color:var(--neg)}
+textarea{width:100%;min-height:110px;font-family:inherit;font-size:15px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.hide{display:none}
+.tx{overflow-x:auto}
+.best{font-weight:700;color:var(--ac)}
+table.tt{min-width:760px}
+table.tt td:first-child{min-width:170px}
+table.tt td.n{white-space:nowrap}
+input.name{width:100%;font-family:inherit;font-size:17px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.grid.off button{opacity:.35;pointer-events:none}
+.cert{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:22px 18px;position:relative;overflow:hidden}
+.cert:before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:var(--ac)}
+.cert .ct{font-size:13px;color:var(--mut);letter-spacing:.12em;text-align:center;margin-top:6px}
+.cert .cn{font-size:30px;font-weight:700;text-align:center;margin:8px 0 2px}
+.cert .cg{text-align:center;color:var(--sub);font-size:15px;margin-bottom:14px}
+.cert .done{text-align:center;font-size:17px;font-weight:700;color:var(--ac);margin-bottom:14px}
+.cert .code{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;font-size:13px;color:var(--mut);border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.cert .code b{color:var(--ink);font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// ── 教學模擬數值，非實際給付標準；程式內部以「千元」計算，顯示時由 f()/money() 轉為萬元／千元／元 ──
+// 成本：住院一日 8、檢查一項 1.5、預防衛教計畫 30
+const METHODS = {
+ ffs:  {name:"論量計酬", def:"支付單位為每項服務；總支付金額為所提供各項服務之加總。", pay:"每住院一日支付 1 萬元、每項檢查支付 3 千元。"},
+ case: {name:"論病例計酬", def:"支付一段時間之疾病照護或手術處置，以固定／單一金額涵蓋此期間所有照護服務。", pay:"每次住院（一個病例）支付固定 5 萬元，不論住幾天、做幾項檢查。"},
+ diem: {name:"論日計酬", def:"針對住院，以日為支付單位，每天支付固定金額，乘以住院天數即為總支付金額。", pay:"每住院一日支付 1 萬 1 千元，已涵蓋當日所有服務（檢查不另計）。"},
+ cap:  {name:"論人計酬", def:"以人為支付單位，支付每人固定金額，涵蓋照護此人於一個月或一年之所有照護服務。", pay:"每位登記於貴院之照護對象，每年支付固定 6 萬元，不論使用多少服務。已登記者之費用已收取，本回合收入不再增加。"},
+ gb:   {name:"總額預算支付", def:"支付所有照護病人於特定期間之所有服務，如個別醫院之總額預算。", pay:"貴院今年總額預算已固定核定，不論服務多少病人、提供多少服務，收入均不增加。"},
+};
+const GROUPS = {1:"ffs",2:"ffs",3:"case",4:"case",5:"diem",6:"diem",7:"cap",8:"cap",9:"gb",10:"gb"};
+
+// 每一選項：days 住院日、tests 檢查項數、cases 住院次數、prog 是否推動預防計畫、enroll 新登記人數
+const SCEN = [
+ {t:"術後住院天數", s:"阿嬤接受膝關節置換手術後住院。主治醫師評估：第 4 天即可出院。",
+  A:{h:"第 4 天出院", d:"依醫師評估出院", days:4, tests:2, cases:1},
+  B:{h:"多住 3 天觀察（共 7 天）", d:"延長住院觀察", days:7, tests:2, cases:1}},
+ {t:"住院中加做檢查", s:"一位住院病人病情穩定，醫師評估目前的 1 項檢查已足夠。",
+  A:{h:"維持 1 項檢查", d:"依醫師評估", days:0, tests:1, cases:0},
+  B:{h:"加做 3 項檢查（共 4 項）", d:"多做檢查「比較保險」", days:0, tests:4, cases:0}},
+ {t:"糖尿病預防衛教", s:"貴院照護 100 位糖尿病病人。若不介入，明年預估 10 人次住院（每次 5 天）；若推動衛教與追蹤計畫（成本 3 萬元），預估降為 4 人次住院。",
+  A:{h:"推動衛教與追蹤計畫", d:"明年住院 4 人次", days:20, tests:0, cases:4, prog:true},
+  B:{h:"不推動，照常看診", d:"明年住院 10 人次", days:50, tests:0, cases:10}},
+ {t:"接收新病人", s:"一位多重慢性病病人想轉到貴院長期照護。預估明年住院 3 次，每次 7 天、做 4 項檢查。",
+  A:{h:"接收，並登記為貴院照護對象", d:"明年住院 3 次", days:21, tests:12, cases:3, enroll:1},
+  B:{h:"婉拒，建議轉往他院", d:"不增加服務", days:0, tests:0, cases:0}},
+];
+
+function calc(m, o){
+ const cost = o.days*8 + o.tests*1.5 + (o.prog?30:0);
+ let rev = 0;
+ if(m==="ffs")  rev = o.days*10 + o.tests*3;
+ if(m==="case") rev = o.cases*50;
+ if(m==="diem") rev = o.days*11;
+ if(m==="cap")  rev = (o.enroll||0)*60;
+ if(m==="gb")   rev = 0;
+ return {rev, cost, net: rev-cost};
+}
+const esc = t => String(t||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function money(k){ // k：千元
+ const y = Math.round(Math.abs(k)*1000);
+ if(y===0) return "0 元";
+ if(y>=10000){ const w = y/10000; return (Number.isInteger(w)? w : w.toFixed(2).replace(/0+$/,"")) + " 萬元"; }
+ if(y%1000===0) return (y/1000) + " 千元";
+ return y.toLocaleString("zh-TW") + " 元";
+}
+const f = n => (n>0?"+":n<0?"−":"") + money(n);
+
+let st = {name:"", g:null, m:null, i:0, picks:[], done:""};
+try{ const s = JSON.parse(sessionStorage.getItem("pgame")||"null"); if(s && s.g) st = s; }catch(e){}
+const save = () => { try{ sessionStorage.setItem("pgame", JSON.stringify(st)); }catch(e){} };
+const app = document.getElementById("app");
+let timerId = null;
+
+function head(){
+ const g = st.g ? `<span class="g">${esc(st.name)}｜第 ${st.g} 組｜${METHODS[st.m].name}</span>` : `<span class="g">健康照護體系</span>`;
+ return `<header><span class="t">院長經營模擬</span>${g}</header>`;
+}
+
+function home(){
+ app.style.maxWidth = "";
+ let b = ""; for(let i=1;i<=10;i++) b += `<button onclick="pick(${i})">${i}</button>`;
+ app.innerHTML = head() + `
+ <span class="pill">支付制度</span>
+ <h1>如果你是醫院院長，保險人的付錢方式會改變你的決定嗎？</h1>
+ <p>選擇你的組別，你將扮演醫院院長，在一種支付方式下面對四個經營情境。每個決定都會即時顯示醫院的收入、成本與結餘。</p>
+ <div class="card"><div class="lbl">1　請輸入姓名</div><input class="name" id="nm" maxlength="20" placeholder="例：王小明" autocomplete="name"></div>
+ <div class="card"><div class="lbl">2　請選擇組別</div><div class="grid off" id="gg">${b}</div></div>
+ <p class="note">本遊戲金額為教學模擬數值，非實際給付標準。定義依據：《衛生行政與管理》第 7 章第二節，頁 227–228。</p>
+ <p class="note"><a href="#teacher" onclick="teacher();return false" style="color:var(--mut)">教師總覽</a></p>`;
+ const nm = document.getElementById("nm"), gg = document.getElementById("gg");
+ nm.value = st.name||""; const upd = () => gg.classList.toggle("off", !nm.value.trim());
+ nm.oninput = upd; upd();
+}
+function pick(g){ const n = (document.getElementById("nm")||{}).value||""; if(!n.trim()) return;
+ st = {name:n.trim(), g, m:GROUPS[g], i:0, picks:[], done:""}; save(); role(); }
+
+function role(){
+ const M = METHODS[st.m];
+ app.innerHTML = head() + `
+ <div class="card role">
+  <div class="lbl">你的角色</div>
+  <h2>你是醫院院長，保險人以「${M.name}」支付貴院</h2>
+  <p><b>定義</b>：${M.def}</p>
+  <p><b>本遊戲規則</b>：${M.pay}</p>
+  <p class="note">醫院成本：每住院一日 8 千元、每項檢查 1,500 元（教學模擬數值）。</p>
+ </div>
+ <p>接下來四個情境，請小組討論後做決定。院長的目標是讓醫院經營下去，也請留意每個決定對病人的影響。</p>
+ <button class="btn" onclick="st.i=0;st.picks=[];save();scene()">開始經營</button>
+ <button class="btn ghost" onclick="st.g=null;st.picks=[];save();home()">重選組別</button>`;
+ scrollTo(0,0);
+}
+
+function scene(){
+ const S = SCEN[st.i], k = st.picks[st.i];
+ let prog = ""; for(let j=0;j<SCEN.length;j++) prog += `<i class="${j<=st.i?'on':''}"></i>`;
+ const ch = x => `<button class="choice ${k===x?'sel':''}" ${k?'disabled':''} onclick="choose('${x}')"><b>${x}．${S[x].h}</b><span>${S[x].d}</span></button>`;
+ let out = "";
+ if(k){
+  const r = calc(st.m, S[k]), o = calc(st.m, S[k==="A"?"B":"A"]);
+  const better = r.net >= o.net;
+  out = `<div class="res ${r.net>=0?'pos':'neg'}">
+   <div class="row"><span>本案收入增加</span><span>${f(r.rev)}</span></div>
+   <div class="row"><span>本案成本</span><span>${f(-r.cost)}</span></div>
+   <div class="row tot"><span>對醫院結餘之影響</span><b>${f(r.net)}</b></div>
+   <div class="cmp">若選另一個選項，結餘影響為 <b>${f(o.net)}</b>。${better?"你的選擇對醫院財務較有利。":"另一個選項對醫院財務較有利。"}</div>
+  </div>
+  <button class="btn" onclick="next()">${st.i<SCEN.length-1?"下一個情境":"查看經營結果"}</button>`;
+ }
+ app.innerHTML = head() + `<div class="prog">${prog}</div>
+ <div class="lbl">情境 ${st.i+1}／${SCEN.length}｜${S.t}</div>
+ <h2>${S.s}</h2>${ch("A")}${ch("B")}${out}`;
+}
+function choose(x){ st.picks[st.i]=x; save(); scene(); }
+function next(){ if(st.i<SCEN.length-1){ st.i++; save(); scene(); scrollTo(0,0);} else { const d=new Date(); st.done=d.toLocaleString("zh-TW",{hour12:false}); save(); result(); } }
+
+function result(){
+ let rows="", tot=0, best=0;
+ SCEN.forEach((S,j)=>{
+  const k = st.picks[j], r = calc(st.m,S[k]), a = calc(st.m,S.A), b = calc(st.m,S.B);
+  const bk = a.net>=b.net ? "A" : "B";
+  tot += r.net; best += Math.max(a.net,b.net);
+  rows += `<tr><td>${S.t}</td><td>${k}</td><td class="n">${f(r.net)}</td><td class="best">${bk}</td></tr>`;
+ });
+ app.innerHTML = head() + `
+ <span class="pill">經營結果</span>
+ <h2>${METHODS[st.m].name}下，四個情境對醫院結餘之合計影響為 ${f(tot)}</h2>
+ <div class="card tx"><table>
+  <tr><th>情境</th><th>你的選擇</th><th style="text-align:right">結餘影響</th><th>財務最有利</th></tr>${rows}
+  <tr><td colspan="2"><b>合計</b></td><td class="n"><b>${f(tot)}</b></td><td class="n">${f(best)}</td></tr>
+ </table></div>
+ <div class="card">
+  <div class="lbl">小組討論（8 分鐘）</div>
+  <div class="q"><span>1</span><div>支付金額如何計算？</div></div>
+  <div class="q"><span>2</span><div>身為院長，在這種支付方式下傾向增加哪些服務？傾向減少哪些服務？</div></div>
+  <div class="q"><span>3</span><div>上述做法對病人可能產生哪些影響？</div></div>
+  <div class="timer" id="tm">08:00</div>
+  <button class="btn" id="tb" onclick="startTimer()">開始計時</button>
+ </div>
+ <div class="card"><div class="lbl">報告重點（只存在這支手機，重新整理仍保留）</div>
+  <textarea id="memo" placeholder="記錄者在這裡寫下報告重點…"></textarea></div>
+ <button class="btn" onclick="cert()">顯示完成證明（截圖上傳 Zuvio）</button>
+ <button class="btn ghost" onclick="st.i=0;st.picks=[];st.done='';save();scene()">重新經營一次</button>`;
+ const t = document.getElementById("memo");
+ try{ t.value = localStorage.getItem("pgame-memo-"+st.g)||""; }catch(e){}
+ t.oninput = () => { try{ localStorage.setItem("pgame-memo-"+st.g, t.value); }catch(e){} };
+ scrollTo(0,0);
+}
+function startTimer(){
+ clearInterval(timerId); let s = 480; const el = document.getElementById("tm"), b = document.getElementById("tb");
+ b.textContent = "重新計時";
+ timerId = setInterval(()=>{ s--; if(!document.getElementById("tm")){clearInterval(timerId);return}
+  el.textContent = String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  el.classList.toggle("low", s<=120);
+  if(s<=0){ clearInterval(timerId); el.textContent="時間到"; } },1000);
+}
+
+function vcode(){
+ const src = [st.name, st.g, st.picks.join(""), st.done].join("|"); let h = 2166136261;
+ for(const ch of src){ h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; }
+ return h.toString(36).toUpperCase().padStart(7,"0").slice(-7);
+}
+function cert(){
+ let rows="", tot=0;
+ SCEN.forEach((S,j)=>{ const k=st.picks[j], r=calc(st.m,S[k]); tot+=r.net;
+  rows += `<tr><td>${S.t}</td><td>${k}．${S[k].h}</td><td class="n">${f(r.net)}</td></tr>`; });
+ app.innerHTML = `
+ <div class="cert">
+  <div class="ct">健康照護體系｜支付制度　學習紀錄</div>
+  <div class="cn">${esc(st.name)}</div>
+  <div class="cg">第 ${st.g} 組｜${METHODS[st.m].name}</div>
+  <div class="done">已完成「院長經營模擬」四個情境</div>
+  <table><tr><th>情境</th><th>選擇</th><th style="text-align:right">結餘影響</th></tr>${rows}
+   <tr><td colspan="2"><b>合計</b></td><td class="n"><b>${f(tot)}</b></td></tr></table>
+  <div class="code"><span>完成時間 ${esc(st.done)}</span><span>驗證碼 <b>${vcode()}</b></span></div>
+ </div>
+ <p class="note" style="text-align:center;margin-top:10px">請截圖此畫面上傳 Zuvio。金額為教學模擬數值。</p>
+ <button class="btn ghost" onclick="result()">返回小組討論</button>`;
+ scrollTo(0,0);
+}
+function teacher(){
+ app.style.maxWidth = "1080px";
+ let h = "<tr><th>情境</th>" + Object.values(METHODS).map(M=>`<th>${M.name}</th>`).join("") + "</tr>";
+ SCEN.forEach(S=>{
+  h += `<tr><td>${S.t}<br><span class="note">A ${S.A.h}<br>B ${S.B.h}</span></td>`;
+  Object.keys(METHODS).forEach(m=>{
+   const a = calc(m,S.A).net, b = calc(m,S.B).net;
+   h += `<td class="n">A ${f(a)}<br>B ${f(b)}<br><span class="best">${a>=b?"A":"B"}</span></td>`;
+  });
+  h += "</tr>";
+ });
+ app.innerHTML = `<header><span class="t">院長經營模擬｜教師總覽</span><span class="g"><a href="#" onclick="home();return false" style="color:var(--ac)">返回</a></span></header>
+ <h2>同一情境下，五種支付方式對醫院財務最有利之選擇不同</h2>
+ <div class="card tx"><table class="tt">${h}</table></div>
+ <p class="note">金額為各選項對醫院結餘之影響（教學模擬數值）；綠字為財務最有利之選項。</p>`;
+}
+
+if(location.hash==="#teacher") teacher();
+else if(st.g && st.picks.length===SCEN.length && st.picks.every(Boolean)) result();
+else if(st.g) role();
+else home();
+</script>
+</body>
+</html>
