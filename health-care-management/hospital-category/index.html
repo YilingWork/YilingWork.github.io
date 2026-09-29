@@ -29,6 +29,15 @@ header.hd h1{margin:0;font-size:clamp(24px,5.5vw,32px);line-height:1.3;font-weig
 header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 .howto{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:18px 0;box-shadow:var(--shadow);font-size:17px}
 .howto b{color:var(--brand)}
+.namebox{background:var(--card);border:2px solid var(--brand-2);border-radius:14px;padding:14px 18px;margin:18px 0 0;box-shadow:var(--shadow)}
+.namebox label{display:block;font-size:17px;font-weight:800;color:var(--brand);margin-bottom:6px}
+.namebox input{width:100%;font:inherit;font-size:20px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.namebox input:focus{outline:3px solid var(--brand-2);outline-offset:1px;border-color:var(--brand-2)}
+.namebox input:disabled{background:#EEF1F0}
+.namebox .hint{font-size:14px;color:var(--muted);margin-top:6px}
+.who{font-size:24px;font-weight:900;color:var(--ink);margin:0 0 6px}
+.when{font-size:15px;color:var(--muted);margin:0 0 14px}
+.shot{background:#FFF6D6;border:1.5px solid #E8C45A;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:17px;font-weight:800;margin:0 0 16px}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .legend span{font-size:15px;font-weight:700;padding:4px 10px;border-radius:999px;border:1.5px solid currentColor}
 .list{display:flex;flex-direction:column;gap:14px}
@@ -63,7 +72,7 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 .btn.main{background:var(--brand);color:#fff;flex:1}
 .btn.main:disabled{background:#AEB9B5;cursor:not-allowed}
 .btn.sub{background:#E4E9E7;color:var(--ink)}
-#again{flex:1}
+#again,#showres{flex:1}
 .overlay{position:fixed;inset:0;background:rgba(10,20,18,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
 .overlay.show{display:flex}
 .modal{background:var(--card);border-radius:20px;padding:28px 22px;max-width:420px;width:100%;text-align:center}
@@ -80,8 +89,13 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 </div></header>
 
 <main class="wrap">
+  <div class="namebox">
+    <label for="stu">請先輸入你的姓名</label>
+    <input id="stu" type="text" autocomplete="name" placeholder="例：王小明" maxlength="20">
+    <div class="hint">姓名會顯示在成績畫面上；完成後請截圖上傳 Zuvio。</div>
+  </div>
   <div class="howto">
-    <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完後按下方「送出驗證」。
+    <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完、並填好姓名後，按下方「送出驗證」，再<b>截圖成績畫面上傳 Zuvio</b>。
     <div class="legend" id="legend"></div>
   </div>
   <div class="list" id="list"></div>
@@ -90,14 +104,18 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 <div class="bar"><div class="wrap">
   <div class="prog"><span id="prog">0 / 16</span><small>已作答</small></div>
   <button class="btn main" id="submit" disabled>送出驗證</button>
+  <button class="btn main" id="showres" hidden>看成績</button>
   <button class="btn sub" id="again" hidden>再玩一次</button>
 </div></div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="msg">
   <div class="modal">
+    <p class="who" id="who"></p>
+    <p class="when" id="when"></p>
     <div class="score" id="pct">0%</div>
     <div class="detail" id="detail"></div>
     <p class="msg" id="msg"></p>
+    <p class="shot">📸 請截圖此畫面，上傳到 Zuvio</p>
     <div class="row">
       <button class="btn sub" id="review">檢視對錯</button>
       <button class="btn main" id="reset">再玩一次</button>
@@ -153,7 +171,11 @@ function render(){
   }).join("");
   const done = Object.keys(answers).length;
   $("prog").textContent = `${done} / ${hospitals.length}`;
-  $("submit").disabled = submitted || done < hospitals.length;
+  const nm = $("stu").value.trim();
+  $("submit").disabled = submitted || done < hospitals.length || !nm;
+  $("submit").textContent = (!submitted && done === hospitals.length && !nm) ? "請先填姓名" : "送出驗證";
+  $("stu").disabled = submitted;
+  $("showres").hidden = !submitted;
   $("submit").hidden = submitted;
   $("again").hidden = !submitted;
 }
@@ -167,8 +189,16 @@ $("list").addEventListener("click", e => {
   render();
 });
 
+$("stu").addEventListener("input", () => { try { localStorage.setItem("hc-name", $("stu").value) } catch(e) {} render(); });
+try { $("stu").value = localStorage.getItem("hc-name") || ""; } catch(e) {}
+$("showres").onclick = () => $("overlay").classList.add("show");
 $("submit").onclick = () => {
+  const nm = $("stu").value.trim();
+  if (!nm) { $("stu").focus(); return; }
   submitted = true;
+  const d = new Date(), z = n => String(n).padStart(2, "0");
+  $("who").textContent = nm;
+  $("when").textContent = `醫院法律分類配對｜${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
   const score = hospitals.filter(h => answers[h.id] === h.answer).length;
   const pct = Math.round(score / hospitals.length * 100);
   $("pct").textContent = pct + "%";
