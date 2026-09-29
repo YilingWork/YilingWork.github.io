@@ -38,6 +38,8 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 .who{font-size:24px;font-weight:900;color:var(--ink);margin:0 0 6px}
 .when{font-size:15px;color:var(--muted);margin:0 0 14px}
 .shot{background:#FFF6D6;border:1.5px solid #E8C45A;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:17px;font-weight:800;margin:0 0 16px}
+.shot.retry{background:#EEF1F0;border-color:var(--line);color:var(--soft);font-weight:700}
+.modal.perfect{border:4px solid var(--ok)}
 .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .legend span{font-size:15px;font-weight:700;padding:4px 10px;border-radius:999px;border:1.5px solid currentColor}
 .list{display:flex;flex-direction:column;gap:14px}
@@ -92,10 +94,10 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
   <div class="namebox">
     <label for="stu">請先輸入你的姓名</label>
     <input id="stu" type="text" autocomplete="name" placeholder="例：王小明" maxlength="20">
-    <div class="hint">姓名會顯示在成績畫面上；完成後請截圖上傳 Zuvio。</div>
+    <div class="hint">姓名會顯示在成績畫面上；<b>全部答對</b>才會出現上傳用畫面，請截圖上傳 Zuvio。</div>
   </div>
   <div class="howto">
-    <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完、並填好姓名後，按下方「送出驗證」，再<b>截圖成績畫面上傳 Zuvio</b>。
+    <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完、並填好姓名後，按下方「送出驗證」，<b>全部答對</b>後截圖成績畫面上傳 Zuvio；沒全對可以看對錯再玩一次。
     <div class="legend" id="legend"></div>
   </div>
   <div class="list" id="list"></div>
@@ -115,7 +117,7 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
     <div class="score" id="pct">0%</div>
     <div class="detail" id="detail"></div>
     <p class="msg" id="msg"></p>
-    <p class="shot">📸 請截圖此畫面，上傳到 Zuvio</p>
+    <p class="shot" id="shot"></p>
     <div class="row">
       <button class="btn sub" id="review">檢視對錯</button>
       <button class="btn main" id="reset">再玩一次</button>
@@ -204,6 +206,10 @@ $("submit").onclick = () => {
   $("pct").textContent = pct + "%";
   $("detail").textContent = `答對 ${score} / ${hospitals.length} 家`;
   $("msg").textContent = pct === 100 ? "完璧！您是醫療法規專家！" : pct >= 70 ? "表現優秀！僅有少數錯誤。" : "建議重新複習醫療法相關條文。";
+  const perfect = pct === 100;
+  document.querySelector(".modal").classList.toggle("perfect", perfect);
+  $("shot").className = perfect ? "shot" : "shot retry";
+  $("shot").textContent = perfect ? "📸 全部正確！請截圖此畫面，上傳到 Zuvio" : "尚未全對，這個畫面不用上傳。請按「檢視對錯」看正確答案，再按「再玩一次」重新作答，全對才會出現上傳畫面。";
   $("overlay").classList.add("show");
   render();
 };
