@@ -1,288 +1,190 @@
-<!doctype html>
-<html lang="zh-TW" class="h-full">
+<!DOCTYPE html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>醫院法律分類配對遊戲</title>
-    <script src="https://cdn.tailwindcss.com/3.4.1"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Noto Sans TC', sans-serif; }
-        .card-item { transition: all 0.2s; cursor: grab; user-select: none; }
-        .card-item:active { cursor: grabbing; }
-        .card-item.dragging { opacity: 0.3; transform: scale(0.9); }
-        .drop-zone { transition: all 0.2s; min-height: 52px; position: relative; }
-        .drop-zone.drag-over { border-color: #6366f1; background: rgba(99, 102, 241, 0.15); border-style: solid; }
-        .filled-zone { background: rgba(30, 41, 59, 0.5); border-color: rgba(99, 102, 241, 0.4); border-style: solid; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>醫院法律分類配對遊戲</title>
+<meta name="color-scheme" content="light">
+<style>
+:root{
+  --paper:#F3F5F4; --card:#FFFFFF; --ink:#15211E; --soft:#3A4A45; --muted:#5E6E69;
+  --line:#D3DAD6; --brand:#0E4D45; --brand-2:#2F7F73;
+  --ok:#157A3E; --ok-bg:#E6F4EA; --bad:#B42318; --bad-bg:#FDECEA;
+  --shadow:0 1px 2px rgba(20,33,30,.05),0 8px 24px -12px rgba(20,33,30,.18);
+  /* 五類分類色：淺底＋深字，選取時填滿 */
+  --c1:#3651B5; --c1-bg:#EAEEFB;   /* 公立 */
+  --c2:#9A5B00; --c2-bg:#FFF3DC;   /* 財團法人 */
+  --c3:#11734F; --c3-bg:#E3F5EC;   /* 社團法人 */
+  --c4:#B0304A; --c4-bg:#FCE9ED;   /* 法人附設 */
+  --c5:#6B3FB0; --c5-bg:#F1EAFB;   /* 私立 */
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:110px}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px}
+header.hd{background:var(--brand);color:#fff;padding:22px 0 20px}
+header.hd h1{margin:0;font-size:clamp(24px,5.5vw,32px);line-height:1.3;font-weight:800;letter-spacing:.02em}
+header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
+.howto{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:18px 0;box-shadow:var(--shadow);font-size:17px}
+.howto b{color:var(--brand)}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.legend span{font-size:15px;font-weight:700;padding:4px 10px;border-radius:999px;border:1.5px solid currentColor}
+.list{display:flex;flex-direction:column;gap:14px}
+.h{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);transition:border-color .15s}
+.h.done{border-color:var(--brand-2)}
+.h.right{border-color:var(--ok);background:var(--ok-bg)}
+.h.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.loc{font-size:15px;color:var(--muted);font-weight:600}
+.name{font-size:21px;font-weight:800;line-height:1.4;margin:2px 0 12px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.opt{appearance:none;font:inherit;font-size:16px;font-weight:700;min-height:46px;padding:8px 14px;border-radius:12px;
+  border:2px solid var(--c);background:var(--cbg);color:var(--c);cursor:pointer;touch-action:manipulation;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .08s,background .15s,color .15s}
+.opt:active{transform:scale(.97)}
+.opt .n{font-size:13px;font-weight:700;opacity:.8}
+.opt.sel{background:var(--c);color:#fff}
+.opt:disabled{opacity:.3;cursor:not-allowed}
+.opt.sel:disabled{opacity:1}
+.locked .opt:not(.sel){opacity:.22}
+.locked .opt .n{display:none}
+.opt:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.k1{--c:var(--c1);--cbg:var(--c1-bg)} .k2{--c:var(--c2);--cbg:var(--c2-bg)} .k3{--c:var(--c3);--cbg:var(--c3-bg)}
+.k4{--c:var(--c4);--cbg:var(--c4-bg)} .k5{--c:var(--c5);--cbg:var(--c5-bg)}
+.fb{margin-top:10px;font-size:17px;font-weight:800}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+  box-shadow:0 -6px 20px -10px rgba(20,33,30,.25);padding:12px 0 calc(12px + env(safe-area-inset-bottom))}
+.bar .wrap{display:flex;align-items:center;gap:14px}
+.prog{font-size:18px;font-weight:800;white-space:nowrap}
+.prog small{display:block;font-size:13px;font-weight:600;color:var(--muted)}
+.btn{appearance:none;font:inherit;font-size:18px;font-weight:800;border:0;border-radius:14px;min-height:52px;padding:10px 20px;cursor:pointer;touch-action:manipulation}
+.btn.main{background:var(--brand);color:#fff;flex:1}
+.btn.main:disabled{background:#AEB9B5;cursor:not-allowed}
+.btn.sub{background:#E4E9E7;color:var(--ink)}
+#again{flex:1}
+.overlay{position:fixed;inset:0;background:rgba(10,20,18,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.overlay.show{display:flex}
+.modal{background:var(--card);border-radius:20px;padding:28px 22px;max-width:420px;width:100%;text-align:center}
+.score{font-size:64px;font-weight:900;color:var(--brand);line-height:1.1}
+.detail{font-size:17px;color:var(--soft);margin:4px 0 10px}
+.msg{font-size:21px;font-weight:800;margin:0 0 20px}
+.modal .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
 </head>
-<body class="h-full bg-[#0f172a] text-[#f1f5f9]">
-    <div id="app-wrapper" class="h-full w-full overflow-auto">
-        <header class="sticky top-0 z-30 bg-[#0f172a]/95 backdrop-blur-md border-b border-[#1e293b]">
-            <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <i data-lucide="hospital" class="text-white"></i>
-                    </div>
-                    <h1 class="text-xl font-black tracking-tight">醫院法律分類配對</h1>
-                </div>
-                <div class="px-4 py-2 rounded-full bg-[#1e293b] text-[#94a3b8] font-bold text-sm border border-[#334155]">
-                    進度: <span id="progress-text" class="text-indigo-400">0 / 16</span>
-                </div>
-            </div>
-        </header>
+<body>
+<header class="hd"><div class="wrap">
+  <h1>🏥 醫院法律分類配對</h1>
+  <p>依《醫療法》判斷每家醫院屬於哪一種法律分類</p>
+</div></header>
 
-        <main class="max-w-5xl mx-auto px-4 py-8">
-            <div class="p-5 rounded-2xl bg-[#1e293b] border border-[#334155] mb-8 flex gap-4">
-                <i data-lucide="info" class="text-indigo-400 shrink-0"></i>
-                <div>
-                    <p class="text-sm font-bold text-slate-200 italic">標籤用過即消失模式</p>
-                    <p class="text-xs text-slate-400 mt-1">將右側標籤拖曳至對應醫院。若答案錯誤，標籤會回到右側清單。</p>
-                </div>
-            </div>
+<main class="wrap">
+  <div class="howto">
+    <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完後按下方「送出驗證」。
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="list" id="list"></div>
+</main>
 
-            <div class="flex flex-col lg:flex-row gap-8">
-                <div class="flex-1 space-y-4" id="hospital-list">
-                    </div>
+<div class="bar"><div class="wrap">
+  <div class="prog"><span id="prog">0 / 16</span><small>已作答</small></div>
+  <button class="btn main" id="submit" disabled>送出驗證</button>
+  <button class="btn sub" id="again" hidden>再玩一次</button>
+</div></div>
 
-                <div class="lg:w-72 w-full">
-                    <div class="sticky top-24 p-5 rounded-2xl bg-[#1e293b] border border-[#334155] shadow-xl">
-                        <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-3">
-                            <i data-lucide="tag" class="w-4 h-4 text-indigo-400"></i>
-                            <span class="text-sm font-bold">待分配法律標籤</span>
-                        </div>
-                        <div id="tag-pool" class="flex flex-wrap gap-2 min-h-[120px]">
-                            </div>
-                        <p class="text-[10px] text-slate-500 mt-4 text-center">拖曳上方標籤至左側空格</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-12 flex justify-center pb-20">
-                <button id="submit-btn" onclick="submitAnswers()" disabled 
-                    class="px-16 py-4 rounded-2xl font-black text-lg transition-all transform hover:scale-105 disabled:opacity-20 bg-indigo-600 shadow-xl shadow-indigo-600/30">
-                    送出驗證
-                </button>
-            </div>
-        </main>
-
-        <div id="results-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div class="bg-[#1e293b] border border-[#334155] w-full max-w-md rounded-3xl p-8 text-center">
-                <div id="score-circle" class="w-32 h-32 mx-auto rounded-full border-8 border-indigo-500 flex items-center justify-center mb-6">
-                    <span id="score-pct" class="text-4xl font-black italic">0%</span>
-                </div>
-                <h2 id="score-msg" class="text-2xl font-bold mb-4"></h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="hideOverlay()" class="py-3 rounded-xl bg-slate-700 font-bold hover:bg-slate-600">檢視錯誤</button>
-                    <button onclick="resetGame()" class="py-3 rounded-xl bg-indigo-600 font-bold hover:bg-indigo-500">再玩一次</button>
-                </div>
-            </div>
-        </div>
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="msg">
+  <div class="modal">
+    <div class="score" id="pct">0%</div>
+    <div class="detail" id="detail"></div>
+    <p class="msg" id="msg"></p>
+    <div class="row">
+      <button class="btn sub" id="review">檢視對錯</button>
+      <button class="btn main" id="reset">再玩一次</button>
     </div>
+  </div>
+</div>
 
 <script>
-    const hospitals = [
-        { id: 1, location: "新北投", name: "三軍總醫院北投分院", answer: "公立醫療機構" },
-        { id: 2, location: "石牌", name: "臺北榮民總醫院", answer: "公立醫療機構" },
-        { id: 3, location: "石牌", name: "振興醫院", answer: "醫療法人 (財團法人)" },
-        { id: 4, location: "芝山", name: "北市聯醫（陽明院區）", answer: "公立醫療機構" },
-        { id: 5, location: "士林", name: "新光吳火獅紀念醫院", answer: "醫療法人 (財團法人)" },
-        { id: 6, location: "雙連", name: "馬偕紀念醫院（總院）", answer: "醫療法人 (財團法人)" },
-        { id: 7, location: "台北車站", name: "北市聯醫（中興院區）", answer: "公立醫療機構" },
-        { id: 8, location: "台大醫院", name: "台大醫院（總院）", answer: "公立醫療機構" },
-        { id: 9, location: "中正紀念堂", name: "北市聯醫（婦幼院區）", answer: "公立醫療機構" },
-        { id: 10, location: "信義安和", name: "國泰綜合醫院", answer: "醫療法人 (財團法人)" },
-        { id: 11, location: "象山", name: "臺北醫學大學附設醫院", answer: "法人附設醫療機構" },
-        { id: 12, location: "高雄市", name: "阮綜合醫院", answer: "醫療法人 (社團法人)" },
-        { id: 13, location: "台中市", name: "澄清醫院", answer: "醫療法人 (社團法人)" },
-        { id: 14, location: "桃園市", name: "天成醫院", answer: "醫療法人 (社團法人)" },
-        { id: 15, location: "松山區", name: "博仁綜合醫院", answer: "私立醫療機構" },
-        { id: 16, location: "平鎮區", name: "秉坤婦幼醫院", answer: "私立醫療機構" }
-    ];
+const hospitals = [
+  { id: 1, location: "新北投", name: "三軍總醫院北投分院", answer: "公立醫療機構" },
+  { id: 2, location: "石牌", name: "臺北榮民總醫院", answer: "公立醫療機構" },
+  { id: 3, location: "石牌", name: "振興醫院", answer: "醫療法人 (財團法人)" },
+  { id: 4, location: "芝山", name: "北市聯醫（陽明院區）", answer: "公立醫療機構" },
+  { id: 5, location: "士林", name: "新光吳火獅紀念醫院", answer: "醫療法人 (財團法人)" },
+  { id: 6, location: "雙連", name: "馬偕紀念醫院（總院）", answer: "醫療法人 (財團法人)" },
+  { id: 7, location: "台北車站", name: "北市聯醫（中興院區）", answer: "公立醫療機構" },
+  { id: 8, location: "台大醫院", name: "台大醫院（總院）", answer: "公立醫療機構" },
+  { id: 9, location: "中正紀念堂", name: "北市聯醫（婦幼院區）", answer: "公立醫療機構" },
+  { id: 10, location: "信義安和", name: "國泰綜合醫院", answer: "醫療法人 (財團法人)" },
+  { id: 11, location: "象山", name: "臺北醫學大學附設醫院", answer: "法人附設醫療機構" },
+  { id: 12, location: "高雄市", name: "阮綜合醫院", answer: "醫療法人 (社團法人)" },
+  { id: 13, location: "台中市", name: "澄清醫院", answer: "醫療法人 (社團法人)" },
+  { id: 14, location: "桃園市", name: "天成醫院", answer: "醫療法人 (社團法人)" },
+  { id: 15, location: "松山區", name: "博仁綜合醫院", answer: "私立醫療機構" },
+  { id: 16, location: "平鎮區", name: "秉坤婦幼醫院", answer: "私立醫療機構" }
+];
+const cats = ["公立醫療機構","醫療法人 (財團法人)","醫療法人 (社團法人)","法人附設醫療機構","私立醫療機構"];
+const cls = c => "k" + (cats.indexOf(c) + 1);
+const short = {"公立醫療機構":"公立","醫療法人 (財團法人)":"財團法人","醫療法人 (社團法人)":"社團法人","法人附設醫療機構":"法人附設","私立醫療機構":"私立"};
+const quota = Object.fromEntries(cats.map(c => [c, hospitals.filter(h => h.answer === c).length]));
 
-    const categoryStyles = {
-        "公立醫療機構": "bg-indigo-500 text-white",
-        "醫療法人 (財團法人)": "bg-amber-500 text-slate-900",
-        "醫療法人 (社團法人)": "bg-emerald-500 text-white",
-        "法人附設醫療機構": "bg-rose-500 text-white",
-        "私立醫療機構": "bg-violet-500 text-white"
-    };
+let answers = {}, submitted = false, order = [];
+const $ = id => document.getElementById(id);
 
-    let userAnswers = {}; // 格式: { hospitalId: { tagId, label } }
-    let submitted = false;
+function left(c){ return quota[c] - Object.values(answers).filter(a => a === c).length; }
 
-    // 初始化遊戲
-    function initGame() {
-        renderHospitalList();
-        updateGameStatus();
+function render(){
+  $("legend").innerHTML = cats.map(c => `<span class="${cls(c)}" style="color:var(--c)">${short[c]}＝${c}（${quota[c]} 家）</span>`).join("");
+  $("list").innerHTML = order.map(h => {
+    const mine = answers[h.id];
+    let state = mine ? "done" : "", fb = "";
+    if (submitted && reviewing){
+      const ok = mine === h.answer;
+      state = ok ? "right" : "wrong";
+      fb = ok ? `<div class="fb ok">✓ 正確</div>` : `<div class="fb no">✗ 正確答案：${h.answer}</div>`;
     }
+    const opts = cats.map(c => {
+      const sel = mine === c, n = left(c);
+      const dis = submitted || (!sel && n <= 0);
+      return `<button class="opt ${cls(c)}${sel ? " sel" : ""}" data-h="${h.id}" data-c="${c}" aria-pressed="${sel}" aria-label="${c}"${dis ? " disabled" : ""}>${short[c]}<span class="n">剩 ${n}</span></button>`;
+    }).join("");
+    return `<section class="h ${state}${submitted ? " locked" : ""}"><div class="loc">📍 ${h.location}</div><div class="name">${h.name}</div><div class="opts">${opts}</div>${fb}</section>`;
+  }).join("");
+  const done = Object.keys(answers).length;
+  $("prog").textContent = `${done} / ${hospitals.length}`;
+  $("submit").disabled = submitted || done < hospitals.length;
+  $("submit").hidden = submitted;
+  $("again").hidden = !submitted;
+}
 
-    // 建立左側醫院清單
-    function renderHospitalList() {
-        const listContainer = document.getElementById('hospital-list');
-        if (!listContainer) return;
-        
-        listContainer.innerHTML = '';
-        // 隨機排列醫院順序
-        const shuffledHospitals = [...hospitals].sort(() => Math.random() - 0.5);
-        
-        shuffledHospitals.forEach(h => {
-            const card = document.createElement('div');
-            card.className = "p-4 rounded-2xl bg-[#1e293b] border border-[#334155] flex flex-col sm:flex-row sm:items-center gap-4 transition-all";
-            card.innerHTML = `
-                <div class="sm:w-56 shrink-0">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">${h.location}</div>
-                    <div class="text-sm font-bold text-slate-100">${h.name}</div>
-                </div>
-                <div class="flex-1 drop-zone border-2 border-dashed border-slate-700 rounded-xl flex items-center px-4" 
-                     id="zone-${h.id}" data-id="${h.id}" 
-                     ondragover="onDragOver(event)" 
-                     ondragleave="onDragLeave(event)" 
-                     ondrop="onDrop(event)">
-                    </div>
-            `;
-            listContainer.appendChild(card);
-        });
-    }
+let reviewing = false;
+$("list").addEventListener("click", e => {
+  const b = e.target.closest(".opt");
+  if (!b || submitted) return;
+  const id = b.dataset.h, c = b.dataset.c;
+  if (answers[id] === c) delete answers[id]; else answers[id] = c;
+  render();
+});
 
-    // 建立/更新右側標籤池
-    function renderTagPool() {
-        const poolContainer = document.getElementById('tag-pool');
-        if (!poolContainer) return;
-        
-        poolContainer.innerHTML = '';
-        
-        // 獲取目前已經被使用的 tagId 清單 (轉為數字避免比對錯誤)
-        const usedTagIds = Object.values(userAnswers).map(ans => Number(ans.tagId));
-        
-        hospitals.forEach(h => {
-            // 如果這個標籤還沒被用掉，就顯示在右邊
-            if (!usedTagIds.includes(h.id)) {
-                const tag = document.createElement('div');
-                const styleClass = categoryStyles[h.answer] || "bg-slate-500";
-                tag.className = `card-item px-3 py-2 rounded-lg text-[11px] font-black shadow-lg ${styleClass}`;
-                tag.draggable = true;
-                tag.id = `tag-${h.id}`;
-                tag.textContent = h.answer;
-                
-                // 設定拖曳事件
-                tag.ondragstart = (e) => {
-                    e.dataTransfer.setData("text/plain", h.id);
-                    tag.classList.add('dragging');
-                };
-                tag.ondragend = () => tag.classList.remove('dragging');
-                
-                poolContainer.appendChild(tag);
-            }
-        });
-    }
-
-    // 更新整體 UI 狀態
-    function updateGameStatus() {
-        hospitals.forEach(h => {
-            const zone = document.getElementById(`zone-${h.id}`);
-            if (!zone) return;
-
-            if (userAnswers[h.id]) {
-                const ans = userAnswers[h.id];
-                const styleClass = categoryStyles[ans.label];
-                zone.innerHTML = `
-                    <div class="flex items-center justify-between w-full">
-                        <span class="px-3 py-1.5 rounded-lg text-[10px] font-black ${styleClass}">${ans.label}</span>
-                        <button onclick="removeAnswer(${h.id})" class="text-slate-500 hover:text-rose-400 transition-colors">
-                            <i data-lucide="x-circle" class="w-4 h-4"></i>
-                        </button>
-                    </div>`;
-                zone.classList.remove('border-dashed', 'border-slate-700');
-                zone.classList.add('filled-zone');
-            } else {
-                zone.innerHTML = `<span class="text-[10px] text-slate-600 italic">請拖曳標籤至此...</span>`;
-                zone.classList.add('border-dashed', 'border-slate-700');
-                zone.classList.remove('filled-zone');
-            }
-        });
-
-        const currentCount = Object.keys(userAnswers).length;
-        document.getElementById('progress-text').textContent = `${currentCount} / ${hospitals.length}`;
-        document.getElementById('submit-btn').disabled = currentCount < hospitals.length;
-        
-        renderTagPool();
-        // 嘗試啟動圖示，若庫還沒好就跳過
-        try { if(window.lucide) window.lucide.createIcons(); } catch(e) {}
-    }
-
-    // 拖曳邏輯
-    function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-    function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-    function onDrop(e) {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
-        if (submitted) return;
-
-        const hospitalId = e.currentTarget.dataset.id;
-        const tagId = e.dataTransfer.getData("text/plain");
-        if (!tagId) return;
-
-        const tagData = hospitals.find(h => h.id == tagId);
-        if (!tagData) return;
-
-        // 如果這個標籤已經在別的格子，先清除舊的
-        for (let hid in userAnswers) {
-            if (userAnswers[hid].tagId == tagId) delete userAnswers[hid];
-        }
-
-        // 存入新答案
-        userAnswers[hospitalId] = { tagId: tagId, label: tagData.answer };
-        updateGameStatus();
-    }
-
-    // 點擊 X 移除答案
-    function removeAnswer(hid) {
-        if (submitted) return;
-        delete userAnswers[hid];
-        updateGameStatus();
-    }
-
-    // 送出答案驗證
-    function submitAnswers() {
-        submitted = true;
-        let score = 0;
-        hospitals.forEach(h => {
-            if (userAnswers[h.id] && userAnswers[h.id].label === h.answer) score++;
-        });
-
-        const pct = Math.round((score / hospitals.length) * 100);
-        document.getElementById('results-overlay').classList.remove('hidden');
-        document.getElementById('score-pct').textContent = pct + '%';
-        
-        const msg = document.getElementById('score-msg');
-        if (pct === 100) msg.textContent = "完璧！您是醫療法規專家！";
-        else if (pct >= 70) msg.textContent = "表現優秀！僅有少數錯誤。";
-        else msg.textContent = "建議重新複習醫療法相關條文。";
-    }
-
-    function hideOverlay() {
-        document.getElementById('results-overlay').classList.add('hidden');
-        // 標記紅綠色標註正確性
-        hospitals.forEach(h => {
-            const zone = document.getElementById(`zone-${h.id}`);
-            if (!zone) return;
-            const isCorrect = userAnswers[h.id] && userAnswers[h.id].label === h.answer;
-            zone.style.borderColor = isCorrect ? "#10b981" : "#f43f5e";
-            zone.style.borderWidth = "3px";
-        });
-    }
-
-    function resetGame() {
-        userAnswers = {};
-        submitted = false;
-        document.getElementById('results-overlay').classList.add('hidden');
-        initGame();
-    }
-
-    // 頁面載入後啟動
-    window.onload = initGame;
+$("submit").onclick = () => {
+  submitted = true;
+  const score = hospitals.filter(h => answers[h.id] === h.answer).length;
+  const pct = Math.round(score / hospitals.length * 100);
+  $("pct").textContent = pct + "%";
+  $("detail").textContent = `答對 ${score} / ${hospitals.length} 家`;
+  $("msg").textContent = pct === 100 ? "完璧！您是醫療法規專家！" : pct >= 70 ? "表現優秀！僅有少數錯誤。" : "建議重新複習醫療法相關條文。";
+  $("overlay").classList.add("show");
+  render();
+};
+$("review").onclick = () => { reviewing = true; $("overlay").classList.remove("show"); render(); window.scrollTo({top:0,behavior:"smooth"}); };
+function reset(){
+  answers = {}; submitted = false; reviewing = false;
+  order = [...hospitals].sort(() => Math.random() - 0.5);
+  $("overlay").classList.remove("show"); render(); window.scrollTo({top:0});
+}
+$("reset").onclick = reset; $("again").onclick = reset;
+reset();
 </script>
 </body>
 </html>
