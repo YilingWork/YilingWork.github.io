@@ -65,6 +65,10 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 .k4{--c:var(--c4);--cbg:var(--c4-bg)} .k5{--c:var(--c5);--cbg:var(--c5-bg)}
 .fb{margin-top:10px;font-size:17px;font-weight:800}
 .fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+.full{margin-top:6px;font-size:16px;color:var(--soft);line-height:1.55}
+.full b{color:var(--ink)}
+.tipbox{margin-top:12px;padding:12px 14px;border-radius:12px;background:#EEF6F4;border:1px solid #BFDCD5;font-size:16px;line-height:1.6}
+.tipbox a{color:var(--brand);font-weight:800}
 .bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);
   box-shadow:0 -6px 20px -10px rgba(20,33,30,.25);padding:12px 0 calc(12px + env(safe-area-inset-bottom))}
 .bar .wrap{display:flex;align-items:center;gap:14px}
@@ -99,6 +103,7 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
   <div class="howto">
     <b>玩法：</b>每家醫院<b>點一下</b>你認為的分類即可；再點一次可取消。按鈕上的數字是該分類<b>還剩幾個名額</b>（下方為各簡稱對應的法律分類與家數），用完就不能再選。全部選完、並填好姓名後，按下方「送出驗證」，<b>全部答對</b>後截圖成績畫面上傳 Zuvio；沒全對可以看對錯再玩一次。
     <div class="legend" id="legend"></div>
+    <div class="tipbox">💡 <b>提示：看醫院的「正式全名」。</b>醫療法人設立的醫院，全名會冠上「○○醫療財團法人」或「○○醫療社團法人」；私立醫學院校附設的，會冠上學校名稱並加「附設」；私立醫院的全名沒有「法人」字樣。不確定時，可到 <a href="https://ma.mohw.gov.tw/Accessibility/BASSearch/MASearchBAS" target="_blank" rel="noopener">衛福部醫事查詢系統（醫事機構查詢）↗</a> 輸入醫院名稱查詢。</div>
   </div>
   <div class="list" id="list"></div>
 </main>
@@ -126,23 +131,24 @@ header.hd p{margin:6px 0 0;font-size:16px;opacity:.9}
 </div>
 
 <script>
+// fullName：衛福部「醫療機構與人員基本資料」與健保署「健保特約醫事機構」開放資料之登記名稱（2026-09-30 查證）
 const hospitals = [
-  { id: 1, location: "新北投", name: "三軍總醫院北投分院", answer: "公立醫療機構" },
-  { id: 2, location: "石牌", name: "臺北榮民總醫院", answer: "公立醫療機構" },
-  { id: 3, location: "石牌", name: "振興醫院", answer: "醫療法人 (財團法人)" },
-  { id: 4, location: "芝山", name: "北市聯醫（陽明院區）", answer: "公立醫療機構" },
-  { id: 5, location: "士林", name: "新光吳火獅紀念醫院", answer: "醫療法人 (財團法人)" },
-  { id: 6, location: "雙連", name: "馬偕紀念醫院（總院）", answer: "醫療法人 (財團法人)" },
-  { id: 7, location: "台北車站", name: "北市聯醫（中興院區）", answer: "公立醫療機構" },
-  { id: 8, location: "台大醫院", name: "台大醫院（總院）", answer: "公立醫療機構" },
-  { id: 9, location: "中正紀念堂", name: "北市聯醫（婦幼院區）", answer: "公立醫療機構" },
-  { id: 10, location: "信義安和", name: "國泰綜合醫院", answer: "醫療法人 (財團法人)" },
-  { id: 11, location: "象山", name: "臺北醫學大學附設醫院", answer: "法人附設醫療機構" },
-  { id: 12, location: "高雄市", name: "阮綜合醫院", answer: "醫療法人 (社團法人)" },
-  { id: 13, location: "台中市", name: "澄清醫院", answer: "醫療法人 (社團法人)" },
-  { id: 14, location: "桃園市", name: "天成醫院", answer: "醫療法人 (社團法人)" },
-  { id: 15, location: "松山區", name: "博仁綜合醫院", answer: "私立醫療機構" },
-  { id: 16, location: "平鎮區", name: "秉坤婦幼醫院", answer: "私立醫療機構" }
+  { id: 1, location: "新北投", name: "三軍總醫院北投分院", answer: "公立醫療機構", fullName: "三軍總醫院北投分院附設民眾診療服務處", tip: "軍方醫院，由政府機關設立（醫療法第 3 條）" },
+  { id: 2, location: "石牌", name: "臺北榮民總醫院", answer: "公立醫療機構", fullName: "臺北榮民總醫院", tip: "由政府機關設立（醫療法第 3 條）" },
+  { id: 3, location: "石牌", name: "振興醫院", answer: "醫療法人 (財團法人)", fullName: "振興醫療財團法人振興醫院" },
+  { id: 4, location: "芝山", name: "北市聯醫（陽明院區）", answer: "公立醫療機構", fullName: "臺北市立聯合醫院（陽明院區）", tip: "臺北市政府設立（醫療法第 3 條）" },
+  { id: 5, location: "士林", name: "新光吳火獅紀念醫院", answer: "醫療法人 (財團法人)", fullName: "新光醫療財團法人新光吳火獅紀念醫院" },
+  { id: 6, location: "雙連", name: "馬偕紀念醫院（總院）", answer: "醫療法人 (財團法人)", fullName: "台灣基督長老教會馬偕醫療財團法人馬偕紀念醫院" },
+  { id: 7, location: "台北車站", name: "北市聯醫（中興院區）", answer: "公立醫療機構", fullName: "臺北市立聯合醫院（中興院區）", tip: "臺北市政府設立（醫療法第 3 條）" },
+  { id: 8, location: "台大醫院", name: "台大醫院（總院）", answer: "公立醫療機構", fullName: "國立臺灣大學醫學院附設醫院", tip: "名稱有「附設」，但國立大學是公立學校，屬公立醫療機構（醫療法第 3 條）" },
+  { id: 9, location: "中正紀念堂", name: "北市聯醫（婦幼院區）", answer: "公立醫療機構", fullName: "臺北市立聯合醫院（婦幼院區）", tip: "臺北市政府設立（醫療法第 3 條）" },
+  { id: 10, location: "信義安和", name: "國泰綜合醫院", answer: "醫療法人 (財團法人)", fullName: "國泰醫療財團法人國泰綜合醫院" },
+  { id: 11, location: "象山", name: "臺北醫學大學附設醫院", answer: "法人附設醫療機構", fullName: "臺北醫學大學附設醫院", tip: "私立醫學院校為臨床教學附設的醫院（醫療法第 6 條）" },
+  { id: 12, location: "高雄市", name: "阮綜合醫院", answer: "醫療法人 (社團法人)", fullName: "阮綜合醫療社團法人阮綜合醫院" },
+  { id: 13, location: "台中市", name: "光田綜合醫院", answer: "醫療法人 (社團法人)", fullName: "光田醫療社團法人光田綜合醫院" },
+  { id: 14, location: "桃園市", name: "天晟醫院", answer: "醫療法人 (社團法人)", fullName: "天成醫療社團法人天晟醫院" },
+  { id: 15, location: "松山區", name: "博仁綜合醫院", answer: "私立醫療機構", fullName: "博仁綜合醫院", tip: "全名沒有「法人」字樣；私立醫療機構是由醫師設立（醫療法第 4 條）" },
+  { id: 16, location: "平鎮區", name: "秉坤婦幼醫院", answer: "私立醫療機構", fullName: "秉坤婦幼醫院", tip: "全名沒有「法人」字樣；私立醫療機構是由醫師設立（醫療法第 4 條）" }
 ];
 const cats = ["公立醫療機構","醫療法人 (財團法人)","醫療法人 (社團法人)","法人附設醫療機構","私立醫療機構"];
 const cls = c => "k" + (cats.indexOf(c) + 1);
@@ -162,7 +168,8 @@ function render(){
     if (submitted && reviewing){
       const ok = mine === h.answer;
       state = ok ? "right" : "wrong";
-      fb = ok ? `<div class="fb ok">✓ 正確</div>` : `<div class="fb no">✗ 正確答案：${h.answer}</div>`;
+      fb = (ok ? `<div class="fb ok">✓ 正確</div>` : `<div class="fb no">✗ 正確答案：${h.answer}</div>`)
+        + `<div class="full">正式全名：<b>${h.fullName}</b>${h.tip ? `<br>💡 ${h.tip}` : ""}</div>`;
     }
     const opts = cats.map(c => {
       const sel = mine === c, n = left(c);
