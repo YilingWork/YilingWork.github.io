@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>組織文化：王國配對挑戰</title>
+    <style>
+        :root {
+            --primary: #2c3e50; --accent: #3498db; --success: #2ecc71; --error: #e74c3c; --bg: #f8f9fa;
+        }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 2px solid #eee; margin-bottom: 30px; padding-bottom: 10px; }
+        h1 { color: var(--primary); margin: 0; }
+        p.subtitle { color: #666; margin-top: 5px; }
+
+        /* 表格樣式 */
+        .matching-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .matching-table th { background: #f1f3f5; padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; }
+        .matching-table td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .org-name { font-weight: bold; color: var(--accent); width: 120px; }
+        .org-desc { font-size: 14px; line-height: 1.6; color: #444; }
+        .culture-elements { margin-top: 8px; font-size: 13px; color: #666; font-style: italic; }
+        
+        /* 下拉選單樣式 */
+        select { 
+            padding: 10px; border-radius: 6px; border: 2px solid #ddd; background: white; 
+            font-size: 15px; width: 100%; cursor: pointer; transition: 0.2s;
+        }
+        select:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-submit { 
+            display: block; width: 100%; padding: 18px; background: var(--primary); color: white; 
+            border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-submit:hover { background: var(--accent); transform: translateY(-2px); }
+
+        /* 結果頁面 */
+        #result-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; width: 90%; }
+        .score-text { font-size: 64px; font-weight: bold; color: var(--accent); margin-bottom: 10px; }
+        
+        .correct-row { background-color: rgba(46, 204, 113, 0.08); }
+        .wrong-row { background-color: rgba(231, 76, 60, 0.08); }
+        .feedback-label { font-size: 13px; font-weight: bold; display: block; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏢 組織文化配對挑戰</h1>
+        <p class="subtitle">分析各組織的故事、儀式與符號，判斷其所屬的文化類型。</p>
+    </header>
+
+    <table class="matching-table">
+        <thead>
+            <tr>
+                <th>組織名稱</th>
+                <th>文化特質與特徵描述</th>
+                <th style="width: 180px;">選擇文化類型</th>
+            </tr>
+        </thead>
+        <tbody id="quiz-body"></tbody>
+    </table>
+
+    <button class="btn-submit" onclick="gradeQuiz()">提交所有配對結果</button>
+</div>
+
+<div id="result-modal">
+    <div class="modal-content">
+        <h2>測驗完成！</h2>
+        <div class="score-text" id="final-score">0%</div>
+        <p id="final-comment"></p>
+        <button class="btn-submit" onclick="location.reload()">重新挑戰</button>
+    </div>
+</div>
+
+<script>
+    const orgs = [
+        { 
+            n: "誠信檔案局", 
+            d: "強調正式化、標準作業程序與層級協調，任務與職權界定清晰。內部流傳著「開國元老因嚴格遵守流程而避免重大損失」的故事；每週舉行「合規校準會議」；隨處可見「程序即正義」的標語。", 
+            a: "科層體制" 
+        },
+        { 
+            n: "暖心茶坊", 
+            d: "尊重傳統、高度互賴，成員視組織為大家庭並具有強烈認同感。新進員工會聽到「老店長在風雨中守護每位員工」的感人故事；入職需參加「奉茶認同儀式」；內部習慣互稱「家人」。", 
+            a: "宗族" 
+        },
+        { 
+            n: "閃電開發", 
+            d: "強調冒險、動態與創造性，致力於創造變革。傳頌著「創辦人在車庫中拒絕高薪、堅持開發破壞性技術」的傳奇；每月舉辦「黑客松創新競賽」；辦公室掛著「不創新，即滅亡」的旗幟。", 
+            a: "創業家" 
+        },
+        { 
+            n: "巔峰銷售", 
+            d: "利潤掛帥、追求可衡量目標，市場競爭氛圍強烈。故事多環繞在「業務員如何克服困難簽下天價訂單」；每季舉行「業績達成慶功宴」；牆上張貼著即時更新的「績效排行榜」。", 
+            a: "市場" 
+        },
+        { 
+            n: "永恆航運", 
+            d: "重視成員的高度付出與長期回饋，具有極高的社會互動度。故事強調「三代員工同在一艘船上服務」的忠誠；每年舉辦「資深員工授勳典禮」；「終身服務」是公司的核心術語。", 
+            a: "宗族" 
+        },
+        { 
+            n: "法規院", 
+            d: "管理者將自己視為規則的協調者，焦點集中在內部穩定。流傳著「前任院長憑藉準則平息紛爭」的故事；每日進行「流程確認早會」；各部門必備「紅皮書標準手冊」。", 
+            a: "科層體制" 
+        },
+        { 
+            n: "幻夢工場", 
+            d: "鼓勵彈性與自由，透過新穎產品達成績效。流傳著「工程師隨手塗鴉變成年度熱銷產品」的故事；設有「自由研發日」儀式；大家常用「突破天際」作為專案口號。", 
+            a: "創業家" 
+        },
+        { 
+            n: "金幣銀行", 
+            d: "成員間屬於契約關係，專注於投資報酬率。流傳著「精準預測市場趨勢而大獲全勝」的故事；每月進行「損益績效面談」；「ROI」與「市佔率」是員工最常掛在嘴邊的術語。", 
+            a: "市場" 
+        },
+        { 
+            n: "極限科技", 
+            d: "創辦人具冒險精神，對變革持正面態度。傳述著「在資源極匱乏時大膽轉型成功」的故事；每週五下午是「失敗經驗分享會」；辦公室充滿了「Prototype (原型)」與「Pivot (轉向)」等術語。", 
+            a: "創業家" 
+        },
+        { 
+            n: "標準財團", 
+            d: "重視正式控制，所有行為需符合標準規範。故事圍繞「落實品管系統如何挽救品牌名譽」；實施「ISO 標準稽核儀式」；名牌上清楚標註「職級編號」以利層級辨識。", 
+            a: "科層體制" 
+        }
+    ];
+
+    const types = ["-- 請選擇 --", "科層體制", "宗族", "創業家", "市場"];
+
+    const quizBody = document.getElementById('quiz-body');
+    orgs.forEach((org, index) => {
+        const row = document.createElement('tr');
+        row.id = `row-${index}`;
+        row.innerHTML = `
+            <td class="org-name">${org.n}</td>
+            <td class="org-desc">${org.d}</td>
+            <td>
+                <select id="select-${index}">
+                    ${types.map(t => `<option value="${t}">${t}</option>`).join('')}
+                </select>
+                <span id="feedback-${index}" class="feedback-label"></span>
+            </td>
+        `;
+        quizBody.appendChild(row);
+    });
+
+    function gradeQuiz() {
+        let score = 0;
+        let unanswered = false;
+
+        orgs.forEach((org, index) => {
+            const select = document.getElementById(`select-${index}`);
+            if (select.value === "-- 請選擇 --") {
+                unanswered = true;
+            }
+        });
+
+        if (unanswered) {
+            alert("請完成所有組織的配對後再提交！");
+            return;
+        }
+
+        orgs.forEach((org, index) => {
+            const select = document.getElementById(`select-${index}`);
+            const row = document.getElementById(`row-${index}`);
+            const feedback = document.getElementById(`feedback-${index}`);
+            
+            if (select.value === org.a) {
+                score++;
+                row.className = "correct-row";
+                feedback.innerText = "✅ 正確";
+                feedback.style.color = "var(--success)";
+            } else {
+                row.className = "wrong-row";
+                feedback.innerText = `❌ 應為：${org.a}`;
+                feedback.style.color = "var(--error)";
+            }
+            select.disabled = true;
+        });
+
+        const pct = Math.round((score / orgs.length) * 100);
+        document.getElementById('final-score').innerText = `${pct}%`;
+        document.getElementById('final-comment').innerText = pct === 100 ? "大滿貫！你完全理解了文化背後的隱喻與特徵。" : "不錯的嘗試！建議對照故事內容，分析各類型的核心價值差異。";
+        document.getElementById('result-modal').style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>
