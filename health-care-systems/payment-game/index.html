@@ -96,7 +96,7 @@ const METHODS = {
  case: {name:"論病例計酬", def:"支付一段時間之疾病照護或手術處置，以固定／單一金額涵蓋此期間所有照護服務。", pay:"每次住院（一個病例）支付固定 5 萬元，不論住幾天、做幾項檢查。"},
  diem: {name:"論日計酬", def:"針對住院，以日為支付單位，每天支付固定金額，乘以住院天數即為總支付金額。", pay:"每住院一日支付 1 萬 1 千元，已涵蓋當日所有服務（檢查不另計）。"},
  cap:  {name:"論人計酬", def:"以人為支付單位，支付每人固定金額，涵蓋照護此人於一個月或一年之所有照護服務。", pay:"每位登記於貴院之照護對象，每年支付固定 6 萬元，不論使用多少服務。已登記者之費用已收取，本回合收入不再增加。"},
- gb:   {name:"總額預算支付", def:"支付所有照護病人於特定期間之所有服務，如個別醫院之總額預算。", pay:"貴院今年總額預算已固定核定，不論服務多少病人、提供多少服務，收入均不增加。"},
+ gb:   {name:"總額預算支付", def:"支付所有照護病人於特定期間之所有服務，如個別醫院之總額預算。", pay:"貴院今年總額預算為 60 萬元。每個情境先依論量方式申報「點數」（每住院一日 1 萬點、每項檢查 3 千點），四個情境結束後再結算：點值＝總額 ÷ 總申報點數，實際收入＝總申報點數 × 點值。因此不論申報多少點數，拿到的錢都是 60 萬元：點數多，點值小於 1；點數少，點值大於 1。"},
 };
 const GROUPS = {1:"ffs",2:"ffs",3:"case",4:"case",5:"diem",6:"diem",7:"cap",8:"cap",9:"gb",10:"gb"};
 
@@ -116,6 +116,14 @@ const SCEN = [
   B:{h:"婉拒，建議轉往他院", d:"不增加服務", days:0, tests:0, cases:0}},
 ];
 
+const BUDGET = 600; // 總額預算（千元）＝60 萬元
+const pts = o => o.days*10 + o.tests*3; // 申報點數（千點），比照論量計酬標準
+function settle(picks){ // 總額預算：四情境結束後結算點值（不設上限，收入恆為總額）
+ let P = 0, C = 0;
+ SCEN.forEach((S,j)=>{ const o = S[picks[j]]; P += pts(o); C += calc("gb",o).cost; });
+ const v = P>0 ? BUDGET/P : 1, rev = P*v;
+ return {P, v, rev, cost:C, net:rev-C};
+}
 function calc(m, o){
  const cost = o.days*8 + o.tests*1.5 + (o.prog?30:0);
  let rev = 0;
@@ -123,7 +131,7 @@ function calc(m, o){
  if(m==="case") rev = o.cases*50;
  if(m==="diem") rev = o.days*11;
  if(m==="cap")  rev = (o.enroll||0)*60;
- if(m==="gb")   rev = 0;
+ if(m==="gb")   return {rev:null, pts:pts(o), cost, net:null};
  return {rev, cost, net: rev-cost};
 }
 const esc = t => String(t||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -135,6 +143,13 @@ function money(k){ // k：千元
  return y.toLocaleString("zh-TW") + " 元";
 }
 const f = n => (n>0?"+":n<0?"−":"") + money(n);
+function points(k){ // k：千點
+ const y = Math.round(Math.abs(k)*1000);
+ if(y>=10000){ const w = y/10000; return (Number.isInteger(w)? w : w.toFixed(2).replace(/0+$/,"")) + " 萬點"; }
+ if(y%1000===0 && y>0) return (y/1000) + " 千點";
+ return y.toLocaleString("zh-TW") + " 點";
+}
+const pv = v => v.toFixed(3).replace(/\.?0+$/,"");
 
 let st = {name:"", g:null, m:null, i:0, picks:[], done:""};
 try{ const s = JSON.parse(sessionStorage.getItem("pgame")||"null"); if(s && s.g) st = s; }catch(e){}
@@ -189,13 +204,21 @@ function scene(){
  if(k){
   const r = calc(st.m, S[k]), o = calc(st.m, S[k==="A"?"B":"A"]);
   const better = r.net >= o.net;
+  if(st.m==="gb"){
+   out = `<div class="res pos">
+   <div class="row"><span>本案申報點數</span><span>${points(r.pts)}</span></div>
+   <div class="row"><span>本案成本</span><span>${f(-r.cost)}</span></div>
+   <div class="row tot"><span>實際收入</span><b>待結算</b></div>
+   <div class="cmp">四個情境結束後，依點值（總額 60 萬元 ÷ 總申報點數）結算。若選另一個選項，本案申報點數為 <b>${points(o.pts)}</b>。</div>
+  </div>`;
+  } else
   out = `<div class="res ${r.net>=0?'pos':'neg'}">
    <div class="row"><span>本案收入增加</span><span>${f(r.rev)}</span></div>
    <div class="row"><span>本案成本</span><span>${f(-r.cost)}</span></div>
    <div class="row tot"><span>對醫院結餘之影響</span><b>${f(r.net)}</b></div>
    <div class="cmp">若選另一個選項，結餘影響為 <b>${f(o.net)}</b>。${better?"你的選擇對醫院財務較有利。":"另一個選項對醫院財務較有利。"}</div>
-  </div>
-  <button class="btn" onclick="next()">${st.i<SCEN.length-1?"下一個情境":"查看經營結果"}</button>`;
+  </div>`;
+  out += `<button class="btn" onclick="next()">${st.i<SCEN.length-1?"下一個情境":"查看經營結果"}</button>`;
  }
  app.innerHTML = head() + `<div class="prog">${prog}</div>
  <div class="lbl">情境 ${st.i+1}／${SCEN.length}｜${S.t}</div>
@@ -204,21 +227,44 @@ function scene(){
 function choose(x){ st.picks[st.i]=x; save(); scene(); }
 function next(){ if(st.i<SCEN.length-1){ st.i++; save(); scene(); scrollTo(0,0);} else { const d=new Date(); st.done=d.toLocaleString("zh-TW",{hour12:false}); save(); result(); } }
 
+function gbBlock(){
+ const R = settle(st.picks), hi = settle(SCEN.map(S=>pts(S.A)>=pts(S.B)?"A":"B")), lo = settle(SCEN.map(S=>pts(S.A)<pts(S.B)?"A":"B"));
+ let rows = "";
+ SCEN.forEach((S,j)=>{ const k = st.picks[j];
+  rows += `<tr><td>${S.t}</td><td>${k}</td><td class="n">${points(pts(S[k]))}</td><td class="n">${f(-calc("gb",S[k]).cost)}</td></tr>`; });
+ return {R, html:`<div class="card tx"><table>
+  <tr><th>情境</th><th>你的選擇</th><th style="text-align:right">申報點數</th><th style="text-align:right">成本</th></tr>${rows}
+  <tr><td colspan="2"><b>合計</b></td><td class="n"><b>${points(R.P)}</b></td><td class="n"><b>${f(-R.cost)}</b></td></tr></table></div>
+ <div class="card"><div class="lbl">點值結算</div>
+  <div class="row"><span>總額預算</span><span>60 萬元</span></div>
+  <div class="row"><span>總申報點數</span><span>${points(R.P)}</span></div>
+  <div class="row"><span>點值（總額 ÷ 總申報點數）</span><span><b>${pv(R.v)}</b></span></div>
+  <div class="row"><span>實際收入（總申報點數 × 點值）</span><span>${money(R.rev)}</span></div>
+  <div class="row"><span>成本</span><span>${f(-R.cost)}</span></div>
+  <div class="row tot"><span>醫院結餘</span><b style="color:var(--${R.net>=0?'pos':'neg'})">${f(R.net)}</b></div>
+  <div class="cmp">對照：四個情境都選服務較多者，總申報 ${points(hi.P)}、點值 ${pv(hi.v)}，收入仍只有 ${money(hi.rev)}；都選服務較少者，總申報 ${points(lo.P)}、點值 ${pv(lo.v)}，收入同樣是 ${money(lo.rev)}。</div>
+ </div>`};
+}
 function result(){
  let rows="", tot=0, best=0;
  SCEN.forEach((S,j)=>{
+  if(st.m==="gb") return;
   const k = st.picks[j], r = calc(st.m,S[k]), a = calc(st.m,S.A), b = calc(st.m,S.B);
   const bk = a.net>=b.net ? "A" : "B";
   tot += r.net; best += Math.max(a.net,b.net);
   rows += `<tr><td>${S.t}</td><td>${k}</td><td class="n">${f(r.net)}</td><td class="best">${bk}</td></tr>`;
  });
- app.innerHTML = head() + `
- <span class="pill">經營結果</span>
- <h2>${METHODS[st.m].name}下，四個情境對醫院結餘之合計影響為 ${f(tot)}</h2>
+ let body;
+ if(st.m==="gb"){ const G = gbBlock();
+  body = `<h2>總額預算下，點值為 ${pv(G.R.v)}，醫院結餘為 ${f(G.R.net)}</h2>${G.html}`;
+ } else body = `<h2>${METHODS[st.m].name}下，四個情境對醫院結餘之合計影響為 ${f(tot)}</h2>
  <div class="card tx"><table>
   <tr><th>情境</th><th>你的選擇</th><th style="text-align:right">結餘影響</th><th>財務最有利</th></tr>${rows}
   <tr><td colspan="2"><b>合計</b></td><td class="n"><b>${f(tot)}</b></td><td class="n">${f(best)}</td></tr>
- </table></div>
+ </table></div>`;
+ app.innerHTML = head() + `
+ <span class="pill">經營結果</span>
+ ${body}
  <div class="card">
   <div class="lbl">小組討論（8 分鐘）</div>
   <div class="q"><span>1</span><div>支付金額如何計算？</div></div>
@@ -251,17 +297,22 @@ function vcode(){
  return h.toString(36).toUpperCase().padStart(7,"0").slice(-7);
 }
 function cert(){
- let rows="", tot=0;
- SCEN.forEach((S,j)=>{ const k=st.picks[j], r=calc(st.m,S[k]); tot+=r.net;
-  rows += `<tr><td>${S.t}</td><td>${k}．${S[k].h}</td><td class="n">${f(r.net)}</td></tr>`; });
+ let rows="", tot=0, gb = st.m==="gb", R = gb ? settle(st.picks) : null;
+ SCEN.forEach((S,j)=>{ const k=st.picks[j], r=calc(st.m,S[k]); if(!gb) tot+=r.net;
+  rows += `<tr><td>${S.t}</td><td>${k}．${S[k].h}</td><td class="n">${gb ? points(pts(S[k])) : f(r.net)}</td></tr>`; });
+ const colh = gb ? "申報點數" : "結餘影響";
+ const totrow = gb ? `<tr><td colspan="2">總申報點數</td><td class="n">${points(R.P)}</td></tr>
+   <tr><td colspan="2">點值／實際收入</td><td class="n">${pv(R.v)}／${money(R.rev)}</td></tr>
+   <tr><td colspan="2"><b>醫院結餘</b></td><td class="n"><b>${f(R.net)}</b></td></tr>`
+  : `<tr><td colspan="2"><b>合計</b></td><td class="n"><b>${f(tot)}</b></td></tr>`;
  app.innerHTML = `
  <div class="cert">
   <div class="ct">健康照護體系｜支付制度　學習紀錄</div>
   <div class="cn">${esc(st.name)}</div>
   <div class="cg">第 ${st.g} 組｜${METHODS[st.m].name}</div>
   <div class="done">已完成「院長經營模擬」四個情境</div>
-  <table><tr><th>情境</th><th>選擇</th><th style="text-align:right">結餘影響</th></tr>${rows}
-   <tr><td colspan="2"><b>合計</b></td><td class="n"><b>${f(tot)}</b></td></tr></table>
+  <table><tr><th>情境</th><th>選擇</th><th style="text-align:right">${colh}</th></tr>${rows}
+   ${totrow}</table>
   <div class="code"><span>完成時間 ${esc(st.done)}</span><span>驗證碼 <b>${vcode()}</b></span></div>
  </div>
  <p class="note" style="text-align:center;margin-top:10px">請截圖此畫面上傳 Zuvio。金額為教學模擬數值。</p>
@@ -274,6 +325,7 @@ function teacher(){
  SCEN.forEach(S=>{
   h += `<tr><td>${S.t}<br><span class="note">A ${S.A.h}<br>B ${S.B.h}</span></td>`;
   Object.keys(METHODS).forEach(m=>{
+   if(m==="gb"){ h += `<td class="n">A ${points(pts(S.A))}<br>B ${points(pts(S.B))}<br><span class="note">依點值結算</span></td>`; return; }
    const a = calc(m,S.A).net, b = calc(m,S.B).net;
    h += `<td class="n">A ${f(a)}<br>B ${f(b)}<br><span class="best">${a>=b?"A":"B"}</span></td>`;
   });
@@ -282,7 +334,11 @@ function teacher(){
  app.innerHTML = `<header><span class="t">院長經營模擬｜教師總覽</span><span class="g"><a href="#" onclick="home();return false" style="color:var(--ac)">返回</a></span></header>
  <h2>同一情境下，五種支付方式對醫院財務最有利之選擇不同</h2>
  <div class="card tx"><table class="tt">${h}</table></div>
- <p class="note">金額為各選項對醫院結餘之影響（教學模擬數值）；綠字為財務最有利之選項。</p>`;
+ <p class="note">金額為各選項對醫院結餘之影響（教學模擬數值）；綠字為財務最有利之選項。總額預算欄為各選項之申報點數，於四情境結束後依點值結算。</p>
+ <div class="card"><div class="lbl">總額預算之點值結算（總額 60 萬元）</div>${(()=>{
+  const hi = settle(SCEN.map(S=>pts(S.A)>=pts(S.B)?"A":"B")), lo = settle(SCEN.map(S=>pts(S.A)<pts(S.B)?"A":"B"));
+  return `<div class="row"><span>四情境皆選服務較多</span><span>總申報 ${points(hi.P)}｜點值 ${pv(hi.v)}｜收入 ${money(hi.rev)}｜結餘 ${f(hi.net)}</span></div>
+  <div class="row"><span>四情境皆選服務較少</span><span>總申報 ${points(lo.P)}｜點值 ${pv(lo.v)}｜收入 ${money(lo.rev)}｜結餘 ${f(lo.net)}</span></div>`;})()}</div>`;
 }
 
 if(location.hash==="#teacher") teacher();
