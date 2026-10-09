@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>醫療機構經營 RPG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f3ea;
+  --surface: #ffffff;
+  --surface-2: #f1ede2;
+  --text: #24221d;
+  --muted: #6b665a;
+  --line: #d9d2c0;
+  --accent: #2f6f5e;
+  --accent-text: #ffffff;
+  --locked: #b9b3a5;
+  --gold: #c99a1c;
+  --camp: #c8743a;   --camp-bg: #fbeee2;
+  --plain: #8a8f1f;  --plain-bg: #f4f3dc;
+  --castle: #4f63a8; --castle-bg: #e7eaf6;
+  --forest: #2f7d4f; --forest-bg: #e2f1e7;
+  --tower: #8c4a8f;  --tower-bg: #f3e6f3;
+  --shadow: 0 2px 10px rgba(40, 35, 20, .10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1a17; --surface: #262521; --surface-2: #302e29; --text: #eeeae0; --muted: #b0a998;
+    --line: #47443b; --accent: #5fb39b; --accent-text: #10201b; --locked: #5e5a50; --gold: #e4bb45;
+    --camp: #e59a62;   --camp-bg: #3a2b20;
+    --plain: #c3c85a;  --plain-bg: #33331f;
+    --castle: #8b9ee0; --castle-bg: #252b42;
+    --forest: #6cc191; --forest-bg: #1f3529;
+    --tower: #cb8bce;  --tower-bg: #3a2739;
+    --shadow: 0 2px 10px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1b1a17; --surface: #262521; --surface-2: #302e29; --text: #eeeae0; --muted: #b0a998;
+  --line: #47443b; --accent: #5fb39b; --accent-text: #10201b; --locked: #5e5a50; --gold: #e4bb45;
+  --camp: #e59a62;   --camp-bg: #3a2b20;
+  --plain: #c3c85a;  --plain-bg: #33331f;
+  --castle: #8b9ee0; --castle-bg: #252b42;
+  --forest: #6cc191; --forest-bg: #1f3529;
+  --tower: #cb8bce;  --tower-bg: #3a2739;
+  --shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 18px; line-height: 1.65; overflow-x: hidden;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
+header h1 { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: .02em; }
+header .course { color: var(--muted); font-size: 17px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
+nav button, .btn {
+  font: inherit; font-size: 17px; border: 2px solid var(--line); background: var(--surface);
+  color: var(--text); padding: 8px 16px; border-radius: 999px; cursor: pointer;
+}
+nav button[aria-selected="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+nav .rules { margin-left: auto; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* 冒險地圖 */
+.map { display: grid; grid-template-columns: 3fr 2fr 3fr; gap: 18px; position: relative; }
+.zone {
+  border-radius: 18px; padding: 14px 14px 18px; background: var(--zbg);
+  border: 2px solid var(--zc); box-shadow: var(--shadow); min-width: 0; position: relative;
+}
+.zone h2 { margin: 0 0 6px; font-size: 19px; color: var(--zc); display: flex; align-items: center; gap: 6px; }
+.zone h2 .emo { font-size: 26px; }
+.z-camp { --zc: var(--camp); --zbg: var(--camp-bg); grid-column: 1; grid-row: 1; }
+.z-plain { --zc: var(--plain); --zbg: var(--plain-bg); grid-column: 2; grid-row: 1; }
+.z-castle { --zc: var(--castle); --zbg: var(--castle-bg); grid-column: 3; grid-row: 1; }
+.z-forest { --zc: var(--forest); --zbg: var(--forest-bg); grid-column: 2 / 4; grid-row: 2; }
+.z-tower { --zc: var(--tower); --zbg: var(--tower-bg); grid-column: 1; grid-row: 2; }
+.z-forest .path, .z-tower .path { flex-direction: row-reverse; }
+.path { display: flex; align-items: flex-start; justify-content: space-around; gap: 4px; position: relative; padding-top: 6px; }
+.path::before {
+  content: ""; position: absolute; left: 12%; right: 12%; top: 38px; height: 4px;
+  background: repeating-linear-gradient(90deg, var(--zc) 0 10px, transparent 10px 18px); opacity: .55;
+}
+/* 區域之間的連線 */
+.z-camp::after, .z-plain::after {
+  content: "➜"; position: absolute; right: -17px; top: 42px; color: var(--muted); font-size: 18px; z-index: 2;
+}
+.z-castle::after { content: "⬇"; position: absolute; bottom: -22px; right: 40px; color: var(--muted); font-size: 18px; }
+.z-forest::after { content: "⬅"; position: absolute; left: -17px; top: 42px; color: var(--muted); font-size: 18px; z-index: 2; }
+.node-wrap { display: flex; flex-direction: column; align-items: center; min-width: 0; flex: 1; position: relative; z-index: 1; }
+.node {
+  width: 64px; height: 64px; border-radius: 50%; border: 4px solid var(--zc); background: var(--surface);
+  color: var(--zc); font: inherit; font-size: 24px; font-weight: 900; cursor: pointer; position: relative;
+  display: grid; place-items: center; transition: transform .15s;
+}
+.node:hover, .node:focus-visible { transform: scale(1.08); outline: none; }
+.node.boss { width: 76px; height: 76px; font-size: 28px; }
+.node.boss .star { position: absolute; top: -10px; right: -8px; font-size: 18px; color: var(--gold); }
+.node.open { background: var(--zc); color: var(--surface); animation: light .6s ease-out; }
+.node.current { background: var(--surface); color: var(--zc); animation: pulse 1.6s ease-in-out infinite; }
+.node.locked { border-color: var(--locked); color: var(--locked); background: var(--surface-2); }
+.node.locked::after { content: "🔒"; position: absolute; bottom: -6px; right: -6px; font-size: 16px; }
+.node.side { border-style: dashed; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 var(--zc); } 50% { box-shadow: 0 0 0 9px transparent; } }
+@keyframes light { from { filter: brightness(1.6); transform: scale(.9); } to { filter: none; transform: none; } }
+.node-label { font-size: 16px; text-align: center; margin-top: 6px; line-height: 1.3; word-break: keep-all; overflow-wrap: anywhere; }
+.node-date { font-size: 14px; color: var(--muted); }
+.stars { font-size: 14px; color: var(--gold); letter-spacing: 1px; min-height: 18px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 22px; color: var(--muted); font-size: 16px; }
+.legend span::before { margin-right: 4px; }
+.lg-open::before { content: "●"; color: var(--accent); }
+.lg-cur::before { content: "◎"; color: var(--accent); }
+.lg-lock::before { content: "○"; color: var(--locked); }
+.lg-boss::before { content: "★"; color: var(--gold); }
+
+/* 卡片 */
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); }
+.org-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+.org-head .name { font-size: 26px; font-weight: 900; }
+.badge { display: inline-block; padding: 2px 12px; border-radius: 999px; background: var(--surface-2); font-size: 16px; }
+.bars { margin-top: 14px; display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 4.5em 1fr 3em; align-items: center; gap: 10px; }
+.bar .track { height: 16px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 999px; }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; }
+select { font: inherit; font-size: 18px; padding: 6px 10px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--text); }
+.notice { color: var(--muted); background: var(--surface-2); border-radius: 14px; padding: 16px; }
+.board { display: grid; gap: 12px; }
+.row { display: grid; grid-template-columns: 2.4em 1fr auto; align-items: center; gap: 12px; }
+.rank { font-size: 24px; font-weight: 900; color: var(--gold); text-align: center; }
+.row .title { font-weight: 700; }
+.row .sub { color: var(--muted); font-size: 16px; }
+.row .score { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+/* 對話框 */
+dialog {
+  width: min(720px, calc(100vw - 24px)); max-height: calc(100vh - 32px); border: none; border-radius: 20px;
+  padding: 0; background: var(--surface); color: var(--text); box-shadow: 0 10px 40px rgba(0,0,0,.3);
+}
+dialog::backdrop { background: rgba(20, 18, 12, .55); }
+.dlg-head { padding: 18px 20px 12px; border-bottom: 2px solid var(--line); position: sticky; top: 0; background: var(--surface); }
+.dlg-head h3 { margin: 0; font-size: 24px; }
+.dlg-head .meta { color: var(--muted); font-size: 16px; }
+.dlg-body { padding: 14px 20px 20px; }
+.dlg-body h4 { margin: 18px 0 8px; font-size: 18px; }
+.close { position: absolute; top: 12px; right: 12px; border: none; background: var(--surface-2); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; }
+.story { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; }
+.task { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.task:last-child { border-bottom: none; }
+.tag { font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; align-self: start; margin-top: 3px; }
+.tag-個人小關 { background: var(--plain-bg); color: var(--plain); }
+.tag-魔王關 { background: var(--camp-bg); color: var(--camp); }
+.tag-支線 { background: var(--castle-bg); color: var(--castle); }
+.task .act { grid-column: 2; }
+a.go { display: inline-block; background: var(--accent); color: var(--accent-text); text-decoration: none; padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: 16px; }
+.na { display: inline-block; color: var(--locked); border: 2px dashed var(--locked); padding: 4px 14px; border-radius: 999px; font-size: 16px; }
+.crit { border-left: 5px solid var(--accent); background: var(--surface-2); border-radius: 0 12px 12px 0; padding: 10px 12px; margin-bottom: 10px; }
+.crit b { display: block; }
+.crit .src { color: var(--muted); font-size: 14px; }
+.upgrade { margin-top: 16px; border: 2px solid var(--gold); border-radius: 14px; padding: 12px 14px; }
+.upgrade b { color: var(--gold); }
+.lockmsg { color: var(--muted); font-weight: 700; }
+.rules-list { padding-left: 1.2em; margin: 0; }
+.rules-list li { margin-bottom: 8px; }
+
+@media (max-width: 720px) {
+  header h1 { font-size: 25px; }
+  nav .rules { margin-left: 0; }
+  .map { display: flex; flex-direction: column; gap: 22px; }
+  .zone::after { display: none; }
+  .zone:not(:last-child)::before {
+    content: "⬇"; position: absolute; bottom: -24px; left: 50%; transform: translateX(-50%); color: var(--muted);
+  }
+  .path, .z-forest .path, .z-tower .path { flex-direction: column; align-items: stretch; gap: 10px; }
+  .path::before { left: 37px; right: auto; top: 30px; bottom: 30px; width: 4px; height: auto;
+    background: repeating-linear-gradient(180deg, var(--zc) 0 10px, transparent 10px 18px); }
+  .node-wrap { flex-direction: row; align-items: center; gap: 12px; }
+  .node-wrap .info { text-align: left; }
+  .node-label { text-align: left; margin-top: 0; }
+  .node.boss { width: 72px; height: 72px; }
+  .node:not(.boss) { margin-left: 4px; margin-right: 4px; }
+  .map .zone.order-camp { order: 1; } .map .zone.order-plain { order: 2; } .map .zone.order-castle { order: 3; }
+  .map .zone.order-forest { order: 4; } .map .zone.order-tower { order: 5; }
+}
+@media (prefers-reduced-motion: reduce) { .node, .node.open, .node.current { animation: none; transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">醫療機構經營 RPG</h1>
+    <div class="course" id="course"></div>
+  </header>
+  <nav role="tablist">
+    <button role="tab" data-tab="map" aria-selected="true">冒險地圖</button>
+    <button role="tab" data-tab="org" aria-selected="false">我的機構卡</button>
+    <button role="tab" data-tab="board" aria-selected="false">排行榜</button>
+    <button class="rules" id="rulesBtn">規則</button>
+  </nav>
+
+  <section class="panel active" id="panel-map">
+    <div class="map" id="map"></div>
+    <div class="legend">
+      <span class="lg-open">已開放</span><span class="lg-cur">本週關卡</span><span class="lg-lock">未開放</span><span class="lg-boss">魔王關（小組）</span>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-org">
+    <p><label for="groupSel">選擇組別：</label>
+      <select id="groupSel"><option value="">請選擇</option></select></p>
+    <div id="orgCard"></div>
+  </section>
+
+  <section class="panel" id="panel-board">
+    <div id="board"></div>
+  </section>
+</div>
+
+<dialog id="dlg">
+  <button class="close" aria-label="關閉" data-close>×</button>
+  <div id="dlgContent"></div>
+</dialog>
+
+<dialog id="rulesDlg">
+  <button class="close" aria-label="關閉" data-close>×</button>
+  <div class="dlg-head"><h3>遊戲規則</h3></div>
+  <div class="dlg-body">
+    <ul class="rules-list">
+      <li>每組經營一家虛擬醫療機構，從「創立組織」開局，每學一章就用該章的判斷準則升級機構。</li>
+      <li><b>課堂出勤及參與 40%</b>：每週出席，加上每一關的個人小關（表單自動計分）。</li>
+      <li><b>練習作業 25%</b>：5 個魔王關（小組），每關 5%；組員的魔王關分數都等於小組得分。</li>
+      <li><b>期末考 25%</b>、<b>參觀心得報告 10%</b>。</li>
+      <li>魔王關部分項目由程式檢查（例如欄位完整、計算正確），部分項目由人工智慧（AI）依公開的評分規準評分；對結果有疑問可以申訴。</li>
+      <li><b>只能交一次</b>：每組每個魔王關只採計第一次送出，請組內確認後再由一人送出。</li><li><b>回頭升級</b>：後面的魔王關會要求修正前面的內容，修正寫在新的魔王關作答裡評分。</li>
+      <li>排行榜只公布組名與機構分數，不顯示學號或個人分數。</li>
+    </ul>
+    <p class="rules-links" id="rulesLinks"></p>
+  </div>
+</dialog>
+
+<script src="levels.js"></script>
+<script>
+(function () {
+  var R = window.RPG;
+  if (!R) { document.getElementById('map').textContent = '關卡設定檔 levels.js 載入失敗。'; return; }
+  (function () {
+    var links = [];
+    if (R.attendanceUrl) links.push('<a class="go" href="' + R.attendanceUrl + '" target="_blank" rel="noopener">課堂簽到</a>');
+    if (R.appealUrl) links.push('<a class="go" href="' + R.appealUrl + '" target="_blank" rel="noopener">評分申訴</a>');
+    document.getElementById('rulesLinks').innerHTML = links.join(' ');
+  })();
+  var zoneById = {};
+  R.zones.forEach(function (z) { zoneById[z.id] = z; });
+  var CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮';
+  var board = null; // 排行榜資料
+  var group = '';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  // 今天（台北時間）
+  function todayTaipei() {
+    try {
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    } catch (e) { return new Date().toISOString().slice(0, 10); }
+  }
+  var today = todayTaipei();
+  function dayNum(s) { var p = s.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]) / 864e5; }
+  function status(lv) {
+    var d = dayNum(lv.date) - dayNum(today);
+    if (d <= 0 && d > -7) return 'current';   // 本週（上課日起 7 天內）
+    if (d <= 0) return 'open';
+    if (d < 7) return 'current';               // 未來 7 天內即將上的關卡
+    return 'locked';
+  }
+  function fmtDate(s) { var p = s.split('-'); return (+p[1]) + '/' + (+p[2]); }
+
+  document.getElementById('title').textContent = R.title;
+  document.getElementById('course').textContent = R.course;
+
+  // ---------- 地圖 ----------
+  function groupRow() {
+    if (!board || !group) return null;
+    for (var i = 0; i < board.rows.length; i++) if (String(board.rows[i]['組別']) === String(group)) return board.rows[i];
+    return null;
+  }
+  function renderMap() {
+    var gr = groupRow();
+    var html = R.zones.map(function (z) {
+      var lvls = R.levels.filter(function (l) { return l.zone === z.id; });
+      var nodes = lvls.map(function (l) {
+        var st = status(l);
+        var cls = ['node', st, l.type === 'boss' ? 'boss' : '', l.type === 'side' ? 'side' : ''].join(' ');
+        var stars = '';
+        if (gr && gr['L' + l.no] !== undefined && gr['L' + l.no] !== '') {
+          var n = Math.max(0, Math.min(3, parseInt(gr['L' + l.no], 10) || 0));
+          stars = '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n);
+        }
+        return '<div class="node-wrap">' +
+          '<button class="' + cls + '" data-no="' + l.no + '" aria-label="第 ' + l.no + ' 關 ' + esc(l.name) + '">' +
+          CIRCLED.charAt(l.no - 1) + (l.type === 'boss' ? '<span class="star">★</span>' : '') + '</button>' +
+          '<div class="info"><div class="node-label">' + esc(l.name) + '</div>' +
+          '<div class="node-date">' + fmtDate(l.date) + (l.type === 'side' ? '．支線驛站' : '') + '</div>' +
+          '<div class="stars">' + stars + '</div></div></div>';
+      }).join('');
+      return '<div class="zone z-' + z.id + ' order-' + z.id + '"><h2><span class="emo">' + z.emoji + '</span>' + esc(z.name) + '</h2>' +
+        '<div class="path">' + nodes + '</div></div>';
+    }).join('');
+    var map = document.getElementById('map');
+    map.innerHTML = html;
+    map.querySelectorAll('.node').forEach(function (b) {
+      b.addEventListener('click', function () { openLevel(+b.getAttribute('data-no')); });
+    });
+  }
+
+  function openLevel(no) {
+    var l = R.levels.filter(function (x) { return x.no === no; })[0];
+    if (!l) return;
+    var z = zoneById[l.zone] || { name: '', emoji: '' };
+    var st = status(l);
+    var typeName = l.type === 'boss' ? '★ 魔王關 ' + (l.bossNo || '') : (l.type === 'side' ? '支線驛站' : '個人關卡');
+    var tasks = (l.tasks || []).map(function (t) {
+      var act = t.url ? '<a class="go" href="' + esc(t.url) + '" target="_blank" rel="noopener">前往</a>'
+                      : '<span class="na">表單尚未開放</span>';
+      return '<div class="task"><span class="tag tag-' + esc(t.kind) + '">' + esc(t.kind) + '</span><div>' + esc(t.text) + '</div><div class="act">' + act + '</div></div>';
+    }).join('');
+    var crit = (l.criteria || []).map(function (c) {
+      return '<div class="crit"><b>' + esc(c.name) + '</b>' + esc(c.desc) + '<div class="src">出處：' + esc(c.source) + '</div></div>';
+    }).join('');
+    var up = l.upgrade ? '<div class="upgrade"><b>↺ 回頭升級</b><div>' + esc(l.upgrade) + '</div></div>' : '';
+    document.getElementById('dlgContent').innerHTML =
+      '<div class="dlg-head"><h3>' + CIRCLED.charAt(l.no - 1) + ' ' + esc(l.name) + '</h3>' +
+      '<div class="meta">' + z.emoji + ' ' + esc(z.name) + '．' + fmtDate(l.date) + '．' + typeName +
+      (st === 'locked' ? '．<span class="lockmsg">🔒 未開放</span>' : '') + '</div></div>' +
+      '<div class="dlg-body"><div class="story">' + esc(l.story) + '</div>' +
+      '<h4>任務</h4>' + tasks + '<h4>本關判斷準則</h4>' + crit + up + '</div>';
+    showDialog(document.getElementById('dlg'));
+  }
+
+  function showDialog(d) {
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+  }
+  document.querySelectorAll('dialog').forEach(function (d) {
+    d.addEventListener('click', function (e) {
+      if (e.target === d || e.target.hasAttribute('data-close')) { if (d.close) d.close(); else d.removeAttribute('open'); }
+    });
+  });
+  document.getElementById('rulesBtn').addEventListener('click', function () { showDialog(document.getElementById('rulesDlg')); });
+
+  // ---------- 分頁 ----------
+  document.querySelectorAll('nav [data-tab]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('nav [data-tab]').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + b.getAttribute('data-tab')); });
+    });
+  });
+
+  // ---------- 排行榜 ----------
+  function parseCSV(text) {
+    var rows = [], row = [], f = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text[i];
+      if (q) {
+        if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+        else f += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(f); f = ''; if (row.join('') !== '') rows.push(row); row = [];
+      } else f += c;
+    }
+    row.push(f); if (row.join('') !== '') rows.push(row);
+    if (!rows.length) return { header: [], rows: [] };
+    var header = rows[0].map(function (h) { return h.trim(); });
+    return {
+      header: header,
+      rows: rows.slice(1).map(function (r) { var o = {}; header.forEach(function (h, i) { o[h] = (r[i] || '').trim(); }); return o; })
+    };
+  }
+  // 魔王關 1 評分前，試算表的機構名稱預設為「第 N 組」
+  function orgName(r) { var n = r['機構名稱']; return (!n || n === '第 ' + r['組別'] + ' 組') ? '（尚未創立）' : n; }
+  var EMPTY = '<div class="notice">排行榜將於第一個魔王關評分完成後公布。</div>';
+  function renderBoard() {
+    var el = document.getElementById('board');
+    if (!board || !board.rows.length) { el.innerHTML = EMPTY; return; }
+    var rows = board.rows.slice().sort(function (a, b) { return (parseFloat(b['總分']) || 0) - (parseFloat(a['總分']) || 0); });
+    el.innerHTML = '<div class="board">' + rows.map(function (r, i) {
+      return '<div class="card row"><div class="rank">' + (i + 1) + '</div><div><div class="title">第 ' + esc(r['組別']) + ' 組．' + esc(orgName(r)) +
+        '</div><div class="sub">等級 ' + esc(r['等級'] || '-') + '</div></div><div class="score">' + esc(r['總分'] || 0) + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function loadBoard() {
+    if (!R.leaderboardCsvUrl) { renderBoard(); return; }
+    fetch(R.leaderboardCsvUrl, { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (t) { board = parseCSV(t); renderBoard(); renderOrg(); renderMap(); })
+      .catch(function () { board = null; renderBoard(); });
+  }
+
+  // ---------- 我的機構卡 ----------
+  var sel = document.getElementById('groupSel');
+  for (var g = 1; g <= 12; g++) { var o = document.createElement('option'); o.value = g; o.textContent = '第 ' + g + ' 組'; sel.appendChild(o); }
+  group = store('rpg-group') || '';
+  sel.value = group;
+  sel.addEventListener('change', function () { group = sel.value; store('rpg-group', group); renderOrg(); renderMap(); });
+  var STATS = [['規劃', 'var(--plain)'], ['組織', 'var(--castle)'], ['領導', 'var(--forest)'], ['控制', 'var(--tower)']];
+  function renderOrg() {
+    var el = document.getElementById('orgCard');
+    if (!group) { el.innerHTML = '<div class="notice">請先選擇你的組別。</div>'; return; }
+    var r = groupRow();
+    if (!r) { el.innerHTML = '<div class="notice">第 ' + esc(group) + ' 組的機構卡將於第一個魔王關評分完成後公布。</div>'; return; }
+    var bars = STATS.map(function (s) {
+      var v = Math.max(0, Math.min(100, parseFloat(r[s[0]]) || 0));
+      return '<div class="bar"><span>' + s[0] + '</span><div class="track"><div class="fill" style="width:' + v + '%;background:' + s[1] + '"></div></div><span class="v">' + v + '</span></div>';
+    }).join('');
+    var passed = R.levels.filter(function (l) { return (parseInt(r['L' + l.no], 10) || 0) > 0; }).length;
+    el.innerHTML = '<div class="card"><div class="org-head"><span class="name">' + esc(orgName(r)) + '</span>' +
+      '<span class="badge">第 ' + esc(group) + ' 組</span><span class="badge">等級 ' + esc(r['等級'] || '-') + '</span>' +
+      '<span class="badge">總分 ' + esc(r['總分'] || 0) + '</span><span class="badge">已通過 ' + passed + ' 關</span></div>' +
+      '<div class="bars">' + bars + '</div></div>';
+  }
+
+  renderMap(); renderOrg(); renderBoard(); loadBoard();
+})();
+</script>
+</body>
+</html>
