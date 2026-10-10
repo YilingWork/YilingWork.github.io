@@ -26,7 +26,12 @@ if (/\bLine\//i.test(UA) && !/openExternalBrowser=1/.test(location.search)) {
 
 let S = null, SCHEMA = null, MANUAL = null;
 
+// Admin "view as": state is loaded for another person; every write is blocked in the browser.
+const VIEW_OK = { state: 1, schema: 1, manual: 1, signout: 1 };
 async function api(action, data = {}) {
+  const va = store.get("viewAs", true);
+  if (va && !VIEW_OK[action]) throw Object.assign(new Error(`View only: you are viewing as ${va}. Go back to your own view to make changes.`), { code: 0 });
+  if (va && action === "state") data = { ...data, viewAs: va };
   let r;
   try {
     r = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action, session: store.get("session"), ...data }) });
@@ -52,6 +57,7 @@ async function load() {
     S = await api("state");
     render();
   } catch (e) {
+    if (store.get("viewAs", true)) { store.set("viewAs", null, true); return load(); }
     if (e.code === 401) { store.set("session", null); return renderLogin(e.message === "Please sign in." ? "" : e.message); }
     $("#app").innerHTML = `<main><p class="bad">${esc(e.message)}</p><button class="btn" onclick="location.reload()">Try again</button></main>`;
   }
@@ -97,13 +103,13 @@ async function renderLogin(msg = "") {
 }
 async function signOut() {
   try { await api("signout"); } catch {}
-  store.set("session", null); S = null;
+  store.set("session", null); store.set("viewAs", null, true); S = null;
   try { google.accounts.id.disableAutoSelect(); } catch {}
   renderLogin();
 }
 
 // ------------------------------------------------------------------ shell
-const ROUTES = [["home", "Home"], ["refusal", "Refusal Log"], ["onsite", "On-site Record"], ["entry", "Data Entry"], ["manual", "Manual"]];
+const ROUTES = [["home", "Home"], ["refusal", "Refusal Log"], ["onsite", "On-site Record"], ["entry", "Data Entry"], ["work", "Work Log"], ["manual", "Manual"]];
 const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
@@ -114,9 +120,11 @@ function render() {
       <nav class="tabs">${tabs.map(([k, v]) => `<a href="#${k}" class="${k === route ? "on" : ""}">${v}</a>`).join("")}</nav>
       <div class="who"><span>${esc(S.me.short || S.me.name)}</span><button class="btn sm" id="out">Sign out</button></div>
     </div></header>
+    ${S.viewAs ? `<div class="note warn" style="margin:0;border-radius:0;text-align:center">Viewing as <b>${esc(S.me.name)}</b> (view only) · <button class="btn sm" id="vaexit">Back to my view</button></div>` : ""}
     <main id="view"></main>`;
   $("#out").onclick = signOut;
-  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, manual: viewManual, admin: viewAdmin }[route] || viewHome;
+  if (S.viewAs) $("#vaexit").onclick = () => { store.set("viewAs", null, true); location.hash = "admin"; load(); };
+  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, manual: viewManual, admin: viewAdmin }[route] || viewHome;
   view($("#view"));
   window.scrollTo(0, 0);
 }
@@ -137,6 +145,7 @@ function viewHome(v) {
   v.innerHTML = `
     <h1>Hello, ${esc(me.short || me.name)}</h1>
     <p class="lead">${esc(S.today)}${me.team ? ` · ${esc(me.team)} team` : ""}</p>
+    ${workReminder()}
     <div class="grid two">
       ${me.q ? `<section class="card"><h2>My next serial numbers</h2>
         <div class="serials">
@@ -265,6 +274,64 @@ function todayList(title, rows, desc, kind) {
     ${rows.map((r) => `<tr><td class="mono">${esc(r.serial)}</td><td class="mono faint">${esc(r.time)}</td><td>${desc(r)}</td>
     <td style="text-align:right">${r.deletable === false ? "" : `<button class="btn sm danger" onclick="delRecord('${kind}','${esc(r.serial)}')">Delete</button>`}</td></tr>`).join("")}
     </tbody></table></div><p class="sub" style="margin-top:6px">Made a mistake? Delete it and enter it again (today only).</p>` : `<p class="empty">None yet today.</p>`}</section>`;
+}
+
+// ------------------------------------------------------------------ work log
+function workReminder() {
+  const miss = S.my.work.missing;
+  if (!miss.length) return "";
+  const past = miss.filter((d) => d !== S.today);
+  return `<a class="note warn" href="#work" style="display:block;text-decoration:none;color:inherit;margin:0 0 16px">
+    <b>Work hours not logged${miss.includes(S.today) ? " for today" : ""}.</b>
+    ${miss.includes(S.today) ? "Log today's hours and a short description before you leave." : ""}
+    ${past.length ? `Missing: <span class="mono">${past.map(esc).join(", ")}</span>.` : ""} <u>Open Work Log →</u></a>`;
+}
+function viewWork(v) {
+  const w = S.my.work;
+  const hrs = (a, b) => { const m = (t) => { const x = /^(\d\d):(\d\d)$/.exec(t || ""); return x ? +x[1] * 60 + +x[2] : null; }; const p = m(a), q = m(b); return p != null && q != null && q > p ? ((q - p) / 60).toFixed(2) : ""; };
+  const dflt = w.missing.filter((d) => d !== S.today).slice(-1)[0] || S.today;
+  v.innerHTML = `
+    <h1>Work Log</h1>
+    <p class="lead">Record each work period: shifts at the pharmacy, data entry, training and meetings. Add a separate period for each part of the day (for example, morning and evening shifts).</p>
+    ${w.missing.length ? `<p class="note warn">Days with work but no hours logged: <span class="mono">${w.missing.map(esc).join(", ")}</span></p>` : ""}
+    <form class="card" id="wf">
+      <div class="f"><label class="q" for="wd">Date</label><div class="h">Today or up to ${w.cutoff ? esc(w.cutoff) : "7 days ago"}. Older days: ask the PI.</div>
+        <input id="wd" type="date" value="${esc(dflt)}" min="${esc(w.cutoff)}" max="${esc(S.today)}" style="max-width:220px"></div>
+      <div class="f" style="display:flex;gap:12px;flex-wrap:wrap">
+        <div><label class="q" for="ws" style="display:block">Start</label><input id="ws" type="time" step="300" style="width:150px"></div>
+        <div><label class="q" for="we" style="display:block">End</label><input id="we" type="time" step="300" style="width:150px"></div>
+        <div><span class="q">Hours</span><div class="mono" id="wh" style="font-size:22px;padding-top:4px">—</div></div>
+      </div>
+      <div class="f"><label class="q" for="wdesc">What did you do?</label><div class="h">One or two lines. For example: "Morning shift at B1 pharmacy, 6 questionnaires, 3 refusals" or "Data entry, serials 4012–4020".</div>
+        <textarea id="wdesc" maxlength="500"></textarea></div>
+      <div class="formbar"><button class="btn pri" id="wsave">Save work period</button></div>
+    </form>
+    <section class="card" style="margin-top:16px"><h2>My work periods (last 31 days)</h2>
+      <p class="sub" style="margin-bottom:6px">This month: <b>${(+w.monthHours).toFixed(2)}</b> hours</p>
+      ${w.list.length ? `<div class="tw"><table><thead><tr><th>Date</th><th>Time</th><th class="num">Hours</th><th>Description</th><th></th></tr></thead><tbody>
+      ${w.list.map((r) => `<tr><td class="mono" style="white-space:nowrap">${esc(r.date)}</td><td class="mono" style="white-space:nowrap">${esc(r.start)}–${esc(r.end)}</td><td class="num">${esc(r.hours)}</td><td>${esc(r.desc)}</td>
+        <td style="text-align:right">${r.deletable ? `<button class="btn sm danger" data-wdel="${r.row}" data-d="${esc(r.date)}" data-s="${esc(r.start)}">Delete</button>` : ""}</td></tr>`).join("")}
+      </tbody></table></div><p class="sub" style="margin-top:6px">Made a mistake? Delete it and add it again (last 7 days only).</p>` : `<p class="empty">Nothing logged yet.</p>`}
+    </section>`;
+  const f = $("#wf");
+  const upd = () => { $("#wh").textContent = hrs($("#ws").value, $("#we").value) || "—"; };
+  $("#ws").oninput = upd; $("#we").oninput = upd;
+  f.onsubmit = async (ev) => {
+    ev.preventDefault();
+    const body = { date: $("#wd").value, start: $("#ws").value, end: $("#we").value, desc: $("#wdesc").value.trim() };
+    if (!body.date || !body.start || !body.end) return toast("Please fill in the date, start and end.");
+    if (!hrs(body.start, body.end)) return toast("End time must be later than start time.");
+    if (body.desc.length < 5) return toast("Please write a short description.");
+    const b = $("#wsave");
+    busy(b, true);
+    try { const j = await api("work.add", body); toast(`Saved ${j.hours} hours on ${j.saved}`); await refresh(); }
+    catch (e) { busy(b, false); toast(e.message, 4500); }
+  };
+  $$("[data-wdel]", v).forEach((b) => (b.onclick = async () => {
+    if (!confirmInline("wdel-" + b.dataset.wdel)) return;
+    try { await api("work.delete", { row: b.dataset.wdel, date: b.dataset.d, start: b.dataset.s }); toast("Deleted"); await refresh(); }
+    catch (e) { toast(e.message, 4000); }
+  }));
 }
 
 // ------------------------------------------------------------------ on-site record
@@ -510,11 +577,11 @@ function viewAdmin(v) {
     <p class="lead">Only the PI and 子芸 see this page. Data sheet: <a href="${esc(A.sheetUrl)}" target="_blank" rel="noopener">PI-only spreadsheet</a></p>
     <div class="grid">
     <section class="card"><h2>People and invite links</h2>
-      <p class="sub" style="margin-bottom:8px">Each link works once: the first Google account that signs in with it is linked to that person. Reset makes a new link and signs the person out.</p>
+      <p class="sub" style="margin-bottom:8px">"View as" shows a research assistant's pages as they see them (view only). Each link works once: the first Google account that signs in with it is linked to that person. Reset makes a new link and signs the person out.</p>
       <div class="tw"><table><thead><tr><th>Name</th><th>Role</th><th>Linked account</th><th>Invite link</th><th></th></tr></thead><tbody>
       ${A.users.map((u) => `<tr><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${u.email ? `${esc(u.email)}<div class="faint" style="font-size:12px">${esc(u.boundAt)}</div>` : '<span class="faint">not yet</span>'}</td>
         <td>${u.email ? "" : `<button class="btn sm" data-copy="${esc(u.invite)}">Copy link</button>`}</td>
-        <td><button class="btn sm danger" data-reset="${esc(u.name)}">Reset</button></td></tr>`).join("")}
+        <td style="white-space:nowrap">${u.role === "RA" ? `<button class="btn sm" data-viewas="${esc(u.name)}">View as</button> ` : ""}<button class="btn sm danger" data-reset="${esc(u.name)}">Reset</button></td></tr>`).join("")}
       </tbody></table></div></section>
 
     <section class="card"><h2>Entry differences</h2>
@@ -530,10 +597,18 @@ function viewAdmin(v) {
       <p class="sub" style="margin-top:8px">Returned so far: ${A.returned.length}</p>
     </section>
 
+    <section class="card"><h2>Work hours by month</h2>
+      ${A.work.length ? `<div class="tw"><table><thead><tr><th>Month</th><th>Name</th><th class="num">Days</th><th class="num">Hours</th></tr></thead><tbody>
+      ${A.work.map((x) => `<tr><td class="mono">${esc(x.month)}</td><td>${esc(x.name)}</td><td class="num">${x.days}</td><td class="num">${x.hours.toFixed(2)}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="empty">No work hours logged yet.</p>`}
+      <p class="sub" style="margin-top:8px">Details: download "Work log" below.</p>
+    </section>
+
     <section class="card"><h2>Download (CSV)</h2>
-      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
+      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"], ["worklog", "Work log"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
       <p class="sub" style="margin-top:8px">Final dataset: one row per questionnaire entered twice; status "pending" until every difference is checked and confirmed.</p>
     </section></div>`;
+  $$("[data-viewas]", v).forEach((b) => (b.onclick = () => { store.set("viewAs", b.dataset.viewas, true); location.hash = "home"; load(); }));
   $$("[data-copy]", v).forEach((b) => (b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied"); } catch { toast(b.dataset.copy, 8000); } }));
   $$("[data-reset]", v).forEach((b) => (b.onclick = async () => {
     if (!confirmInline("reset-" + b.dataset.reset)) return;

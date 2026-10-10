@@ -87,7 +87,7 @@ table.sched td.me{background:var(--accent-bg);font-weight:700;color:var(--ink)}
 .opt{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;line-height:1.4}
 .opt input{margin:3px 0 0;flex:none;width:18px;height:18px;accent-color:var(--accent)}
 .opt:has(input:checked){border-color:var(--accent);background:var(--accent-bg)}
-input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:var(--card)}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:var(--card)}
 textarea{min-height:80px;resize:vertical}
 input.serialin{font-family:var(--mono);font-size:22px;max-width:160px}
 .sec{margin:26px 0 12px;padding-top:12px;border-top:2px solid var(--ink);font-weight:700;color:var(--ink)}
