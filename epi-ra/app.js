@@ -380,10 +380,14 @@ function entryForm(box, c, fields) {
       html += `<div class="scale" data-k="${f.k}"><b>${f.k}</b>${f.o.map((o) => `<label title="${esc(o)}"><input type="radio" name="${f.k}" value="${esc(o)}" ${draft[f.k] === o ? "checked" : ""}></label>`).join("")}</div>`;
       return;
     }
+    if (c.fixed && f.k in c.fixed) {
+      html += `<div class="f" data-k="${esc(f.k)}"><span class="q">${esc(f.l)}</span><div class="h">From the on-site record. Not entered again.</div><div class="opt" style="cursor:default"><b>${esc(c.fixed[f.k])}</b></div></div>`;
+      return;
+    }
     html += `<div class="f" data-k="${esc(f.k)}"><span class="q">${esc(f.l)}${f.opt ? ' <span class="faint">(optional)</span>' : ""}</span>${f.h ? `<div class="h">${esc(f.h)}</div>` : ""}`;
     if (f.t === "mc") html += radios(f.k, f.o, draft[f.k], f.other);
     else if (f.t === "cb") html += checks(f.k, f.o, draft[f.k] || [], f.other);
-    else if (f.t === "date") html += `<input type="date" name="${f.k}" value="${esc(draft[f.k] || "")}">`;
+    else if (f.t === "date") html += `<input type="date" name="${f.k}" value="${esc(draft[f.k] || c.date || "")}">`;
     else html += `<textarea name="${f.k}" maxlength="3000">${esc(draft[f.k] || "")}</textarea>`;
     if (f.k === "validity") html += `<div id="vsug"></div>`;
     html += `</div>`;
@@ -395,7 +399,8 @@ function entryForm(box, c, fields) {
   const collect = () => {
     const a = {};
     fields.forEach((f) => {
-      if (f.t === "cb") a[f.k] = getChecks(form, f.k);
+      if (c.fixed && f.k in c.fixed) a[f.k] = c.fixed[f.k];
+      else if (f.t === "cb") a[f.k] = getChecks(form, f.k);
       else if (f.t === "mc" || f.t === "scale") a[f.k] = getRadio(form, f.k);
       else a[f.k] = (form.elements[f.k]?.value || "").trim();
     });
