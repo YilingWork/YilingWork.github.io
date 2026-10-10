@@ -5,6 +5,7 @@ window.RPG = {
   title: "醫療機構經營 RPG",
   course: "健康照護管理學 115-1",
   leaderboardCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSuCKWwziSr4bhobdetNOFKEEsi99Cs-4eCp4mHAXdfEKaggCLEQGa7JYvZ9eiz2NA2VqKPwEo5o_5/pub?gid=1130442393&single=true&output=csv", // 試算表「排行榜」分頁發布成 CSV 後填入
+  gameUrl: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec", // 遊戲（Apps Script 網頁應用程式）網址；個人小關改在遊戲裡由關主提問
   attendanceUrl: "https://docs.google.com/forms/d/e/1FAIpQLSe4Emj-c1fqcSNfnYv2rAwrEwuEX0MWdbDJet1FF6C-KszkbQ/viewform", // 課堂簽到表單
   appealUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdPpGKTZJjDzdtxPfaSAbDlgDF2rDVzOFgMqYIvTh6hbWP8mQ/viewform", // 評分申訴表單
   zones: [

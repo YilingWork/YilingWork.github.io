@@ -57,6 +57,9 @@ body {
 .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 48px; }
 header h1 { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: .02em; }
 header .course { color: var(--muted); font-size: 17px; }
+header .enter-note { margin: 8px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6; }
+header .enter-note b { color: var(--ink); }
+header .enter { display: inline-block; margin-top: 12px; background: var(--accent); color: var(--accent-text); text-decoration: none; padding: 12px 22px; border-radius: 999px; font-weight: 900; font-size: 19px; }
 nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 20px; }
 nav button, .btn {
   font: inherit; font-size: 17px; border: 2px solid var(--line); background: var(--surface);
@@ -195,6 +198,8 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   <header>
     <h1 id="title">醫療機構經營 RPG</h1>
     <div class="course" id="course"></div>
+    <a class="enter" id="enterGame" href="#" target="_blank" rel="noopener" hidden>🏕️ 進入遊戲</a>
+    <p class="enter-note" id="enterNote" hidden>進入遊戲後輸入<b>學號</b>和老師發的<b>個人通行碼</b>（6 位數字）。通行碼代表你本人，不要借給別人。</p>
   </header>
   <nav role="tablist">
     <button role="tab" data-tab="map" aria-selected="true">冒險地圖</button>
@@ -254,6 +259,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     if (R.appealUrl) links.push('<a class="go" href="' + R.appealUrl + '" target="_blank" rel="noopener">評分申訴</a>');
     document.getElementById('rulesLinks').innerHTML = links.join(' ');
   })();
+  if (R.gameUrl) { var eg = document.getElementById('enterGame'); eg.href = R.gameUrl; eg.hidden = false; document.getElementById('enterNote').hidden = false; }
   var zoneById = {};
   R.zones.forEach(function (z) { zoneById[z.id] = z; });
   var CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮';
@@ -329,7 +335,8 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     var st = status(l);
     var typeName = l.type === 'boss' ? '★ 魔王關 ' + (l.bossNo || '') : (l.type === 'side' ? '支線驛站' : '個人關卡');
     var tasks = (l.tasks || []).map(function (t) {
-      var act = t.url ? '<a class="go" href="' + esc(t.url) + '" target="_blank" rel="noopener">前往</a>'
+      var url = t.kind === '個人小關' && R.gameUrl ? R.gameUrl : t.url;
+      var act = url ? '<a class="go" href="' + esc(url) + '" target="_blank" rel="noopener">' + (url === R.gameUrl ? '進入遊戲' : '前往') + '</a>'
                       : '<span class="na">表單尚未開放</span>';
       return '<div class="task"><span class="tag tag-' + esc(t.kind) + '">' + esc(t.kind) + '</span><div>' + esc(t.text) + '</div><div class="act">' + act + '</div></div>';
     }).join('');
