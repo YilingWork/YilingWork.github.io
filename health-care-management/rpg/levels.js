@@ -5,7 +5,7 @@ window.RPG = {
   title: "醫療機構經營 RPG",
   course: "健康照護管理學 115-1",
   leaderboardCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSuCKWwziSr4bhobdetNOFKEEsi99Cs-4eCp4mHAXdfEKaggCLEQGa7JYvZ9eiz2NA2VqKPwEo5o_5/pub?gid=1130442393&single=true&output=csv", // 試算表「排行榜」分頁發布成 CSV 後填入
-  gameUrl: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec", // 遊戲（Apps Script 網頁應用程式）網址；個人小關改在遊戲裡由關主提問
+  gameUrl: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec", // 遊戲（Apps Script 網頁應用程式）網址；個人小關在遊戲裡以故事事件進行（2026-10-10 起）
   attendanceUrl: "https://docs.google.com/forms/d/e/1FAIpQLSe4Emj-c1fqcSNfnYv2rAwrEwuEX0MWdbDJet1FF6C-KszkbQ/viewform", // 課堂簽到表單
   appealUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdPpGKTZJjDzdtxPfaSAbDlgDF2rDVzOFgMqYIvTh6hbWP8mQ/viewform", // 評分申訴表單
   zones: [
@@ -20,7 +20,7 @@ window.RPG = {
       no: 1, zone: "camp", name: "創立組織", date: "2026-10-10", type: "boss", bossNo: 1,
       story: "主管機關開放新設醫療機構。各組要提交一份「創立申請書」，證明你們是一個真正的正式組織，才能取得開業許可。",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
+        { kind: "個人小關", text: "故事事件：審查官要你到顧問醫院「安和醫院」觀摩一天，依序遇到副院長、門診櫃檯組長、院長、統計室管理師，事件發生時回答問題，共 5 件事、11 題；含實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
         { kind: "魔王關", text: "魔王關 1「創立申請書」：機構名稱與類型、組織四要素逐項檢核、醫療法類別與理由、文化類型與一項具體做法、一項營運指標屬效能或效率", url: "https://docs.google.com/forms/d/e/1FAIpQLSck68EoAnjryABDGlvLMaFW2B3HjRF4jL2BR7ZUJ2SvNN-b2w/viewform" }
       ],
       criteria: [
@@ -37,8 +37,8 @@ window.RPG = {
       no: 2, zone: "camp", name: "看清環境", date: "2026-10-10", type: "solo",
       story: "開業前先做市場偵察：哪些環境力量會直接影響你們？哪些是間接的大趨勢？哪些事件最值得盯緊？",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「主管審稿」：找出環境分析表中分類錯誤的項目（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" },
-        { kind: "個人小關", text: "每人提交一則「與本組機構有關的環境事件」，第 5 關的優勢劣勢機會威脅分析（SWOT，Strengths、Weaknesses、Opportunities、Threats）機會與威脅會用到", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" }
+        { kind: "個人小關", text: "故事事件：在安和醫院遇上員工罷工、地震停電、新聞事件，再接受資深顧問考驗，共 5 件事、8 題；含實務任務「主管審稿」：替實習生找出環境分析表中分類錯誤的項目（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" },
+        { kind: "個人小關", text: "事件都處理完、回到偵察隊長時，每人回報一則「與本組機構有關的環境事件」，第 5 關的優勢劣勢機會威脅分析（SWOT，Strengths、Weaknesses、Opportunities、Threats）機會與威脅會用到", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" }
       ],
       criteria: [
         { name: "環境三層次", desc: "個體環境（直接且立即影響）、總體環境（間接的大趨勢）、超環境（不可預知的力量）。", source: "W3 p3" },
@@ -52,7 +52,7 @@ window.RPG = {
       no: 3, zone: "camp", name: "立文化、守道德", date: "2026-10-10", type: "solo",
       story: "機構的文化看不見，卻決定問題會被藏起來還是被處理掉。這一關練習辨認文化與道德判斷。",
       tasks: [
-        { kind: "個人小關", text: "8 題選擇題＋實務任務「查官方公開資料」：到衛福部醫事查詢系統查真實醫院的正式名稱與法律分類（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSeDLN4r6GlEtvN-wN9smHstQohaRDJ4BQUH3Huu6wwQ3ghXVA/viewform" },
+        { kind: "個人小關", text: "故事事件：跟著安和醫院的新進人員導覽、病安分享、倫理委員會，看見文化與道德判斷，共 6 件事、11 題；含實務任務「查官方公開資料」：到衛福部醫事查詢系統查真實醫院的正式名稱與法律分類（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSeDLN4r6GlEtvN-wN9smHstQohaRDJ4BQUH3Huu6wwQ3ghXVA/viewform" },
         { kind: "支線", text: "組織文化配對挑戰（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/culture-game/" },
         { kind: "支線", text: "醫院法律分類配對遊戲（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/hospital-category/" }
       ],
@@ -67,7 +67,7 @@ window.RPG = {
       no: 4, zone: "plain", name: "決策與目標", date: "2026-10-14", type: "boss", bossNo: 2,
       story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、支持共同目標 Relevant、有時限 Time-bound）。",
       tasks: [
-        { kind: "個人小關", text: "1 題計算、6 題選擇題＋實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
+        { kind: "個人小關", text: "故事事件：幫兒童病房算採購分數、主持創院團隊的規劃會議、替護理部檢查 SMART 目標，共 5 件事、11 題；含實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
         { kind: "魔王關", text: "魔王關 2 前半：用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
       ],
       criteria: [
@@ -83,7 +83,7 @@ window.RPG = {
       no: 5, zone: "plain", name: "策略作戰室", date: "2026-10-21", type: "boss", bossNo: 2,
       story: "目標定了，接下來要決定怎麼打。用 SWOT 盤點內外情勢，交叉出 TOWS 策略（把內部優劣勢與外部機會威脅兩兩配對，得出 SO、WO、ST、WT 四種策略），並選定機構的競爭方式。",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「審一份 SWOT」：找出診所 SWOT 草稿的錯誤並判斷錯誤類型（作答到 10/27（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
+        { kind: "個人小關", text: "故事事件：判讀探子帶回的對手情報、幫安和醫院財務長分析服務組合、在軍師的沙盤上學 SWOT，共 4 件事、10 題；含實務任務「審一份 SWOT」：找出診所 SWOT 草稿的錯誤並判斷錯誤類型（作答到 10/27（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
         { kind: "魔王關", text: "魔王關 2 後半「策略一頁」：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
