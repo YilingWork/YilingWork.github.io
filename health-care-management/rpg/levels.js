@@ -1,6 +1,6 @@
 // 醫療機構經營 RPG：關卡設定檔
 // 教師每週更新講義後只需修改本檔案（任務、判斷準則、出處頁碼、表單連結）。
-// s = 投影片編號；p = PDF 頁碼。表單 url 建好後填入。
+// 出處一律用講義 PDF 頁碼（p）。表單 url 建好後填入。
 window.RPG = {
   title: "醫療機構經營 RPG",
   course: "健康照護管理學 115-1",
@@ -17,65 +17,65 @@ window.RPG = {
   ],
   levels: [
     {
-      no: 1, zone: "camp", name: "創立組織", date: "2026-10-14", type: "boss", bossNo: 1,
+      no: 1, zone: "camp", name: "創立組織", date: "2026-10-10", type: "boss", bossNo: 1,
       story: "主管機關開放新設醫療機構。各組要提交一份「創立申請書」，證明你們是一個真正的正式組織，才能取得開業許可。",
       tasks: [
         { kind: "個人小關", text: "7 題選擇題＋實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
         { kind: "魔王關", text: "魔王關 1「創立申請書」：機構名稱與類型、組織四要素逐項檢核、醫療法類別與理由、文化類型與一項具體做法、一項營運指標屬效能或效率", url: "https://docs.google.com/forms/d/e/1FAIpQLSck68EoAnjryABDGlvLMaFW2B3HjRF4jL2BR7ZUJ2SvNN-b2w/viewform" }
       ],
       criteria: [
-        { name: "正式組織四要素", desc: "一群人、具備共同目標、正式結構、權責分工。", source: "W2 s5" },
-        { name: "效能與效率", desc: "效能是做對的事情，關注結果是否符合目標；效率是把事情做對，關注投入與產出的關係。", source: "W2 s6" },
-        { name: "醫療法五類機構", desc: "以設立單位、法定提撥、盈餘或結餘分配規定判別公立、私立、醫療財團法人、醫療社團法人、法人附設醫療機構。", source: "W4 s41" },
-        { name: "組織文化四類型", desc: "宗族型、科層體制型、創業家型、市場型。", source: "W4 s7" },
-        { name: "打造文化五部曲", desc: "篩選、高階行為示範、社會化、績效評估與獎酬、儀式故事與符號的增強。", source: "W4 s9" },
-        { name: "醫院營運指標", desc: "佔床率、平均住院日（ALOS，Average Length of Stay）、粗死亡率；降低平均住院日勝過盲目擴床。", source: "W2 s23" }
+        { name: "正式組織四要素", desc: "一群人、具備共同目標、正式結構、權責分工。", source: "W2 p5" },
+        { name: "效能與效率", desc: "效能是做對的事情，關注結果是否符合目標；效率是把事情做對，關注投入與產出的關係。", source: "W2 p6" },
+        { name: "醫療法五類機構", desc: "以設立單位、法定提撥、盈餘或結餘分配規定判別公立、私立、醫療財團法人、醫療社團法人、法人附設醫療機構。", source: "W4 p33" },
+        { name: "組織文化四類型", desc: "宗族型、科層體制型、創業家型、市場型。", source: "W4 p7" },
+        { name: "打造文化五部曲", desc: "篩選、高階行為示範、社會化、績效評估與獎酬、儀式故事與符號的增強。", source: "W4 p9" },
+        { name: "醫院營運指標", desc: "佔床率、平均住院日（ALOS，Average Length of Stay）、粗死亡率；降低平均住院日勝過盲目擴床。", source: "W2 p18" }
       ],
       upgrade: ""
     },
     {
-      no: 2, zone: "camp", name: "看清環境", date: "2026-10-14", type: "solo",
+      no: 2, zone: "camp", name: "看清環境", date: "2026-10-10", type: "solo",
       story: "開業前先做市場偵察：哪些環境力量會直接影響你們？哪些是間接的大趨勢？哪些事件最值得盯緊？",
       tasks: [
         { kind: "個人小關", text: "7 題選擇題＋實務任務「主管審稿」：找出環境分析表中分類錯誤的項目", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" },
         { kind: "個人小關", text: "每人提交一則「與本組機構有關的環境事件」，第 5 關的優勢劣勢機會威脅分析（SWOT，Strengths、Weaknesses、Opportunities、Threats）機會與威脅會用到", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" }
       ],
       criteria: [
-        { name: "環境三層次", desc: "個體環境（直接且立即影響）、總體環境（間接的大趨勢）、超環境（不可預知的力量）。", source: "W3 s3" },
-        { name: "六種競爭動力", desc: "供應商、購買者、潛在進入者、替代品、產業內部對抗、其他關係人（政府、工會、社區等）。", source: "W3 s7–8" },
-        { name: "PEST 分析", desc: "政治法律（Political）、經濟（Economic）、社會文化（Social）、科技（Technological）。", source: "W3 s13" },
-        { name: "關鍵事件分析", desc: "依衝擊程度與影響時間幅度，鎖定最值得監控的關鍵環境事件。", source: "W3 s14–15" }
+        { name: "環境三層次", desc: "個體環境（直接且立即影響）、總體環境（間接的大趨勢）、超環境（不可預知的力量）。", source: "W3 p3" },
+        { name: "六種競爭動力", desc: "供應商、購買者、潛在進入者、替代品、產業內部對抗、其他關係人（政府、工會、社區等）。", source: "W3 p7、p16" },
+        { name: "PEST 分析", desc: "政治法律（Political）、經濟（Economic）、社會文化（Social）、科技（Technological）。", source: "W3 p20" },
+        { name: "關鍵事件分析", desc: "依衝擊程度與影響時間幅度，鎖定最值得監控的關鍵環境事件。", source: "W3 p21–22" }
       ],
       upgrade: ""
     },
     {
-      no: 3, zone: "camp", name: "立文化、守道德", date: "2026-10-14", type: "solo",
+      no: 3, zone: "camp", name: "立文化、守道德", date: "2026-10-10", type: "solo",
       story: "機構的文化看不見，卻決定問題會被藏起來還是被處理掉。這一關練習辨認文化與道德判斷。",
       tasks: [
         { kind: "個人小關", text: "8 題選擇題＋實務任務「查官方公開資料」：到衛福部醫事查詢系統查真實醫院的正式名稱與法律分類", url: "https://docs.google.com/forms/d/e/1FAIpQLSeDLN4r6GlEtvN-wN9smHstQohaRDJ4BQUH3Huu6wwQ3ghXVA/viewform" },
-        { kind: "支線", text: "組織文化配對挑戰（全對截圖加分）", url: "https://yilingtsai.tw/health-care-management/culture-game/" },
-        { kind: "支線", text: "醫院法律分類配對遊戲（全對截圖加分）", url: "https://yilingtsai.tw/health-care-management/hospital-category/" }
+        { kind: "支線", text: "組織文化配對挑戰（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/culture-game/" },
+        { kind: "支線", text: "醫院法律分類配對遊戲（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/hospital-category/" }
       ],
       criteria: [
-        { name: "文化四層次", desc: "文化表象、行為型態、價值與信念、基本假設。", source: "W4 s6" },
-        { name: "四個道德準則", desc: "功利主義（結果至上）、道德權利（人權不可侵犯）、普世觀點（己所不欲勿施於人）、正義觀點（公平分配）。", source: "W4 s24" },
-        { name: "社會責任三階梯", desc: "社會義務（只做法律要求的最低限度）、社會回應（順應當時的社會偏好）、社會責任（基於道德信念主動做正確的事）。", source: "W4 PDF p25" }
+        { name: "文化四層次", desc: "文化表象、行為型態、價值與信念、基本假設。", source: "W4 p6" },
+        { name: "四個道德準則", desc: "功利主義（重視結果，追求最大整體利益）、道德權利（不侵犯個人基本權利）、普世觀點（己所不欲勿施於人）、正義觀點（成本與效益公平分配）。", source: "W4 p15" },
+        { name: "社會責任三階梯", desc: "社會義務（只做法律要求的最低限度）、社會回應（順應當時的社會偏好）、社會責任（基於道德信念主動做正確的事）。", source: "W4 p25" }
       ],
       upgrade: ""
     },
     {
       no: 4, zone: "plain", name: "決策與目標", date: "2026-10-14", type: "boss", bossNo: 2,
-      story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、實際可達成 Realistic、有時限 Time-related）。",
+      story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、實際可達成 Realistic、有時限 Time-bound）。",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
+        { kind: "個人小關", text: "1 題計算、6 題選擇題＋實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
         { kind: "魔王關", text: "魔王關 2 前半：用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
       ],
       criteria: [
-        { name: "理性決策與加權計分", desc: "各方案依準則評分乘上權重後加總，選得分最高者。", source: "W5 s3–6" },
-        { name: "名目群體技術", desc: "個人靜默思考、分類想法、小組澄清、個人評分、取平均最高的方案。", source: "W5 s16" },
-        { name: "SMART 目標", desc: "Specific 具體（指向特定改善領域）、Measurable 可衡量（量化或至少提出進度指標）、Attainable 困難度適中（不會太高也不會太低）、Realistic 實際（以可用資源說明可達成的結果）、Time-related 有時限（何時達成）。", source: "S、M、R、T 依 Doran (1981)；A 為本課版本，對應課本「具挑戰性」（W5 s30）" },
-        { name: "目標網", desc: "下一階層目標支持上一階層；同一階層目標不可互相衝突。", source: "W5 s36" },
-        { name: "計畫分類", desc: "策略性、戰術性、作業性計畫；經常性計畫分為政策、程序、規定。", source: "W5 s38、s40" }
+        { name: "理性決策與加權計分", desc: "各方案依準則評分乘上權重後加總，選得分最高者。", source: "W5 p3–6" },
+        { name: "名目群體技術", desc: "個人靜默思考、分類想法、小組澄清、個人評分、取平均最高的方案。", source: "W5 p16" },
+        { name: "SMART 目標", desc: "Specific 具體（指向特定改善領域）、Measurable 可衡量（量化或至少提出進度指標）、Attainable 困難度適中（不會太高也不會太低）、Realistic 實際（以可用資源說明可達成的結果）、Time-bound 有時限（何時達成）。", source: "W5 p31（SMART 原則）；A 本課對照課本「具挑戰性」、T 對照「時間特定性」（W5 p30）" },
+        { name: "目標網", desc: "下一階層目標支持上一階層；同一階層目標不可互相衝突。", source: "W5 p36" },
+        { name: "計畫分類", desc: "策略性、戰術性、作業性計畫；經常性計畫分為政策、程序、規定。", source: "W5 p38、p40" }
       ],
       upgrade: "把第 1 關「創立申請書」的初版共同目標，改寫成符合 SMART 的版本。"
     },
@@ -87,8 +87,8 @@ window.RPG = {
         { kind: "魔王關", text: "魔王關 2 後半「策略一頁」：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
-        { name: "SWOT 常見錯誤", desc: "條列過多（每格約 3–5 項）、高估優勢、描述太廣泛不具體、輕描淡寫弱勢。", source: "W6 s13" },
-        { name: "TOWS 四策略", desc: "SO 積極型、WO 改善型、ST 緩衝型、WT 防禦型。", source: "W6 s16" },
+        { name: "SWOT 常見錯誤", desc: "條列過多（每格約 3–5 項）、高估優勢、描述太廣泛不具體、輕描淡寫弱勢。", source: "W6 p12" },
+        { name: "TOWS 四策略", desc: "SO 積極型、WO 改善型、ST 緩衝型、WT 防禦型。", source: "W6 p15" },
         { name: "策略三層次", desc: "醫院層次（總體策略、波士頓顧問公司（BCG，Boston Consulting Group）矩陣）、事業層次（波特一般策略、產品生命週期）、功能層次。", source: "W6 p17" },
         { name: "BCG 矩陣（波士頓顧問公司成長佔有率矩陣）", desc: "明星、問題兒童、現金牛、瘦狗。", source: "W6 p19" },
         { name: "波特一般策略", desc: "差異化、整體成本領導、專注。", source: "W6 p20" }
@@ -116,7 +116,7 @@ window.RPG = {
       tasks: [
         { kind: "個人小關", text: "黎溫三階段判斷、四種抗拒來源判斷", url: "" },
         { kind: "魔王關", text: "魔王關 3 後半「變革計畫」：七步驟、力場分析、兩種抗拒來源各選一種處方並說明理由", url: "" },
-        { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（獎牌截圖加分）", url: "" }
+        { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（將放進遊戲裡進行，和個人小關合併計分）", url: "" }
       ],
       criteria: [
         { name: "黎溫模式", desc: "解凍、變革、再凍。", source: "W8 p6" },
@@ -184,7 +184,7 @@ window.RPG = {
       story: "藥品與耗材不能斷，也不能堆滿倉庫。守住庫存線！",
       tasks: [
         { kind: "個人小關", text: "再訂購點與經濟訂購量計算、三種補貨制度判斷、採購倍數", url: "" },
-        { kind: "支線", text: "醫療庫存管理模擬器（證書上傳加分）", url: "" }
+        { kind: "支線", text: "醫療庫存管理模擬器（將放進遊戲裡進行，和個人小關合併計分）", url: "" }
       ],
       criteria: [
         { name: "採購倍數", desc: "淨利率 5% 時，採購省 1 元等於增加 20 元營收。", source: "W14 s16" },
