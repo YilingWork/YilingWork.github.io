@@ -20,7 +20,7 @@ window.RPG = {
       no: 1, zone: "camp", name: "創立組織", date: "2026-10-10", type: "boss", bossNo: 1,
       story: "主管機關開放新設醫療機構。各組要提交一份「創立申請書」，證明你們是一個真正的正式組織，才能取得開業許可。",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
+        { kind: "個人小關", text: "7 題選擇題＋實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
         { kind: "魔王關", text: "魔王關 1「創立申請書」：機構名稱與類型、組織四要素逐項檢核、醫療法類別與理由、文化類型與一項具體做法、一項營運指標屬效能或效率", url: "https://docs.google.com/forms/d/e/1FAIpQLSck68EoAnjryABDGlvLMaFW2B3HjRF4jL2BR7ZUJ2SvNN-b2w/viewform" }
       ],
       criteria: [
@@ -37,7 +37,7 @@ window.RPG = {
       no: 2, zone: "camp", name: "看清環境", date: "2026-10-10", type: "solo",
       story: "開業前先做市場偵察：哪些環境力量會直接影響你們？哪些是間接的大趨勢？哪些事件最值得盯緊？",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「主管審稿」：找出環境分析表中分類錯誤的項目", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" },
+        { kind: "個人小關", text: "7 題選擇題＋實務任務「主管審稿」：找出環境分析表中分類錯誤的項目（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" },
         { kind: "個人小關", text: "每人提交一則「與本組機構有關的環境事件」，第 5 關的優勢劣勢機會威脅分析（SWOT，Strengths、Weaknesses、Opportunities、Threats）機會與威脅會用到", url: "https://docs.google.com/forms/d/e/1FAIpQLSfPhjuxZsXAVZX8dyB2nmRYkF6SmW7fVuf5k6ldlbONuyEj7w/viewform" }
       ],
       criteria: [
@@ -52,7 +52,7 @@ window.RPG = {
       no: 3, zone: "camp", name: "立文化、守道德", date: "2026-10-10", type: "solo",
       story: "機構的文化看不見，卻決定問題會被藏起來還是被處理掉。這一關練習辨認文化與道德判斷。",
       tasks: [
-        { kind: "個人小關", text: "8 題選擇題＋實務任務「查官方公開資料」：到衛福部醫事查詢系統查真實醫院的正式名稱與法律分類", url: "https://docs.google.com/forms/d/e/1FAIpQLSeDLN4r6GlEtvN-wN9smHstQohaRDJ4BQUH3Huu6wwQ3ghXVA/viewform" },
+        { kind: "個人小關", text: "8 題選擇題＋實務任務「查官方公開資料」：到衛福部醫事查詢系統查真實醫院的正式名稱與法律分類（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSeDLN4r6GlEtvN-wN9smHstQohaRDJ4BQUH3Huu6wwQ3ghXVA/viewform" },
         { kind: "支線", text: "組織文化配對挑戰（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/culture-game/" },
         { kind: "支線", text: "醫院法律分類配對遊戲（已在 10/7 前於 Zuvio 完成並計分，這裡可自行複習）", url: "https://yilingtsai.tw/health-care-management/hospital-category/" }
       ],
@@ -65,15 +65,15 @@ window.RPG = {
     },
     {
       no: 4, zone: "plain", name: "決策與目標", date: "2026-10-14", type: "boss", bossNo: 2,
-      story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、實際可達成 Realistic、有時限 Time-bound）。",
+      story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、支持共同目標 Relevant、有時限 Time-bound）。",
       tasks: [
-        { kind: "個人小關", text: "1 題計算、6 題選擇題＋實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
+        { kind: "個人小關", text: "1 題計算、6 題選擇題＋實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
         { kind: "魔王關", text: "魔王關 2 前半：用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
       ],
       criteria: [
         { name: "理性決策與加權計分", desc: "各方案依準則評分乘上權重後加總，選得分最高者。", source: "W5 p3–6" },
         { name: "名目群體技術", desc: "個人靜默思考、分類想法、小組澄清、個人評分、取平均最高的方案。", source: "W5 p16" },
-        { name: "SMART 目標", desc: "Specific 具體（指向特定改善領域）、Measurable 可衡量（量化或至少提出進度指標）、Attainable 困難度適中（不會太高也不會太低）、Realistic 實際（以可用資源說明可達成的結果）、Time-bound 有時限（何時達成）。", source: "W5 p31（SMART 原則）；A 本課對照課本「具挑戰性」、T 對照「時間特定性」（W5 p30）" },
+        { name: "SMART 目標", desc: "Specific 具體（指向特定改善領域）、Measurable 可衡量（量化或至少提出進度指標）、Attainable 困難度適中（不會太高也不會太低）、Relevant 相關（目標要支持機構的共同目標）、Time-bound 有時限（何時達成）。", source: "W5 p31（SMART 原則）；A 本課對照課本「具挑戰性」、T 對照「時間特定性」（W5 p30）；R 對照目標網（W5 p36）" },
         { name: "目標網", desc: "下一階層目標支持上一階層；同一階層目標不可互相衝突。", source: "W5 p36" },
         { name: "計畫分類", desc: "策略性、戰術性、作業性計畫；經常性計畫分為政策、程序、規定。", source: "W5 p38、p40" }
       ],
@@ -83,7 +83,7 @@ window.RPG = {
       no: 5, zone: "plain", name: "策略作戰室", date: "2026-10-21", type: "boss", bossNo: 2,
       story: "目標定了，接下來要決定怎麼打。用 SWOT 盤點內外情勢，交叉出 TOWS 策略（把內部優劣勢與外部機會威脅兩兩配對，得出 SO、WO、ST、WT 四種策略），並選定機構的競爭方式。",
       tasks: [
-        { kind: "個人小關", text: "7 題選擇題＋實務任務「審一份 SWOT」：找出診所 SWOT 草稿的錯誤並判斷錯誤類型", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
+        { kind: "個人小關", text: "7 題選擇題＋實務任務「審一份 SWOT」：找出診所 SWOT 草稿的錯誤並判斷錯誤類型（作答到 10/27（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
         { kind: "魔王關", text: "魔王關 2 後半「策略一頁」：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
@@ -116,7 +116,7 @@ window.RPG = {
       tasks: [
         { kind: "個人小關", text: "黎溫三階段判斷、四種抗拒來源判斷", url: "" },
         { kind: "魔王關", text: "魔王關 3 後半「變革計畫」：七步驟、力場分析、兩種抗拒來源各選一種處方並說明理由", url: "" },
-        { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（將放進遊戲裡進行，和個人小關合併計分）", url: "" }
+        { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（將放進遊戲裡進行，依遊戲內得分，和個人小關合併計分）", url: "" }
       ],
       criteria: [
         { name: "黎溫模式", desc: "解凍、變革、再凍。", source: "W8 p6" },
@@ -184,7 +184,7 @@ window.RPG = {
       story: "藥品與耗材不能斷，也不能堆滿倉庫。守住庫存線！",
       tasks: [
         { kind: "個人小關", text: "再訂購點與經濟訂購量計算、三種補貨制度判斷、採購倍數", url: "" },
-        { kind: "支線", text: "醫療庫存管理模擬器（將放進遊戲裡進行，和個人小關合併計分）", url: "" }
+        { kind: "支線", text: "醫療庫存管理模擬器（將放進遊戲裡進行，依遊戲內得分，和個人小關合併計分）", url: "" }
       ],
       criteria: [
         { name: "採購倍數", desc: "淨利率 5% 時，採購省 1 元等於增加 20 元營收。", source: "W14 s16" },
