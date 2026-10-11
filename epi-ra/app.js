@@ -136,7 +136,7 @@ function viewHome(v) {
   const m = S.my, me = S.me;
   const todo = [];
   if (m.mismatches.length) todo.push(`<li><a href="#entry/check">${m.mismatches.length} entry difference${m.mismatches.length > 1 ? "s" : ""} to check against the paper questionnaire</a></li>`);
-  if (m.toReturn.length) todo.push(`<li>Ready to return to the PI office (F1046): <span class="mono">${m.toReturn.map(esc).join(", ")}</span></li>`);
+  if (m.toReturn.length) todo.push(`<li>Ready to return to the PI office (F814): <span class="mono">${m.toReturn.map(esc).join(", ")}</span></li>`);
   const coverNo = m.todayOnsite.filter((r) => r.cover !== "Yes");
   if (coverNo.length) todo.push(`<li>Cover marks not done today: <span class="mono">${coverNo.map((r) => esc(r.serial)).join(", ")}</span>. Complete them before you leave.</li>`);
   const myQueue = S.queue.filter((q) => !q.mine).length;
