@@ -69,6 +69,20 @@ th{font-size:12.5px;color:var(--muted);font-weight:500}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 table.sched td,table.sched th{border:1px solid var(--hairline);white-space:pre-line;min-width:86px}
 table.sched td.me{background:var(--accent-bg);font-weight:700;color:var(--ink)}
+.cardhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cardhead h2{margin:0 0 8px}
+table.sched td{white-space:normal}
+table.sched .tm.mine{outline:2px solid var(--accent)}
+.tm{display:inline-block;padding:1px 7px;margin:2px 0;border-radius:6px;font-weight:600;font-size:13.5px;line-height:1.5;background:var(--paper-deep);color:var(--ink)}
+.tm-id{background:#fbeccb;color:#8a5a00}
+.tm-vi{background:#dde8f7;color:#1f4f96}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tm-id{background:#3d2f12;color:#f2c56b}:root:not([data-theme="light"]) .tm-vi{background:#1b2c45;color:#9cc0f2}}
+:root[data-theme="dark"] .tm-id{background:#3d2f12;color:#f2c56b}
+:root[data-theme="dark"] .tm-vi{background:#1b2c45;color:#9cc0f2}
+td.edit .tm{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:3px 0}
+td.edit .x{border:0;background:none;color:inherit;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;opacity:.75}
+td.edit .x:hover{opacity:1}
+td.edit .sadd{margin-top:4px;width:100%;font-size:13px;padding:3px 4px}
 .empty{color:var(--faint);font-size:14px;padding:6px 0}
 
 /* notices */

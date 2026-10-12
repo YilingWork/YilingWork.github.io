@@ -174,7 +174,7 @@ function viewHome(v) {
         </tbody></table></div>
       </section>
 
-      <section class="card span2"><h2>Shift schedule</h2>${schedHtml()}</section>
+      <section class="card span2" id="schedsec">${schedSection()}</section>
 
       <section class="card"><h2>Data entry progress</h2>
         <div class="kv" style="font-size:15px;gap:6px 18px">
@@ -190,18 +190,50 @@ function viewHome(v) {
         </tbody></table></div>` : `<p class="empty">No records yet.</p>`}
       </section>
     </div>`;
+  bindSched();
+}
+let SCHED_EDIT = false;
+const canEditSched = () => isAdmin() && !S.viewAs;
+const teamTag = (l) => (/^ID /.test(l) ? "tm tm-id" : /^VI /.test(l) ? "tm tm-vi" : "tm");
+function schedSection() {
+  return `<div class="cardhead"><h2>Shift schedule</h2>${canEditSched() && S.schedule ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? "Done" : "Edit"}</button>` : ""}</div>${schedHtml()}`;
 }
 function schedHtml() {
   const s = S.schedule;
   if (!s) return `<p class="empty">The schedule is not available.</p>`;
   const key = (S.me.short || "").toLowerCase();
-  const mine = (c) => key && S.me.role === "RA" && c.toLowerCase().split(/\n/).some((l) => l.includes(key));
+  const lines = (c) => c.split(/\n/).map((l) => l.trim()).filter(Boolean);
+  const mine = (c) => key && S.me.role === "RA" && lines(c.toLowerCase()).some((l) => l.includes(key));
+  const ras = S.people;
+  const cell = (c, ri, ci) => {
+    const ls = lines(c);
+    if (!SCHED_EDIT) return `<td class="${mine(c) ? "me" : ""}">${ls.map((l) => `<span class="${teamTag(l)}${mine(l) ? " mine" : ""}">${esc(l)}</span>`).join("<br>")}</td>`;
+    const avail = ras.filter((p) => !ls.some((l) => l.replace(/^(ID|VI) /, "") === p.short));
+    return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}<button class="x" title="Remove" data-sdel="${ri},${ci}" data-line="${esc(l)}">×</button></span>`).join("")}
+      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ Add</option>${avail.map((p) => `<option value="${esc(p.short)}">${p.team === "Indonesian" ? "ID" : "VI"} ${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
+  };
   return `${s.title ? `<p class="sub" style="margin-bottom:6px"><b>${esc(s.title)}</b></p>` : ""}
     <div class="tw"><table class="sched"><thead><tr>${s.grid[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
-    ${s.grid.slice(1).map((r) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : `<td class="${mine(c) ? "me" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}
+    ${s.grid.slice(1).map((r, ri) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : cell(c, ri + 1, i)).join("")}</tr>`).join("")}
     </tbody></table></div>
+    ${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">Changes are saved to the schedule sheet immediately and shown to everyone.</p>` : ""}
     ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">Your shifts are highlighted.</p>` : ""}
     ${s.notes.concat(s.after).filter((n) => !/^https?:|RA portal/.test(n)).map((n) => `<p class="sub">${esc(n)}</p>`).join("")}`;
+}
+function bindSched() {
+  const sec = $("#schedsec");
+  if (!sec) return;
+  const redraw = () => { sec.innerHTML = schedSection(); bindSched(); };
+  const save = async (data, el) => {
+    $$("button,select", sec).forEach((x) => (x.disabled = true));
+    try { const j = await api("admin.schedule", data); S.schedule = j.schedule; toast("Schedule saved"); }
+    catch (e) { toast(e.message); }
+    redraw();
+  };
+  const ed = $("#sedit", sec);
+  if (ed) ed.onclick = () => { SCHED_EDIT = !SCHED_EDIT; redraw(); };
+  $$("[data-sdel]", sec).forEach((b) => (b.onclick = () => { const [row, col] = b.dataset.sdel.split(","); save({ row, col, op: "remove", line: b.dataset.line }); }));
+  $$("[data-sadd]", sec).forEach((sl) => (sl.onchange = () => { if (!sl.value) return; const [row, col] = sl.dataset.sadd.split(","); save({ row, col, op: "add", name: sl.value }); }));
 }
 
 // ------------------------------------------------------------------ shared form bits
