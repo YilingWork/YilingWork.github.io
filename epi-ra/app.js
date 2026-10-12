@@ -24,10 +24,10 @@ if (/\bLine\//i.test(UA) && !/openExternalBrowser=1/.test(location.search)) {
 { const q = new URLSearchParams(location.search);
   if (q.has("invite")) { store.set("invite", q.get("invite"), true); history.replaceState(null, "", location.pathname + location.hash); } }
 
-let S = null, SCHEMA = null, MANUAL = null;
+let S = null, SCHEMA = null, MANUAL = null, SLIDES = null;
 
 // Admin "view as": state is loaded for another person; every write is blocked in the browser.
-const VIEW_OK = { state: 1, schema: 1, manual: 1, signout: 1 };
+const VIEW_OK = { state: 1, schema: 1, manual: 1, slides: 1, signout: 1 };
 async function api(action, data = {}) {
   const va = store.get("viewAs", true);
   if (va && !VIEW_OK[action]) throw Object.assign(new Error(`View only: you are viewing as ${va}. Go back to your own view to make changes.`), { code: 0 });
@@ -109,7 +109,7 @@ async function signOut() {
 }
 
 // ------------------------------------------------------------------ shell
-const ROUTES = [["home", "Home"], ["refusal", "Refusal Log"], ["onsite", "On-site Record"], ["entry", "Data Entry"], ["work", "Work Log"], ["manual", "Manual"]];
+const ROUTES = [["home", "Home"], ["refusal", "Refusal Log"], ["onsite", "On-site Record"], ["entry", "Data Entry"], ["work", "Work Log"], ["manual", "Manual"], ["slides", "Slides"]];
 const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
@@ -124,7 +124,7 @@ function render() {
     <main id="view"></main>`;
   $("#out").onclick = signOut;
   if (S.viewAs) $("#vaexit").onclick = () => { store.set("viewAs", null, true); location.hash = "admin"; load(); };
-  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, manual: viewManual, admin: viewAdmin }[route] || viewHome;
+  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
   view($("#view"));
   window.scrollTo(0, 0);
 }
@@ -567,6 +567,18 @@ async function viewManual(v) {
   }).join("");
   $$("a[data-to]", toc).forEach((a) => (a.onclick = (e) => { e.preventDefault(); document.getElementById(a.dataset.to).scrollIntoView({ behavior: "smooth" }); }));
   $$("#doc a[href^='http']").forEach((a) => { a.target = "_blank"; a.rel = "noopener"; });
+}
+
+// ------------------------------------------------------------------ slides
+async function viewSlides(v) {
+  v.innerHTML = `<p class="sub">Loading the slides…</p>`;
+  try { SLIDES = SLIDES || (await api("slides")).html; } catch (e) { v.innerHTML = `<p class="bad">${esc(e.message)}</p>`; return; }
+  v.innerHTML = `<h1>Meeting Slides</h1>
+    <p class="lead">RA meeting, 12 October 2026, based on the Field Manual. Click the slide, then use ← → to change slides (on a phone, use the ‹ › buttons). Press N for speaker notes.</p>
+    <div class="btns"><button class="btn sm" id="snew">Open in a new tab</button></div>
+    <div class="deck"><iframe id="deckf" title="Meeting slides" allow="fullscreen"></iframe></div>`;
+  $("#deckf").srcdoc = SLIDES;
+  $("#snew").onclick = () => window.open(URL.createObjectURL(new Blob([SLIDES], { type: "text/html" })), "_blank");
 }
 
 // ------------------------------------------------------------------ admin
