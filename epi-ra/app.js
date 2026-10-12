@@ -194,7 +194,8 @@ function viewHome(v) {
 }
 let SCHED_EDIT = false;
 const canEditSched = () => isAdmin() && !S.viewAs;
-const teamTag = (l) => (/^ID /.test(l) ? "tm tm-id" : /^VI /.test(l) ? "tm tm-vi" : "tm");
+const teamTag = (l) => (/^ID\b/.test(l) ? "tm tm-id" : /^VI\b/.test(l) ? "tm tm-vi" : "tm");
+const lineIs = (l, short) => { const r = l.replace(/^(ID|VI)\b\s*:?\s*/i, "").trim().toLowerCase(), k = short.toLowerCase(); return r === k || r.startsWith(k + " "); };
 function schedSection() {
   return `<div class="cardhead"><h2>Shift schedule</h2>${canEditSched() && S.schedule ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? "Done" : "Edit"}</button>` : ""}</div>${schedHtml()}`;
 }
@@ -208,9 +209,9 @@ function schedHtml() {
   const cell = (c, ri, ci) => {
     const ls = lines(c);
     if (!SCHED_EDIT) return `<td class="${mine(c) ? "me" : ""}">${ls.map((l) => `<span class="${teamTag(l)}${mine(l) ? " mine" : ""}">${esc(l)}</span>`).join("<br>")}</td>`;
-    const avail = ras.filter((p) => !ls.some((l) => l.replace(/^(ID|VI) /, "") === p.short));
+    const avail = ras.filter((p) => !ls.some((l) => lineIs(l, p.short)));
     return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}<button class="x" title="Remove" data-sdel="${ri},${ci}" data-line="${esc(l)}">×</button></span>`).join("")}
-      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ Add</option>${avail.map((p) => `<option value="${esc(p.short)}">${p.team === "Indonesian" ? "ID" : "VI"} ${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
+      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ Add</option>${avail.map((p) => `<option value="${esc(p.short)}">${p.team === "Indonesian" ? "ID" : "VI"}: ${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
   };
   return `${s.title ? `<p class="sub" style="margin-bottom:6px"><b>${esc(s.title)}</b></p>` : ""}
     <div class="tw"><table class="sched"><thead><tr>${s.grid[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
