@@ -80,18 +80,20 @@ window.RPG = {
       upgrade: "把第 1 關「創立申請書」的初版共同目標，改寫成符合 SMART 的版本。"
     },
     {
-      no: 5, zone: "plain", name: "策略作戰室", date: "2026-10-21", type: "boss", bossNo: 2,
+      no: 5, zone: "plain", name: "策略作戰室", date: "2026-10-14", type: "boss", bossNo: 2,
       story: "目標定了，接下來要決定怎麼打。用 SWOT 盤點內外情勢，交叉出 TOWS 策略（把內部優劣勢與外部機會威脅兩兩配對，得出 SO、WO、ST、WT 四種策略），並選定機構的競爭方式。",
       tasks: [
-        { kind: "個人小關", text: "故事事件：判讀探子帶回的對手情報、幫安和醫院財務長分析服務組合、在軍師的沙盤上學 SWOT，共 4 件事、10 題；含實務任務「審一份 SWOT」：找出診所 SWOT 草稿的錯誤並判斷錯誤類型（作答到 10/27（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
+        { kind: "個人小關", text: "故事事件：跟安和醫院人事室主任認識醫院的人力階梯與委員會、判讀探子帶回的對手情報、幫財務長分析服務組合、在軍師的沙盤上學 SWOT，共 6 件事、14 題；含實務任務「審一份 SWOT」與「替安和醫院寫 SWOT」（每格 3–5 項，依公開規準評分）（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
+        { kind: "支線", text: "陪林阿公看病：到安和醫院大廳找導覽志工，陪病人從掛號走到出院（24 站），每站決定要去哪個部門；第一次就選對的站數計入遊戲分數，可分次走完（10/14–10/20）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
         { kind: "魔王關", text: "魔王關 2 後半「策略一頁」：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
-        { name: "SWOT 常見錯誤", desc: "條列過多（每格約 3–5 項）、高估優勢、描述太廣泛不具體、輕描淡寫弱勢。", source: "W6 p12" },
-        { name: "TOWS 四策略", desc: "SO 積極型、WO 改善型、ST 緩衝型、WT 防禦型。", source: "W6 p15" },
-        { name: "策略三層次", desc: "醫院層次（總體策略、波士頓顧問公司（BCG，Boston Consulting Group）矩陣）、事業層次（波特一般策略、產品生命週期）、功能層次。", source: "W6 p17" },
-        { name: "BCG 矩陣（波士頓顧問公司成長佔有率矩陣）", desc: "明星、問題兒童、現金牛、瘦狗。", source: "W6 p19" },
-        { name: "波特一般策略", desc: "差異化、整體成本領導、專注。", source: "W6 p20" }
+        { name: "醫院人力與委員會", desc: "醫師與護理人員的職涯階梯；委員會三項控制原則：訂定工作目標及完成期限、賦予積極性並特別指派任務與期限、委員遴聘注意新陳代謝。", source: "W6 p3、p6" },
+        { name: "SWOT 常見錯誤", desc: "條列過多（每格約 3–5 項）、高估優勢、描述太廣泛不具體、輕描淡寫弱勢。", source: "W6 p13" },
+        { name: "TOWS 四策略", desc: "SO 積極型、WO 改善型、ST 緩衝型、WT 防禦型。", source: "W6 p16" },
+        { name: "策略三層次", desc: "醫院層次（總體策略、波士頓顧問公司（BCG，Boston Consulting Group）矩陣）、事業層次（波特一般策略、產品生命週期）、功能層次。", source: "W6 p18" },
+        { name: "BCG 矩陣（波士頓顧問公司成長佔有率矩陣）", desc: "明星、問題兒童、現金牛、瘦狗。", source: "W6 p20" },
+        { name: "波特一般策略", desc: "差異化、整體成本領導、專注。", source: "W6 p21" }
       ],
       upgrade: "SWOT 的機會與威脅取自第 2 關各人提交的環境事件；每項策略要連到第 4 關的一個 SMART 目標。"
     },
