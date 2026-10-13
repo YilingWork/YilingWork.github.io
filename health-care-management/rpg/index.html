@@ -66,6 +66,8 @@ nav button, .btn {
   color: var(--text); padding: 8px 16px; border-radius: 999px; cursor: pointer;
 }
 nav button[aria-selected="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+nav .signin { margin-left: auto; text-decoration: none; background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+nav .signin:not([hidden]) + .rules { margin-left: 0; }
 nav .rules { margin-left: auto; }
 .panel { display: none; }
 .panel.active { display: block; }
@@ -173,7 +175,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
 
 @media (max-width: 720px) {
   header h1 { font-size: 25px; }
-  nav .rules { margin-left: 0; }
+  nav .rules, nav .signin { margin-left: 0; }
   .map { display: flex; flex-direction: column; gap: 22px; }
   .zone::after { display: none; }
   .zone:not(:last-child)::before {
@@ -223,6 +225,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     <button role="tab" data-tab="map" aria-selected="true">冒險地圖</button>
     <button role="tab" data-tab="org" aria-selected="false">我的機構卡</button>
     <button role="tab" data-tab="board" aria-selected="false">排行榜</button>
+    <a class="btn signin" id="signinBtn" href="#" target="_blank" rel="noopener" hidden>✍️ 課堂簽到</a>
     <button class="rules" id="rulesBtn">規則</button>
   </nav>
 
@@ -299,6 +302,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     if (R.appealUrl) links.push('<a class="go" href="' + R.appealUrl + '" target="_blank" rel="noopener">評分申訴</a>');
     document.getElementById('rulesLinks').innerHTML = links.join(' ');
   })();
+  if (R.attendanceUrl) { var sb = document.getElementById('signinBtn'); sb.href = R.attendanceUrl; sb.hidden = false; }
   if (R.gameUrl) { var eg = document.getElementById('enterGame'); eg.href = R.gameUrl; eg.hidden = false; document.getElementById('enterNote').hidden = false; }
   var zoneById = {};
   R.zones.forEach(function (z) { zoneById[z.id] = z; });
