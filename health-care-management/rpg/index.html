@@ -191,6 +191,14 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   .map .zone.order-forest { order: 4; } .map .zone.order-tower { order: 5; }
 }
 @media (prefers-reduced-motion: reduce) { .node, .node.open, .node.current { animation: none; transition: none; } }
+.teacher-link { text-align: center; margin-top: 28px; }
+.teacher-link button { background: none; border: 1px solid #c8c8c8; color: #888; font-size: 13px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+.att input, .att select { font: inherit; font-size: 18px; padding: 6px 8px; margin-top: 4px; }
+.att-btns button { font: inherit; padding: 8px 14px; margin: 0 6px 6px 0; border-radius: 6px; border: 1px solid #888; background: #fff; cursor: pointer; }
+.att-btns #attOpen { background: #2c7a4f; color: #fff; border-color: #2c7a4f; }
+.att-btns #attClose { background: #b8392c; color: #fff; border-color: #b8392c; }
+.att-msg { font-weight: 700; min-height: 1.4em; }
+.note-sm { font-size: 13px; color: #777; }
 </style>
 </head>
 <body>
@@ -224,7 +232,25 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   <section class="panel" id="panel-board">
     <div id="board"></div>
   </section>
+  <p class="teacher-link"><button type="button" id="attBtn">教師：簽到開關</button></p>
 </div>
+
+<dialog id="attDlg">
+  <button class="close" aria-label="關閉" data-close>×</button>
+  <div class="dlg-head"><h3>課堂簽到開關（教師）</h3></div>
+  <div class="dlg-body att">
+    <p><label>教師通行碼<br><input id="attCode" type="password" inputmode="numeric" autocomplete="off"></label></p>
+    <p><label>開放時間
+      <select id="attMin"><option>10</option><option selected>15</option><option>20</option><option>30</option></select> 分鐘</label></p>
+    <p class="att-btns">
+      <button type="button" id="attOpen">開放簽到</button>
+      <button type="button" id="attClose">立即關閉</button>
+      <button type="button" id="attStat">查看狀態</button>
+    </p>
+    <p id="attMsg" class="att-msg">輸入通行碼後按「查看狀態」。</p>
+    <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。</p>
+  </div>
+</dialog>
 
 <dialog id="dlg">
   <button class="close" aria-label="關閉" data-close>×</button>
@@ -238,11 +264,12 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     <ul class="rules-list">
       <li>每組經營一家虛擬醫療機構，從「創立組織」開局，每學一章就用該章的判斷準則升級機構。</li>
       <li><b>課堂出勤及參與 40%</b>：出席 16%（9/9～12/16）、Zuvio 課堂參與 6%（9/9～10/7），以及遊戲 18%：個人小關在遊戲中以故事事件進行（你是本組的創院團隊成員，到顧問醫院「安和醫院」觀摩；關主派任務，劇情角色遇到事件才提問），只看第一次作答，每關開放 7 天後截止，和遊戲裡的支線（依遊戲內得分）合併計分。</li>
-      <li><b>練習作業 25%</b>：5 個魔王關（小組），每關 5%；組員的魔王關分數都等於小組得分。</li>
+      <li><b>練習作業 25%</b>：3 個魔王關（小組）：魔王關 2 占 9%（前半 4%、後半 5%），魔王關 3、魔王關 4 各占 8%；組員的魔王關分數都等於小組得分。</li>
       <li><b>期末考 25%</b>、<b>參觀心得報告 10%</b>。</li>
       <li>魔王關部分項目由程式檢查（例如欄位完整、計算正確），部分項目由人工智慧（AI）依公開的評分規準評分；對結果有疑問可以申訴。</li>
       <li><b>只能交一次</b>：魔王關是小組作業，每組只採計第一次送出，請全組同意後再由一人送出。</li><li><b>回頭升級</b>：後面的魔王關會要求修正前面的內容，修正寫在新的魔王關作答裡評分。</li>
       <li>排行榜只公布組名與機構分數，不顯示學號或個人分數。</li>
+      <li><b>課堂簽到</b>：填學號、姓名與老師當堂公布的代碼，只在老師開放的時段內有效。</li>
     </ul>
     <p class="rules-links" id="rulesLinks"></p>
   </div>
@@ -394,7 +421,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
       rows: rows.slice(1).map(function (r) { var o = {}; header.forEach(function (h, i) { o[h] = (r[i] || '').trim(); }); return o; })
     };
   }
-  // 魔王關 1 評分前，試算表的機構名稱預設為「第 N 組」
+  // 魔王關 2 前半評分前，試算表的機構名稱預設為「第 N 組」（機構名稱 2026-10-14 起在魔王關 2 前半填寫）
   function orgName(r) { var n = r['機構名稱']; return (!n || n === '第 ' + r['組別'] + ' 組') ? '（尚未創立）' : n; }
   var EMPTY = '<div class="notice">排行榜將於第一個魔王關評分完成後公布。</div>';
   function renderBoard() {
@@ -438,6 +465,31 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   }
 
   renderMap(); renderOrg(); renderBoard(); loadBoard();
+
+  // ---------- 教師：課堂簽到開關（呼叫遊戲 Apps Script 的 doPost；只接受教師通行碼） ----------
+  (function () {
+    var dlg = document.getElementById('attDlg'), msg = document.getElementById('attMsg'), code = document.getElementById('attCode');
+    if (!R.gameUrl || !dlg.showModal) { document.getElementById('attBtn').hidden = true; return; }
+    try { code.value = sessionStorage.getItem('rpg-att-code') || ''; } catch (e) {}
+    document.getElementById('attBtn').addEventListener('click', function () { dlg.showModal(); });
+    function hhmm(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+    function call(action) {
+      var c = code.value.replace(/\s/g, '');
+      if (!c) { msg.textContent = '請先輸入教師通行碼。'; return; }
+      try { sessionStorage.setItem('rpg-att-code', c); } catch (e) {}
+      msg.textContent = '處理中…';
+      fetch(R.gameUrl, { method: 'POST', body: JSON.stringify({ auth: { id: '教師試玩', code: c }, action: action, minutes: document.getElementById('attMin').value }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (!j.ok) { msg.textContent = '⚠️ ' + j.error; return; }
+          msg.textContent = j.open ? ('✅ 簽到開放中' + (j.until ? '，' + hhmm(j.until) + ' 自動關閉' : '（未設時段）')) : '⛔ 簽到已關閉';
+        })
+        .catch(function () { msg.textContent = '⚠️ 連線失敗，請稍後再試；必要時直接到 Google 表單切換「接受回應」。'; });
+    }
+    document.getElementById('attOpen').addEventListener('click', function () { call('open'); });
+    document.getElementById('attClose').addEventListener('click', function () { call('close'); });
+    document.getElementById('attStat').addEventListener('click', function () { call('status'); });
+  })();
 })();
 </script>
 </body>

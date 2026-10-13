@@ -17,11 +17,10 @@ window.RPG = {
   ],
   levels: [
     {
-      no: 1, zone: "camp", name: "創立組織", date: "2026-10-10", type: "boss", bossNo: 1,
-      story: "主管機關開放新設醫療機構。各組要提交一份「創立申請書」，證明你們是一個真正的正式組織，才能取得開業許可。",
+      no: 1, zone: "camp", name: "創立組織", date: "2026-10-10", type: "solo",
+      story: "主管機關開放新設醫療機構。各組先到顧問醫院觀摩，認識一個正式組織需要具備的要素。",
       tasks: [
-        { kind: "個人小關", text: "故事事件：審查官要你到顧問醫院「安和醫院」觀摩一天，依序遇到副院長、門診櫃檯組長、院長、統計室管理師，事件發生時回答問題，共 5 件事、11 題；含實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" },
-        { kind: "魔王關", text: "魔王關 1「創立申請書」：機構名稱與類型、組織四要素逐項檢核、醫療法類別與理由、文化類型與一項具體做法、一項營運指標屬效能或效率", url: "https://docs.google.com/forms/d/e/1FAIpQLSck68EoAnjryABDGlvLMaFW2B3HjRF4jL2BR7ZUJ2SvNN-b2w/viewform" }
+        { kind: "個人小關", text: "故事事件：審查官要你到顧問醫院「安和醫院」觀摩一天，依序遇到副院長、門診櫃檯組長、院長、統計室管理師，事件發生時回答問題，共 5 件事、11 題；含實務任務「讀懂醫院年報」：計算佔床率、平均住院日、粗死亡率，並對擴床提出建議（作答到 10/16（五）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScst4Evzy63mpUoekJD8IO7ibnAjXJbfZFc-xyFfufrR9ku5Q/viewform" }
       ],
       criteria: [
         { name: "正式組織四要素", desc: "一群人、具備共同目標、正式結構、權責分工。", source: "W2 p5" },
@@ -68,7 +67,7 @@ window.RPG = {
       story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、支持共同目標 Relevant、有時限 Time-bound）。",
       tasks: [
         { kind: "個人小關", text: "故事事件：幫兒童病房算採購分數、主持創院團隊的規劃會議、替護理部檢查 SMART 目標，共 5 件事、11 題；含實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
-        { kind: "魔王關", text: "魔王關 2 前半：用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
+        { kind: "魔王關", text: "魔王關 2 前半（占學期成績 4%）：寫下機構名稱與共同目標，用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
       ],
       criteria: [
         { name: "理性決策與加權計分", desc: "各方案依準則評分乘上權重後加總，選得分最高者。", source: "W5 p3–6" },
@@ -77,7 +76,7 @@ window.RPG = {
         { name: "目標網", desc: "下一階層目標支持上一階層；同一階層目標不可互相衝突。", source: "W5 p36" },
         { name: "計畫分類", desc: "策略性、戰術性、作業性計畫；經常性計畫分為政策、程序、規定。", source: "W5 p38、p40" }
       ],
-      upgrade: "把第 1 關「創立申請書」的初版共同目標，改寫成符合 SMART 的版本。"
+      upgrade: "先寫下機構的共同目標，再把年度目標改寫成符合 SMART 的版本，並說明每個目標支持共同目標的哪一部分。"
     },
     {
       no: 5, zone: "plain", name: "策略作戰室", date: "2026-10-14", type: "boss", bossNo: 2,
@@ -85,7 +84,7 @@ window.RPG = {
       tasks: [
         { kind: "個人小關", text: "故事事件：跟安和醫院人事室主任認識醫院的人力階梯與委員會、判讀探子帶回的對手情報、幫財務長分析服務組合、在軍師的沙盤上學 SWOT，共 6 件事、14 題；含實務任務「審一份 SWOT」與「替安和醫院寫 SWOT」（每格 3–5 項，依公開規準評分）（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
         { kind: "支線", text: "陪林阿公看病：到安和醫院大廳找導覽志工，陪病人從掛號走到出院（24 站），每站決定要去哪個部門；第一次就選對的站數計入遊戲分數，可分次走完（10/14–10/20）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
-        { kind: "魔王關", text: "魔王關 2 後半「策略一頁」：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
+        { kind: "魔王關", text: "魔王關 2 後半「策略一頁」（占學期成績 5%）：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
         { name: "醫院人力與委員會", desc: "醫師與護理人員的職涯階梯；委員會三項控制原則：訂定工作目標及完成期限、賦予積極性並特別指派任務與期限、委員遴聘注意新陳代謝。", source: "W6 p3、p6" },
@@ -110,7 +109,7 @@ window.RPG = {
         { name: "部門化與矩陣式", desc: "四種部門化方式；矩陣式混合兩種以上部門化，有雙重指揮。", source: "W7 p8–9" },
         { name: "機械式與有機式", desc: "依策略、規模、科技、環境四個權變因素選擇。", source: "W7 p10–11" }
       ],
-      upgrade: "組織圖的職位必須涵蓋第 1 關的權責分工；有調整的職位直接在本關組織圖中修正並說明。"
+      upgrade: "組織圖的職位必須涵蓋第 4 關 SMART 目標與部門目標所列的負責職位；有調整的職位直接在本關組織圖中修正並說明。"
     },
     {
       no: 7, zone: "castle", name: "變革危機", date: "2026-11-04", type: "boss", bossNo: 3,
@@ -196,11 +195,10 @@ window.RPG = {
       upgrade: ""
     },
     {
-      no: 13, zone: "tower", name: "結算儀表板", date: "2026-12-16", type: "boss", bossNo: 5,
+      no: 13, zone: "tower", name: "結算儀表板", date: "2026-12-16", type: "solo",
       story: "學期結算！用平衡計分卡檢視機構一整年的經營成果。",
       tasks: [
-        { kind: "個人小關", text: "控制四步驟、事前事中事後控制、資訊品質四特性、控制失能原因", url: "" },
-        { kind: "魔王關", text: "魔王關 5「機構平衡計分卡」：四構面指標、權重、容忍區間、對應 SMART 目標，並以控制四步驟回顧一個目標", url: "" }
+        { kind: "個人小關", text: "控制四步驟、事前事中事後控制、資訊品質四特性、控制失能原因", url: "" }
       ],
       criteria: [
         { name: "控制四步驟與容忍區間", desc: "建立績效標準、衡量實際績效、比較標準與實際的差異、評估差異並採取必要的修正行動；差異是否超出容忍範圍決定是否修正。", source: "W15 s5–7" },
@@ -208,7 +206,7 @@ window.RPG = {
         { name: "平衡計分卡", desc: "財務、顧客、內部流程、學習與成長四構面（醫院版另列使命構面）；「平衡」包含內外部、結果與未來、短期與長期、客觀與主觀、財務與非財務。", source: "W15 Rew s5、s7" },
         { name: "指標選取原則", desc: "定義明確、具代表性與可控制性、攸關經營成敗，並依重要性給予權重。", source: "W15 Rew s4" }
       ],
-      upgrade: "每項指標都要連到第 4 關的一個 SMART 目標。"
+      upgrade: ""
     }
   ]
 };
