@@ -151,7 +151,7 @@ dialog::backdrop { background: rgba(20, 18, 12, .55); }
 .dlg-head .meta { color: var(--muted); font-size: 16px; }
 .dlg-body { padding: 14px 20px 20px; }
 .dlg-body h4 { margin: 18px 0 8px; font-size: 18px; }
-.close { position: absolute; top: 12px; right: 12px; border: none; background: var(--surface-2); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; }
+.close { position: absolute; z-index: 5; top: 12px; right: 12px; border: none; background: var(--surface-2); color: var(--text); width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; }
 .story { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; }
 .task { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
 .task:last-child { border-bottom: none; }
@@ -239,13 +239,14 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   <button class="close" aria-label="關閉" data-close>×</button>
   <div class="dlg-head"><h3>課堂簽到開關（教師）</h3></div>
   <div class="dlg-body att">
-    <p><label>教師通行碼<br><input id="attCode" type="password" inputmode="numeric" autocomplete="off"></label></p>
+    <p><label>教師通行碼<br><input id="attCode" name="att-teacher-code" type="password" inputmode="numeric" autocomplete="new-password" data-lpignore="true"></label></p>
     <p><label>開放時間
       <select id="attMin"><option>10</option><option selected>15</option><option>20</option><option>30</option></select> 分鐘</label></p>
     <p class="att-btns">
       <button type="button" id="attOpen">開放簽到</button>
       <button type="button" id="attClose">立即關閉</button>
       <button type="button" id="attStat">查看狀態</button>
+      <button type="button" id="attClear">清除通行碼</button>
     </p>
     <p id="attMsg" class="att-msg">輸入通行碼後按「查看狀態」。</p>
     <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。</p>
@@ -385,7 +386,10 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   }
   document.querySelectorAll('dialog').forEach(function (d) {
     d.addEventListener('click', function (e) {
-      if (e.target === d || e.target.hasAttribute('data-close')) { if (d.close) d.close(); else d.removeAttribute('open'); }
+      // 只在點到對話框外面（背景）時關閉：表單元件（下拉選單、瀏覽器自動填入）有時會把點擊算在 dialog 本身
+      var rc = d.getBoundingClientRect();
+      var outside = e.target === d && e.clientX > 0 && (e.clientX < rc.left || e.clientX > rc.right || e.clientY < rc.top || e.clientY > rc.bottom);
+      if (outside || (e.target.hasAttribute && e.target.hasAttribute('data-close'))) { if (d.close) d.close(); else d.removeAttribute('open'); }
     });
   });
   document.getElementById('rulesBtn').addEventListener('click', function () { showDialog(document.getElementById('rulesDlg')); });
@@ -470,13 +474,11 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
   (function () {
     var dlg = document.getElementById('attDlg'), msg = document.getElementById('attMsg'), code = document.getElementById('attCode');
     if (!R.gameUrl || !dlg.showModal) { document.getElementById('attBtn').hidden = true; return; }
-    try { code.value = sessionStorage.getItem('rpg-att-code') || ''; } catch (e) {}
     document.getElementById('attBtn').addEventListener('click', function () { dlg.showModal(); });
     function hhmm(ms) { var d = new Date(ms); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
     function call(action) {
       var c = code.value.replace(/\s/g, '');
       if (!c) { msg.textContent = '請先輸入教師通行碼。'; return; }
-      try { sessionStorage.setItem('rpg-att-code', c); } catch (e) {}
       msg.textContent = '處理中…';
       fetch(R.gameUrl, { method: 'POST', body: JSON.stringify({ auth: { id: '教師試玩', code: c }, action: action, minutes: document.getElementById('attMin').value }) })
         .then(function (r) { return r.json(); })
@@ -489,6 +491,8 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     document.getElementById('attOpen').addEventListener('click', function () { call('open'); });
     document.getElementById('attClose').addEventListener('click', function () { call('close'); });
     document.getElementById('attStat').addEventListener('click', function () { call('status'); });
+    document.getElementById('attClear').addEventListener('click', function () { code.value = ''; code.focus(); msg.textContent = '已清除，請重新輸入教師通行碼。'; });
+    code.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); call('status'); } });
   })();
 })();
 </script>
