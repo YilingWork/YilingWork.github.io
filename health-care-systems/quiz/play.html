@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>預防保健搶答</title>
+<style>
+:root{--ink:#16283c;--sub:#4a5c6e;--bg:#f2f4f6;--paper:#fff;--ac:#0e6a63;
+  --c1:#e2483d;--c2:#2f6fdb;--c3:#d89a00;--c4:#2c9a52;--ok:#2c9a52;--ng:#e2483d}
+*{box-sizing:border-box;margin:0}
+body{font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--ac);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;font-size:15px}
+main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--paper);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+h1{font-size:22px}
+label{display:block;font-size:14px;color:var(--sub);margin:12px 0 4px}
+input{width:100%;font-size:18px;padding:10px;border:1px solid #c9d2da;border-radius:8px}
+button{font:inherit;border:0;border-radius:10px;cursor:pointer}
+.go{width:100%;margin-top:18px;padding:14px;font-size:18px;font-weight:700;background:var(--ac);color:#fff}
+.err{color:var(--ng);font-size:14px;margin-top:8px;min-height:1em}
+.center{text-align:center}
+.big{font-size:44px;font-weight:800}
+.q{font-size:17px;line-height:1.5}
+.bar{height:8px;background:#dde4ea;border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .25s linear}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.opt{color:#fff;font-size:16px;font-weight:700;padding:14px 10px;min-height:96px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;text-align:center;line-height:1.35;border:4px solid transparent}
+.opt .sh{font-size:26px}
+.opt.sel{border-color:var(--ink);box-shadow:inset 0 0 0 3px #fff}
+.o1{background:var(--c1)}.o2{background:var(--c2)}.o3{background:var(--c3)}.o4{background:var(--c4)}
+.ok{color:var(--ok)}.ng{color:var(--ng)}
+.muted{color:var(--sub);font-size:14px}
+</style>
+</head>
+<body>
+<header><span id="hdrRoom">預防保健搶答</span><span id="hdrMe"></span></header>
+<main id="app"><div class="card center">連線中…</div></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const CFG = window.QUIZ_CONFIG;
+firebase.initializeApp(CFG.firebase);
+const db = firebase.database();
+const app = document.getElementById('app');
+const SHAPES = ['▲', '◆', '●', '■'];
+let uid = null, room = null, me = null, st = null, offset = 0, tick = null, picked = [], sentFor = null, myScore = null;
+
+db.ref('.info/serverTimeOffset').on('value', s => { offset = s.val() || 0; });
+const now = () => Date.now() + offset;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function show(html) { app.innerHTML = html; }
+
+firebase.auth().signInAnonymously().catch(e => show(`<div class="card">無法連線：${esc(e.message)}</div>`));
+firebase.auth().onAuthStateChanged(u => {
+  if (!u) return;
+  uid = u.uid;
+  const q = new URLSearchParams(location.search).get('r');
+  const saved = localStorage.getItem('quizRoom');
+  room = (q || saved || '').toUpperCase();
+  if (room) tryResume(); else joinForm();
+});
+
+async function tryResume() {
+  const p = await db.ref(`rooms/${room}/players/${uid}`).get().catch(() => null);
+  if (p && p.exists()) { me = p.val(); enter(); } else joinForm();
+}
+
+function joinForm(msg = '') {
+  const last = JSON.parse(localStorage.getItem('quizMe') || '{}');
+  show(`<div class="card"><h1>加入搶答</h1>
+    <label>房間代碼</label><input id="fRoom" value="${esc(room || '')}" autocapitalize="characters">
+    <label>學號</label><input id="fSid" value="${esc(last.sid || '')}" inputmode="text" autocapitalize="characters">
+    <label>暱稱（排行榜顯示，最多 12 字）</label><input id="fNick" maxlength="12" value="${esc(last.nick || '')}">
+    <button class="go" id="fGo">加入</button><div class="err" id="fErr">${esc(msg)}</div>
+    <p class="muted" style="margin-top:12px">得分會依學號計入平時成績，請填自己的學號。</p></div>`);
+  document.getElementById('fGo').onclick = doJoin;
+}
+
+async function doJoin() {
+  const r = document.getElementById('fRoom').value.trim().toUpperCase();
+  const sid = document.getElementById('fSid').value.trim().toUpperCase();
+  const nick = document.getElementById('fNick').value.trim();
+  const err = document.getElementById('fErr');
+  if (!/^[A-Z0-9]{5,12}$/.test(sid)) { err.textContent = '學號格式不正確（英數字 5–12 碼）'; return; }
+  if (!nick) { err.textContent = '請輸入暱稱'; return; }
+  const meta = await db.ref(`rooms/${r}/meta`).get().catch(() => null);
+  if (!meta || !meta.exists()) { err.textContent = '找不到這個房間，請確認代碼'; return; }
+  try {
+    await db.ref(`rooms/${r}/ids/${uid}`).set({ sid });
+    await db.ref(`rooms/${r}/players/${uid}`).set({ nick, at: firebase.database.ServerValue.TIMESTAMP });
+  } catch (e) { err.textContent = '加入失敗：' + e.message; return; }
+  room = r; me = { nick };
+  localStorage.setItem('quizRoom', r);
+  localStorage.setItem('quizMe', JSON.stringify({ sid, nick }));
+  enter();
+}
+
+function enter() {
+  document.getElementById('hdrRoom').textContent = '房間 ' + room;
+  document.getElementById('hdrMe').textContent = me.nick;
+  db.ref(`rooms/${room}/scores/${uid}`).on('value', s => { myScore = s.val(); if (st && (st.phase === 'board' || st.phase === 'final')) render(); });
+  db.ref(`rooms/${room}/players/${uid}`).on('value', s => { if (!s.exists() && me) { me = null; localStorage.removeItem('quizRoom'); joinForm('你已被移出房間，請重新加入'); } });
+  db.ref(`rooms/${room}/state`).on('value', s => { st = s.val() || { phase: 'lobby' }; render(); });
+}
+
+function scoreLine() {
+  if (!myScore) return '<p class="muted">總分 0</p>';
+  return `<p style="font-size:20px;margin-top:8px">總分 <b>${myScore.total}</b>　第 <b>${myScore.rank}</b> 名</p>`;
+}
+
+let seq = 0;
+async function render() {
+  clearInterval(tick);
+  const my = ++seq;
+  if (!st || st.phase === 'lobby') return show(`<div class="card center"><div class="big">✓</div><h1>已加入</h1><p class="muted">等待老師開始</p>${scoreLine()}</div>`);
+  if (st.phase === 'break') return show(`<div class="card center"><h1>第一堂結束</h1>${scoreLine()}<p class="muted" style="margin-top:10px">第二堂下課前繼續，網頁不用關</p></div>`);
+  if (st.phase === 'question') return renderQuestion(my);
+  if (st.phase === 'closing') return show('<div class="card center"><h1>作答結束</h1><p class="muted">等待公布答案</p></div>');
+  if (st.phase === 'reveal' || st.phase === 'board') return renderResult(my);
+  if (st.phase === 'final') {
+    show(`<div class="card center"><h1>遊戲結束</h1>${scoreLine()}<p class="muted" style="margin-top:10px">成績已記錄，可以關閉網頁</p></div>`);
+    setTimeout(() => db.goOffline(), 5000);
+  }
+}
+
+async function renderQuestion(my) {
+  const qk = st.qk;
+  const mine = await db.ref(`rooms/${room}/answers/${qk}/${uid}`).get().catch(() => null);
+  if (my !== seq) return;
+  if (mine && mine.exists()) { sentFor = qk; return show(waitHtml()); }
+  if (sentFor !== qk) picked = [];
+  const opts = st.opts.map((o, i) => `<button class="opt o${i + 1}${picked.includes(i + 1) ? ' sel' : ''}" data-i="${i + 1}"><span class="sh">${SHAPES[i]}</span>${esc(o)}</button>`).join('');
+  show(`<div class="muted">第 ${st.n} 題／共 ${st.total} 題${st.multi ? '　<b>（可複選，選好按送出）</b>' : ''}</div>
+    <div class="q">${esc(st.text)}</div><div class="bar"><i id="tb"></i></div>
+    <div class="opts">${opts}</div>${st.multi ? '<button class="go" id="send">送出</button>' : ''}`);
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (!st.multi) return submit([i]);
+    picked = picked.includes(i) ? picked.filter(x => x !== i) : picked.concat(i);
+    b.classList.toggle('sel');
+  });
+  if (st.multi) document.getElementById('send').onclick = () => picked.length && submit(picked);
+  const tb = document.getElementById('tb');
+  tick = setInterval(() => {
+    const left = st.startAt + st.dur * 1000 - now();
+    tb.style.width = Math.max(0, left / (st.dur * 10)) + '%';
+    if (left <= 0) { clearInterval(tick); show('<div class="card center"><h1>時間到</h1><p class="muted">等待公布答案</p></div>'); }
+  }, 200);
+}
+
+function waitHtml() { return '<div class="card center"><div class="big">✓</div><h1>已送出</h1><p class="muted">等待其他同學作答</p></div>'; }
+
+async function submit(arr) {
+  const qk = st.qk;
+  clearInterval(tick);
+  show('<div class="card center"><h1>送出中…</h1></div>');
+  try {
+    await db.ref(`rooms/${room}/answers/${qk}/${uid}`).set({ c: arr.sort().join(','), t: firebase.database.ServerValue.TIMESTAMP });
+    sentFor = qk; show(waitHtml());
+  } catch (e) {
+    show('<div class="card center"><h1>沒有送出成功</h1><p class="muted">可能已超過作答時間</p></div>');
+  }
+}
+
+async function renderResult(my) {
+  const r = await db.ref(`rooms/${room}/results/${st.qk}/${uid}`).get().catch(() => null);
+  if (my !== seq) return;
+  const v = r && r.val();
+  let head;
+  if (!v) head = '<div class="big ng">—</div><h1>未作答</h1>';
+  else if (v.pts > 0) head = `<div class="big ok">✓</div><h1 class="ok">答對 +${v.pts}</h1>`;
+  else head = '<div class="big ng">✗</div><h1 class="ng">答錯</h1>';
+  const ans = st.correct ? `<p class="muted" style="margin-top:8px">正確答案：${st.correct.split(',').map(i => SHAPES[i - 1] + ' ' + esc(st.opts[i - 1])).join('、')}</p>` : '';
+  show(`<div class="card center">${head}${ans}${st.phase === 'board' ? scoreLine() : ''}</div>`);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>預防保健搶答（投影端）</title>
+<style>
+:root{--ink:#16283c;--sub:#4a5c6e;--bg:#f2f4f6;--paper:#fff;--ac:#0e6a63;--ac2:#e7f1f0;
+  --c1:#e2483d;--c2:#2f6fdb;--c3:#d89a00;--c4:#2c9a52;--u:calc(min(100vw,177.78vh)*.01)}
+*{box-sizing:border-box;margin:0}
+body{font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column;padding:calc(var(--u)*2.2) calc(var(--u)*3)}
+button{font:inherit;border:0;border-radius:calc(var(--u)*.6);cursor:pointer}
+.btn{background:var(--ac);color:#fff;font-weight:700;font-size:calc(var(--u)*1.5);padding:calc(var(--u)*.8) calc(var(--u)*2)}
+.btn.ghost{background:#fff;color:var(--ac);border:2px solid var(--ac)}
+.row{display:flex;gap:calc(var(--u)*1.2);align-items:center}
+.sp{flex:1}
+.top{display:flex;align-items:center;gap:calc(var(--u)*1.5);font-size:calc(var(--u)*1.4);color:var(--sub)}
+.panel{background:var(--paper);border-radius:calc(var(--u)*1);padding:calc(var(--u)*2);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+h1{font-size:calc(var(--u)*3)}h2{font-size:calc(var(--u)*2.2)}
+.muted{color:var(--sub)}
+.code{font-size:calc(var(--u)*7);font-weight:900;letter-spacing:.08em;color:var(--ac)}
+.lobby{display:grid;grid-template-columns:auto 1fr;gap:calc(var(--u)*3);flex:1;margin-top:calc(var(--u)*1.5);min-height:0}
+#qr{background:#fff;padding:calc(var(--u)*1);border-radius:calc(var(--u)*1)}
+.names{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);align-content:flex-start;overflow:auto}
+.names span{background:var(--ac2);color:var(--ac);font-weight:700;padding:calc(var(--u)*.4) calc(var(--u)*1);border-radius:99px;font-size:calc(var(--u)*1.3)}
+.qtext{font-size:calc(var(--u)*2.6);font-weight:800;line-height:1.4;background:#fff;border-radius:calc(var(--u)*1);padding:calc(var(--u)*1.6) calc(var(--u)*2);margin:calc(var(--u)*1.2) 0}
+.mid{display:flex;align-items:center;justify-content:space-between;margin-bottom:calc(var(--u)*1.2)}
+.timer{width:calc(var(--u)*9);height:calc(var(--u)*9);border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*4);font-weight:900}
+.timer.hot{background:var(--c1);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+.cnt{text-align:center;font-size:calc(var(--u)*1.4);color:var(--sub)}.cnt b{display:block;font-size:calc(var(--u)*4);color:var(--ink)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);flex:1;min-height:0}
+.opt{color:#fff;font-size:calc(var(--u)*2.1);font-weight:800;border-radius:calc(var(--u)*.8);display:flex;align-items:center;gap:calc(var(--u)*1.2);padding:0 calc(var(--u)*2);position:relative;overflow:hidden}
+.opt .sh{font-size:calc(var(--u)*3)}
+.o1{background:var(--c1)}.o2{background:var(--c2)}.o3{background:var(--c3)}.o4{background:var(--c4)}
+.opt.dim{opacity:.28}
+.opt .n{margin-left:auto;font-size:calc(var(--u)*2.6)}
+.opt .fill{position:absolute;left:0;bottom:0;height:calc(var(--u)*.7);background:rgba(255,255,255,.7)}
+.board{flex:1;display:flex;flex-direction:column;gap:calc(var(--u)*1);margin-top:calc(var(--u)*1.5)}
+.lb{display:flex;align-items:center;background:#fff;border-radius:calc(var(--u)*.8);padding:calc(var(--u)*1.1) calc(var(--u)*2);font-size:calc(var(--u)*2.2);font-weight:800;animation:slide .4s both}
+.lb .rk{width:calc(var(--u)*5);color:var(--ac)}.lb .pt{margin-left:auto}
+@keyframes slide{from{transform:translateX(-30px);opacity:0}}
+.podium{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:calc(var(--u)*2)}
+.pd{width:calc(var(--u)*20);text-align:center}
+.pd .nm{font-size:calc(var(--u)*2.4);font-weight:900;margin-bottom:calc(var(--u)*.6);animation:slide .6s both}
+.pd .bk{border-radius:calc(var(--u)*.8) calc(var(--u)*.8) 0 0;color:#fff;font-size:calc(var(--u)*5);font-weight:900;display:flex;align-items:flex-start;justify-content:center;padding-top:calc(var(--u)*1);animation:grow .9s both}
+@keyframes grow{from{transform:scaleY(0);transform-origin:bottom}}
+.setup{max-width:calc(var(--u)*70);margin:auto}
+.setup label{display:block;margin:calc(var(--u)*1.2) 0 calc(var(--u)*.4);font-size:calc(var(--u)*1.3);color:var(--sub)}
+.setup input,.setup select{font-size:calc(var(--u)*1.5);padding:calc(var(--u)*.5)}
+.small{font-size:calc(var(--u)*1.1)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script>
+// ================= 基本設定 =================
+const CFG = window.QUIZ_CONFIG;
+firebase.initializeApp(CFG.firebase);
+const db = firebase.database(), SV = firebase.database.ServerValue;
+const app = document.getElementById('app');
+const SHAPES = ['▲', '◆', '●', '■'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let uid, room, Q = [], st = {}, offset = 0, players = {}, scores = {}, timer = null, ansOff = null;
+db.ref('.info/serverTimeOffset').on('value', s => offset = s.val() || 0);
+const now = () => Date.now() + offset;
+const R = p => db.ref(`rooms/${room}/${p}`);
+
+// ================= 音效（Web Audio 即時合成，無版權問題） =================
+const AU = { ctx: null, master: null, loop: null };
+function audioInit() {
+  if (AU.ctx) return AU.ctx.resume();
+  AU.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  AU.master = AU.ctx.createGain(); AU.master.gain.value = .5; AU.master.connect(AU.ctx.destination);
+}
+function tone(f, t, d, type = 'sine', v = .3, dest) {
+  const c = AU.ctx, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(g).connect(dest || AU.master); o.start(t); o.stop(t + d + .02);
+}
+function noise(t, d, v = .2, hp = 6000) {
+  const c = AU.ctx, b = c.createBuffer(1, c.sampleRate * d, c.sampleRate), a = b.getChannelData(0);
+  for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1;
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'highpass'; f.frequency.value = hp; s.buffer = b;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  s.connect(f).connect(g).connect(AU.master); s.start(t);
+}
+function kick(t) {
+  const c = AU.ctx, o = c.createOscillator(), g = c.createGain();
+  o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .15);
+  g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t + .2);
+  o.connect(g).connect(AU.master); o.start(t); o.stop(t + .22);
+}
+// 循環配樂：mode = 'lobby'（輕快）或 'q'（緊張，最後 5 秒加速）
+function music(mode) {
+  stopMusic(); if (!AU.ctx) return;
+  const c = AU.ctx; let next = c.currentTime + .05, step = 0;
+  const lobbyBass = [130.8, 130.8, 174.6, 196], lobbyArp = [523, 659, 784, 659, 587, 698, 880, 698];
+  const qBass = [110, 110, 130.8, 110, 98, 98, 116.5, 123.5];
+  AU.loop = setInterval(() => {
+    while (next < c.currentTime + .12) {
+      let bpm = mode === 'q' ? 132 : 108;
+      if (mode === 'q' && st.phase === 'question') {
+        const left = (st.startAt + st.dur * 1000 - now()) / 1000;
+        if (left < 5) bpm = 176;
+      }
+      const sx = 60 / bpm / 4; // 十六分音符
+      if (mode === 'lobby') {
+        if (step % 4 === 0) tone(lobbyBass[(step >> 4) % 4], next, .35, 'triangle', .22);
+        if (step % 2 === 0) tone(lobbyArp[(step >> 1) % 8], next, .18, 'sine', .08);
+        if (step % 8 === 4) noise(next, .05, .05);
+      } else {
+        if (step % 4 === 0) kick(next);
+        noise(next, .03, step % 2 ? .04 : .08);
+        if (step % 2 === 0) tone(qBass[(step >> 1) % 8], next, .12, 'sawtooth', .12);
+        if (step % 16 === 8) tone(qBass[(step >> 4) % 8] * 4, next, .25, 'square', .05);
+      }
+      next += sx; step++;
+    }
+  }, 25);
+}
+function stopMusic() { clearInterval(AU.loop); AU.loop = null; }
+const sfx = {
+  tick(hi) { AU.ctx && tone(hi ? 1320 : 880, AU.ctx.currentTime, .08, 'square', .12); },
+  gong() { if (!AU.ctx) return; const t = AU.ctx.currentTime; tone(98, t, 2.2, 'sine', .7); tone(196, t, 1.5, 'triangle', .25); noise(t, .4, .2, 1500); },
+  reveal() { if (!AU.ctx) return; const t = AU.ctx.currentTime; [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * .09, .4, 'triangle', .2)); },
+  fanfare() { if (!AU.ctx) return; const t = AU.ctx.currentTime; [[523, 0], [523, .15], [523, .3], [659, .45], [784, .75], [659, 1.05], [784, 1.2], [1047, 1.5]].forEach(([f, d]) => { tone(f, t + d, .5, 'square', .1); tone(f / 2, t + d, .5, 'triangle', .15); }); }
+};
+
+// ================= 題目檔（Zuvio 格式 CSV，只存在老師電腦） =================
+function parseCSV(txt) {
+  const rows = []; let row = [], cell = '', q = false;
+  txt = txt.replace(/^﻿/, '');
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    if (q) { if (ch === '"') { if (txt[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(cell); cell = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && txt[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+function toQuestions(txt, round) {
+  return parseCSV(txt).slice(1).filter(r => r[0] === '2' || r[0] === '5').map(r => ({
+    round, multi: r[0] === '5', text: r[1],
+    correct: r[3].split(/[\\,]/).map(Number).sort().join(','),
+    opts: r.slice(4).filter(x => x.trim()).map(x => x.replace(/^[A-D][.．]\s*/, ''))
+  }));
+}
+
+// ================= 畫面：設定 =================
+function setup(msg = '') {
+  const saved = localStorage.getItem('hostRoom');
+  app.innerHTML = `<div class="setup panel"><h1>預防保健搶答・投影端</h1>
+    <label>題目檔（依序選第一堂、第二堂兩個 CSV，可一次多選；檔名排序即堂次）</label>
+    <input type="file" id="files" accept=".csv" multiple>
+    <div id="qinfo" class="muted small"></div>
+    <label>班級</label><select id="cls"><option>A</option><option>B</option></select>
+    <div class="row" style="margin-top:calc(var(--u)*2)"><button class="btn" id="mk">建立新房間</button>
+    ${saved ? `<button class="btn ghost" id="resume">繼續房間 ${esc(saved)}</button>` : ''}</div>
+    <p class="muted small" style="margin-top:calc(var(--u)*1.2)">按鈕會同時啟用音效，請確認投影機或喇叭有聲音。</p>
+    <p style="color:var(--c1);margin-top:8px">${esc(msg)}</p></div>`;
+  const cached = localStorage.getItem('hostQ');
+  if (cached) { Q = JSON.parse(cached); info(); }
+  document.getElementById('files').onchange = async e => {
+    const fs = [...e.target.files].sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+    Q = []; for (let i = 0; i < fs.length; i++) Q = Q.concat(toQuestions(await fs[i].text(), i + 1));
+    localStorage.setItem('hostQ', JSON.stringify(Q)); info();
+  };
+  document.getElementById('mk').onclick = createRoom;
+  if (saved) document.getElementById('resume').onclick = () => { audioInit(); room = saved; start(); };
+}
+function info() {
+  const by = {}; Q.forEach(q => by[q.round] = (by[q.round] || 0) + 1);
+  document.getElementById('qinfo').textContent = Q.length ? `已載入 ${Q.length} 題：` + Object.entries(by).map(([r, n]) => `第${r}堂 ${n} 題`).join('、') : '';
+}
+async function createRoom() {
+  if (!Q.length) return setup('請先選題目檔');
+  audioInit();
+  const cls = document.getElementById('cls').value;
+  for (let k = 0; k < 5; k++) {
+    const code = cls + String(Math.floor(1000 + Math.random() * 9000));
+    try {
+      await db.ref(`rooms/${code}`).set({ meta: { host: uid, cls, created: SV.TIMESTAMP }, state: { phase: 'lobby', total: Q.length } });
+      room = code; localStorage.setItem('hostRoom', code); return start();
+    } catch (e) { /* 代碼已被使用，換一個 */ }
+  }
+  setup('建立房間失敗，請檢查網路或 Firebase 設定');
+}
+
+// ================= 主流程 =================
+function start() {
+  R('players').on('value', s => { players = s.val() || {}; if (st.phase === 'lobby' || st.phase === 'break') render(); });
+  R('scores').on('value', s => scores = s.val() || {});
+  R('state').on('value', s => { const prev = st.phase + st.qk; st = s.val() || { phase: 'lobby' }; if (prev !== st.phase + st.qk) render(); });
+}
+const nPlayers = () => Object.keys(players).length;
+const nick = u => (players[u] && players[u].nick) || '（已離開）';
+const playUrl = () => new URL(CFG.playUrl, location.href).href.split('?')[0] + '?r=' + room;
+function bar(right) {
+  return `<div class="top"><b style="color:var(--ac)">房間 ${room}</b><span>${nPlayers()} 人</span><span class="sp"></span>${right || ''}
+  <button class="btn ghost small" onclick="exportCSV()">匯出成績</button></div>`;
+}
+
+function render() {
+  clearInterval(timer);
+  const ph = st.phase;
+  if (ph === 'lobby' || ph === 'break') {
+    const isBreak = ph === 'break';
+    const nextRound = isBreak ? 2 : 1;
+    app.innerHTML = bar() + `<div class="lobby"><div class="center" style="text-align:center">
+      <div id="qr"></div><div class="muted" style="font-size:calc(var(--u)*1.3);margin-top:8px">${esc(playUrl().replace(/^https?:\/\//, ''))}</div>
+      <div class="muted" style="margin-top:calc(var(--u)*1)">房間代碼</div><div class="code">${room}</div></div>
+      <div style="display:flex;flex-direction:column;min-height:0"><div class="row"><h1>${isBreak ? '第一堂結束・第二堂下課前繼續' : '掃描 QR code 加入'}</h1><span class="sp"></span>
+      <button class="btn" onclick="openQ(${Q.findIndex(q => q.round === nextRound)})">開始第${nextRound === 1 ? '一' : '二'}堂</button></div>
+      <h2 class="muted" style="margin:calc(var(--u)*1) 0">已加入 ${nPlayers()} 人</h2>
+      ${isBreak ? '<div class="board" style="margin-top:0">' + topN(5).map(([u, v]) => `<div class="lb"><span class="rk">${v.rank}</span>${esc(nick(u))}<span class="pt">${v.total}</span></div>`).join('') + '</div>' : ''}
+      <div class="names">${Object.entries(players).map(([u, p]) => `<span title="點兩下移出" ondblclick="removePlayer('${u}')">${esc(p.nick)}</span>`).join('')}</div></div></div>`;
+    new QRCode(document.getElementById('qr'), { text: playUrl(), width: Math.round(innerHeight * .42), height: Math.round(innerHeight * .42), correctLevel: QRCode.CorrectLevel.M });
+    if (!AU.loop) music('lobby');
+    return;
+  }
+  if (ph === 'question') return renderQ();
+  if (ph === 'reveal') return renderReveal();
+  if (ph === 'board') return renderBoard();
+  if (ph === 'final') return renderFinal();
+}
+function removePlayer(u) { if (confirm(`移出「${nick(u)}」？`)) { R(`players/${u}`).remove(); R(`ids/${u}`).remove(); } }
+
+// 開題：題目與選項寫到 state（不含答案），計時用伺服器時間
+async function openQ(i) {
+  if (i < 0 || i >= Q.length) return;
+  audioInit();
+  const q = Q[i], dur = q.multi ? CFG.secMulti : CFG.secSingle;
+  await R('state').set({ phase: 'question', qi: i, qk: 'q' + i, n: Q.filter(x => x.round === q.round).indexOf(q) + 1,
+    total: Q.filter(x => x.round === q.round).length, round: q.round, text: q.text, opts: q.opts, multi: q.multi, dur, startAt: SV.TIMESTAMP });
+}
+
+function optsHtml(q, counts, correct) {
+  const max = Math.max(1, ...(counts || [0]));
+  return `<div class="opts">${q.opts.map((o, i) => {
+    const ok = !correct || correct.includes(i + 1);
+    const n = counts ? `<span class="n">${counts[i]}</span><span class="fill" style="width:${counts[i] / max * 100}%"></span>` : '';
+    return `<div class="opt o${i + 1}${ok ? '' : ' dim'}"><span class="sh">${SHAPES[i]}</span><span>${esc(o)}${correct && ok ? '　✓' : ''}</span>${n}</div>`;
+  }).join('')}</div>`;
+}
+
+function renderQ() {
+  const q = Q[st.qi];
+  app.innerHTML = bar(`<span>第${q.round === 1 ? '一' : '二'}堂　第 ${st.n} / ${st.total} 題${q.multi ? '　<b style="color:var(--c1)">複選</b>' : ''}</span>`) +
+    `<div class="qtext">${esc(q.text)}</div>
+    <div class="mid"><div class="timer" id="tm">${st.dur}</div><span class="sp"></span>
+      <div class="cnt">已作答<b id="ac">0</b></div><span style="width:calc(var(--u)*2)"></span>
+      <button class="btn ghost" onclick="closeQ()">提早結束</button></div>` + optsHtml(q);
+  music('q');
+  let lastSec = null;
+  if (ansOff) ansOff();
+  const ref = R(`answers/${st.qk}`);
+  const cb = ref.on('value', s => {
+    const n = s.numChildren(); const el = document.getElementById('ac'); if (el) el.textContent = n;
+    if (n > 0 && n >= nPlayers() && st.phase === 'question') closeQ();
+  });
+  ansOff = () => ref.off('value', cb);
+  timer = setInterval(() => {
+    if (!st.startAt) return;
+    const left = Math.ceil((st.startAt + st.dur * 1000 - now()) / 1000);
+    const el = document.getElementById('tm'); if (!el) return;
+    el.textContent = Math.max(0, left); el.classList.toggle('hot', left <= 5);
+    if (left !== lastSec && left <= 5 && left > 0) sfx.tick(left <= 3);
+    lastSec = left;
+    if (left <= 0) closeQ();
+  }, 100);
+}
+
+// 截止：等 1.5 秒寬限（與規則相同），讀全部答案計分後公布
+let closing = false;
+async function closeQ() {
+  if (closing || st.phase !== 'question') return;
+  closing = true; clearInterval(timer); stopMusic(); sfx.gong();
+  const wait = Math.max(0, st.startAt + st.dur * 1000 + 1600 - now());
+  const early = st.startAt + st.dur * 1000 > now();
+  if (!early) await new Promise(r => setTimeout(r, wait));
+  else await R('state/phase').set('closing');
+  await new Promise(r => setTimeout(r, 400));
+  const q = Q[st.qi], s = await R(`answers/${st.qk}`).get(), ans = s.val() || {};
+  const res = {}, upd = {};
+  Object.entries(ans).forEach(([u, a]) => {
+    const el = Math.min(Math.max(0, a.t - st.startAt), st.dur * 1000);
+    const ok = a.c === q.correct;
+    res[u] = { c: a.c, pts: ok ? Math.round(1000 * (1 - .5 * el / (st.dur * 1000))) : 0, ms: a.t - st.startAt };
+  });
+  const all = new Set([...Object.keys(scores), ...Object.keys(res)]);
+  all.forEach(u => {
+    const o = scores[u] || { total: 0, correct: 0 };
+    upd[u] = { total: o.total + (res[u] ? res[u].pts : 0), correct: o.correct + (res[u] && res[u].pts > 0 ? 1 : 0) };
+  });
+  Object.entries(upd).sort((a, b) => b[1].total - a[1].total).forEach(([u, v], i, arr) => {
+    v.rank = i > 0 && arr[i - 1][1].total === v.total ? arr[i - 1][1].rank : i + 1;
+  });
+  await R(`results/${st.qk}`).set(res);
+  await R('scores').set(upd); scores = upd;
+  await R('state').update({ phase: 'reveal', correct: q.correct });
+  closing = false;
+}
+
+function renderReveal() {
+  stopMusic(); sfx.reveal();
+  const q = Q[st.qi], correct = q.correct.split(',').map(Number);
+  R(`results/${st.qk}`).get().then(s => {
+    const res = s.val() || {}, counts = [0, 0, 0, 0];
+    Object.values(res).forEach(r => r.c.split(',').forEach(c => counts[c - 1]++));
+    const nOk = Object.values(res).filter(r => r.pts > 0).length;
+    app.innerHTML = bar(`<span>第 ${st.n} / ${st.total} 題</span>`) + `<div class="qtext">${esc(q.text)}</div>
+      <div class="mid"><h2>答對 ${nOk} 人／作答 ${Object.keys(res).length} 人</h2><span class="sp"></span>
+      <button class="btn" onclick="R('state/phase').set('board')">排行榜</button></div>` + optsHtml(q, counts, correct);
+  });
+}
+
+function topN(n) { return Object.entries(scores).sort((a, b) => b[1].total - a[1].total).slice(0, n); }
+function renderBoard() {
+  const q = Q[st.qi], next = st.qi + 1, endRound = next >= Q.length || Q[next].round !== q.round;
+  const btn = next >= Q.length ? `<button class="btn" onclick="R('state').update({phase:'final'})">公布最後名次</button>`
+    : endRound ? `<button class="btn" onclick="R('state').set({phase:'break',total:${Q.length}})">第一堂結束</button>`
+    : `<button class="btn" onclick="openQ(${next})">下一題</button>`;
+  app.innerHTML = bar(btn) + `<h1 style="margin-top:calc(var(--u)*1)">排行榜</h1><div class="board">` +
+    topN(5).map(([u, v], i) => `<div class="lb" style="animation-delay:${i * .12}s"><span class="rk">${v.rank}</span>${esc(nick(u))}<span class="pt">${v.total}</span></div>`).join('') + '</div>';
+  music('lobby');
+}
+
+function renderFinal() {
+  stopMusic(); sfx.fanfare();
+  const t = topN(3), slot = [[1, 'var(--c2)', 26, 'calc(var(--u)*24)'], [0, 'var(--c3)', 0, 'calc(var(--u)*32)'], [2, 'var(--c4)', 52, 'calc(var(--u)*18)']];
+  app.innerHTML = bar() + `<h1 style="text-align:center;margin-top:calc(var(--u)*1)">最後名次</h1><div class="podium">` +
+    slot.filter(([i]) => t[i]).map(([i, col, d, h]) => `<div class="pd"><div class="nm" style="animation-delay:${.6 + d / 60}s">${esc(nick(t[i][0]))}<br><span class="muted">${t[i][1].total}</span></div>
+      <div class="bk" style="background:${col};height:${h};animation-delay:${d / 40}s">${t[i][1].rank}</div></div>`).join('') + '</div>';
+}
+
+// ================= 匯出成績 CSV（學號只有老師端讀得到） =================
+async function buildCSV() {
+  const [ids, res] = await Promise.all([R('ids').get(), R('results').get()]);
+  const I = ids.val() || {}, RS = res.val() || {};
+  const qks = Q.map((_, i) => 'q' + i);
+  const sidCount = {}; Object.values(I).forEach(v => sidCount[v.sid] = (sidCount[v.sid] || 0) + 1);
+  const head = ['學號', '暱稱', '總分', '答對題數', '名次', '學號重複', ...qks.flatMap((k, i) => [`第${i + 1}題作答`, `第${i + 1}題得分`])];
+  const uids = new Set([...Object.keys(I), ...Object.keys(players), ...Object.keys(scores)]);
+  const rows = [...uids].map(u => {
+    const s = scores[u] || { total: 0, correct: 0, rank: '' }, sid = (I[u] || {}).sid || '';
+    return [sid, nick(u), s.total, s.correct, s.rank, sidCount[sid] > 1 ? '是' : '',
+      ...qks.flatMap(k => { const r = (RS[k] || {})[u]; return r ? [r.c.split(',').map(c => 'ABCD'[c - 1]).join(''), r.pts] : ['', '']; })];
+  }).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+  return '\ufeff' + [head, ...rows].map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+}
+async function exportCSV() {
+  const csv = await buildCSV();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `搶答成績_${room}_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+}
+
+firebase.auth().signInAnonymously().catch(e => app.innerHTML = `<div class="panel">無法連線 Firebase：${esc(e.message)}</div>`);
+firebase.auth().onAuthStateChanged(u => { if (u) { uid = u.uid; setup(); } });
+</script>
+</body>
+</html>
