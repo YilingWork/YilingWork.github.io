@@ -67,7 +67,7 @@ window.RPG = {
       story: "開業第一年要做什麼？組內先用名目群體技術收斂出年度三大目標，再把創立時寫的目標升級成 SMART（具體 Specific、可衡量 Measurable、困難度適中 Attainable、支持共同目標 Relevant、有時限 Time-bound）。",
       tasks: [
         { kind: "個人小關", text: "故事事件：幫兒童病房算採購分數、主持創院團隊的規劃會議、替護理部檢查 SMART 目標，共 5 件事、11 題；含實務任務「決策鏈」：主持安和醫院新增服務的四步決策，每一步選完會看到結果（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLSdoUJs4oEC3ss6iK5PrGOqjp_rcQMbvXE6Nez3e1pwYwBWuyQ/viewform" },
-        { kind: "魔王關", text: "魔王關 2 前半（占學期成績 4%）：寫下機構名稱與共同目標，用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
+        { kind: "魔王關", text: "魔王關 1 前半（占學期成績 4%）：寫下機構名稱與共同目標，用名目群體技術選出年度三大目標，改寫成 SMART，並畫出目標網", url: "https://docs.google.com/forms/d/e/1FAIpQLSdW-j7w5JBjOOHFHRc3oYJlcNa4QNDDBZdE2Xx9Vz9uWxa8rw/viewform" }
       ],
       criteria: [
         { name: "理性決策與加權計分", desc: "各方案依準則評分乘上權重後加總，選得分最高者。", source: "W5 p3–6" },
@@ -84,7 +84,7 @@ window.RPG = {
       tasks: [
         { kind: "個人小關", text: "故事事件：跟安和醫院人事室主任認識醫院的人力階梯與委員會、判讀探子帶回的對手情報、幫財務長分析服務組合、在軍師的沙盤上學 SWOT，共 6 件事、14 題；含實務任務「審一份 SWOT」與「替安和醫院寫 SWOT」（每格 3–5 項，依公開規準評分）（作答到 10/20（二）截止）", url: "https://docs.google.com/forms/d/e/1FAIpQLScTXMAe35Ah73WxxfXHjihZeoU_ecmubFJTrKWgAY_vVlHZ5A/viewform" },
         { kind: "支線", text: "陪林阿公看病：到安和醫院大廳找導覽志工，陪病人從掛號走到出院（24 站），每站決定要去哪個部門；第一次就選對的站數計入遊戲分數，可分次走完（10/14–10/20）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
-        { kind: "魔王關", text: "魔王關 2 後半「策略一頁」（占學期成績 5%）：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
+        { kind: "魔王關", text: "魔王關 1 後半「策略一頁」（占學期成績 5%）：SWOT、TOWS 四策略、波特一般策略，每項策略對應一個 SMART 目標", url: "https://docs.google.com/forms/d/e/1FAIpQLSd7ac9KqRLZ9ZNswS91okNXHU4kvYzVUSfOoK9ubiB8exmyzw/viewform" }
       ],
       criteria: [
         { name: "醫院人力與委員會", desc: "醫師與護理人員的職涯階梯；委員會三項控制原則：訂定工作目標及完成期限、賦予積極性並特別指派任務與期限、委員遴聘注意新陳代謝。", source: "W6 p3、p6" },
@@ -101,7 +101,7 @@ window.RPG = {
       story: "機構要開始招人與分工了。畫出組織圖，確認每個人知道該向誰報告。",
       tasks: [
         { kind: "個人小關", text: "控制幅度計算、機械式與有機式判斷、四個權變因素", url: "" },
-        { kind: "魔王關", text: "魔王關 3 前半：填寫職位與直屬上司，系統自動畫出組織圖；說明部門化方式與指揮鏈", url: "" }
+        { kind: "魔王關", text: "魔王關 2 前半：填寫職位與直屬上司，系統自動畫出組織圖；說明部門化方式與指揮鏈", url: "" }
       ],
       criteria: [
         { name: "組織圖四要素", desc: "任務、分工、管理層級、指揮鏈。", source: "W7 p3" },
@@ -116,7 +116,7 @@ window.RPG = {
       story: "危機事件來了！各組抽一張事件卡，機構必須變革，而員工不一定買單。",
       tasks: [
         { kind: "個人小關", text: "黎溫三階段判斷、四種抗拒來源判斷", url: "" },
-        { kind: "魔王關", text: "魔王關 3 後半「變革計畫」：七步驟、力場分析、兩種抗拒來源各選一種處方並說明理由", url: "" },
+        { kind: "魔王關", text: "魔王關 2 後半「變革計畫」：七步驟、力場分析、兩種抗拒來源各選一種處方並說明理由", url: "" },
         { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（將放進遊戲裡進行，依遊戲內得分，和個人小關合併計分）", url: "" }
       ],
       criteria: [
@@ -132,7 +132,7 @@ window.RPG = {
       story: "機構要開出第一個職缺，也要算清楚病房需要多少護理人力。",
       tasks: [
         { kind: "個人小關", text: "兩種甄選錯誤、績效評估方法判斷、自助餐式福利", url: "" },
-        { kind: "魔王關", text: "魔王關 4 前半：一個職缺的工作說明書與工作規範、護理人力計算、選一種績效評估方法", url: "" }
+        { kind: "魔王關", text: "魔王關 3 前半：一個職缺的工作說明書與工作規範、護理人力計算、選一種績效評估方法", url: "" }
       ],
       criteria: [
         { name: "工作說明書與工作規範", desc: "說明書寫工作內容；規範寫擔任者需具備的條件。", source: "W10 s10–11" },
@@ -171,7 +171,7 @@ window.RPG = {
       story: "機構需要一位院長。誰最適合？要看人，也要看情境。",
       tasks: [
         { kind: "個人小關", text: "每人填寫費德勒最難共事者（LPC，Least Preferred Coworker）量表", url: "" },
-        { kind: "魔王關", text: "魔王關 4 後半：依 LPC 選院長、判斷機構屬費德勒第幾情境、為第 8 關錄取的新人選擇情境領導方式", url: "" }
+        { kind: "魔王關", text: "魔王關 3 後半：依 LPC 選院長、判斷機構屬費德勒第幾情境、為第 8 關錄取的新人選擇情境領導方式", url: "" }
       ],
       criteria: [
         { name: "費德勒 LPC 量表（最難共事者量表）", desc: "16 題、每題 1–8 分；高於 64 為關係導向，低於 57 為任務導向。", source: "W13 補充資料" },
