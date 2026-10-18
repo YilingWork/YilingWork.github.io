@@ -112,20 +112,21 @@ window.RPG = {
       upgrade: "組織圖的職位必須涵蓋第 4 關 SMART 目標與部門目標所列的負責職位；有調整的職位直接在本關組織圖中修正並說明。"
     },
     {
-      no: 7, zone: "castle", name: "變革危機", date: "2026-11-04", type: "boss", bossNo: 3,
-      story: "危機事件來了！各組抽一張事件卡，機構必須變革，而員工不一定買單。",
+      no: 7, zone: "castle", name: "變革危機", date: "2026-10-28", type: "boss", bossNo: 3,
+      story: "房子蓋好了，環境卻一直在變。到遊戲裡找翻修總監，跟著安和醫院導入「智慧病床＋電子交班」，看一家醫院怎麼推動變革、怎麼面對同仁的抗拒。",
       tasks: [
-        { kind: "個人小關", text: "黎溫三階段判斷、四種抗拒來源判斷", url: "" },
-        { kind: "魔王關", text: "魔王關 2 後半「變革計畫」（占學期成績 4%）：七步驟、力場分析、兩種抗拒來源各選一種處方並說明理由", url: "" },
-        { kind: "支線", text: "變革先鋒：7-Eleven 數位轉型（將放進遊戲裡進行，依遊戲內得分，和個人小關合併計分）", url: "" }
+        { kind: "個人小關", text: "故事事件：跟著安和醫院院長、人事室主任、智慧病床專案組長、員工代表、兒童病房護理長、品管中心主任走一遍變革，共 7 件事、19 題；含實務任務「力場分析」：從 8 張便條找出驅離的力量。最後回報一則你看過或聽過的組織變革事例（不計對錯，組員在魔王關 2 後半會用到）（10/28（三）開放，作答到 11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
+        { kind: "支線", text: "智慧病床上線記：到安和醫院找院長特助，擔任變革顧問走完 12 站，判斷每一步該做的事與同仁的抗拒理由；第一次就選對的站數計入遊戲分數，可分次完成，不需截圖、不上傳 Zuvio（10/28（三）開放，11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
+        { kind: "魔王關", text: "魔王關 2 後半（占學期成績 4%）：找冰封巨人，替你們的機構規劃一項變革：類型與基礎、七步驟、力場分析、兩位抗拒者（要是前半組織圖上的職位）與降低抗拒的技術、黎溫三階段、評估指標（10/28（三）開放，11/17（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" }
       ],
       criteria: [
-        { name: "黎溫模式", desc: "解凍、變革、再凍。", source: "W8 p6" },
-        { name: "變革七步驟", desc: "界定需求、設定目標、找出抗拒來源、選擇工具、擬定計畫、實施、評估與跟催。", source: "W8 p7" },
-        { name: "四種抗拒來源", desc: "不確定性、害怕失去利益、認知差距、社會關係重構。", source: "W8 p8" },
-        { name: "力場分析與五種處方", desc: "由柔到剛：支持、溝通、協商、操縱、強制。", source: "W8 p9" }
+        { name: "計畫性與因應性變革", desc: "計畫性：預先規劃，基於未來事件預測；因應性：對突發事件的零星反應。", source: "W8 p4" },
+        { name: "五大基礎", desc: "技術、結構、文化、任務、人員。", source: "W8 p5" },
+        { name: "黎溫模式與七步驟", desc: "解凍、實施變革、再凍；界定需求、設定目標、找出抗拒來源、選擇工具、擬定計畫、實施變革、評估與跟催。", source: "W8 p6–7" },
+        { name: "四種抗拒理由", desc: "不確定性、害怕失去既有的利益、認知差距、社會關係的重新建構。", source: "W8 p8" },
+        { name: "降低抗拒的技術", desc: "課本列 7 種：力場分析、溝通、參與、提昇和支持、協商、操縱及買通、強制（由溫和到剛性）。", source: "W8 p9；課本 p.205–208" }
       ],
-      upgrade: ""
+      upgrade: "變革的抗拒者要寫成第 6 關組織圖上的職位；變革可以用來達成第 4 關的 SMART 目標，或解決第 6 關組織圖的問題。"
     },
     {
       no: 8, zone: "castle", name: "招兵買馬", date: "2026-11-11", type: "boss", bossNo: 4,
