@@ -734,23 +734,25 @@ async function viewManual(v) {
 
 // ------------------------------------------------------------------ posters
 // IRB-approved recruitment posters (static files in posters/), shown on site when someone asks
-const POSTERS = [["id", "Bahasa Indonesia"], ["vi", "Tiếng Việt"]];
+// [code, button label, file base]; Chinese shows the IRB approval letter (the Chinese poster has expired)
+const POSTERS = [["zh", "中文 · IRB 核准函", "irb-zh"], ["id", "Bahasa Indonesia", "poster-id"], ["vi", "Tiếng Việt", "poster-vi"]];
 function viewPosters(v) {
   const def = S.me.team === "Indonesian" ? "id" : "vi";
   let cur = store.get("poster", true) || def;
   if (!POSTERS.some(([k]) => k === cur)) cur = def;
   v.innerHTML = `<h1>${t("Recruitment Posters", "招募海報")}</h1>
-    <p class="lead">${t("Approved by the Shin Kong Hospital Institutional Review Board (IRB). Show this to anyone who asks about the study. Choose the language below.", "已經新光醫院人體研究倫理委員會（IRB）核准。現場有人詢問或質疑時，可以出示這張海報。請在下方選擇語言。")}</p>
-    <nav class="tabs plang" aria-label="${t("Poster language", "海報語言")}">${POSTERS.map(([k, n]) => `<a href="#posters" data-pl="${k}" lang="${k}">${n}</a>`).join("")}</nav>
+    <p class="lead">${t("Approved by the Shin Kong Hospital Institutional Review Board (IRB). Show this to anyone who asks about the study. Choose the language below; “中文” shows the IRB approval letter.", "已經新光醫院人體研究倫理委員會（IRB）核准。現場有人詢問或質疑時，可以出示這張海報。請在下方選擇語言；「中文」是 IRB 核准公文。")}</p>
+    <nav class="tabs plang" aria-label="${t("Poster language", "海報語言")}">${POSTERS.map(([k, n]) => `<a href="#posters" data-pl="${k}" lang="${k === "zh" ? "zh-Hant" : k}">${n}</a>`).join("")}</nav>
     <div class="btns"><a class="btn sm" id="ppdf" target="_blank" rel="noopener">${t("Open PDF", "開啟 PDF")}</a></div>
     <a id="pfull" target="_blank" rel="noopener"><img id="pimg" class="poster" alt=""></a>`;
   const show = (k) => {
     cur = k; store.set("poster", k, true);
     $$("[data-pl]", v).forEach((a) => a.classList.toggle("on", a.dataset.pl === k));
-    $("#pimg").src = `posters/poster-${k}.jpg`;
-    $("#pimg").alt = t("Recruitment poster", "招募海報") + " (" + POSTERS.find(([x]) => x === k)[1] + ")";
-    $("#pfull").href = `posters/poster-${k}.jpg`;
-    $("#ppdf").href = `posters/poster-${k}.pdf`;
+    const [, n, f] = POSTERS.find(([x]) => x === k);
+    $("#pimg").src = `posters/${f}.jpg`;
+    $("#pimg").alt = (k === "zh" ? t("IRB approval letter", "IRB 核准函") : t("Recruitment poster", "招募海報")) + " (" + n + ")";
+    $("#pfull").href = `posters/${f}.jpg`;
+    $("#ppdf").href = `posters/${f}.pdf`;
   };
   $$("[data-pl]", v).forEach((a) => (a.onclick = (e) => { e.preventDefault(); show(a.dataset.pl); }));
   show(cur);
