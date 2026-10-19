@@ -189,7 +189,7 @@ async function signOut() {
 
 // ------------------------------------------------------------------ shell
 const ROUTES = [["home", "Home", "首頁"], ["refusal", "Refusal Log", "拒絕紀錄"], ["onsite", "On-site Record", "當場紀錄"], ["entry", "Data Entry", "登錄問卷"],
-  ["work", "Work Log", "工時"], ["manual", "Manual", "手冊"], ["slides", "Slides", "簡報"]];
+  ["work", "Work Log", "工時"], ["posters", "Posters", "招募海報"], ["manual", "Manual", "手冊"], ["slides", "Slides", "簡報"]];
 const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
@@ -204,7 +204,7 @@ function render() {
     <main id="view"></main>`;
   $("#out").onclick = signOut;
   if (S.viewAs) $("#vaexit").onclick = () => { store.set("viewAs", null, true); location.hash = "admin"; load(); };
-  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
+  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, posters: viewPosters, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
   view($("#view"));
   window.scrollTo(0, 0);
 }
@@ -730,6 +730,30 @@ async function viewManual(v) {
   }).join("");
   $$("a[data-to]", toc).forEach((a) => (a.onclick = (e) => { e.preventDefault(); document.getElementById(a.dataset.to).scrollIntoView({ behavior: "smooth" }); }));
   $$("#doc a[href^='http']").forEach((a) => { a.target = "_blank"; a.rel = "noopener"; });
+}
+
+// ------------------------------------------------------------------ posters
+// IRB-approved recruitment posters (static files in posters/), shown on site when someone asks
+const POSTERS = [["zh", "中文"], ["id", "Bahasa Indonesia"], ["vi", "Tiếng Việt"]];
+function viewPosters(v) {
+  const def = S.me.team === "Indonesian" ? "id" : S.me.team === "Vietnamese" ? "vi" : "zh";
+  let cur = store.get("poster", true) || def;
+  if (!POSTERS.some(([k]) => k === cur)) cur = def;
+  v.innerHTML = `<h1>${t("Recruitment Posters", "招募海報")}</h1>
+    <p class="lead">${t("Approved by the Shin Kong Hospital Institutional Review Board (IRB). Show this to anyone who asks about the study. Choose the language below.", "已經新光醫院人體研究倫理委員會（IRB）核准。現場有人詢問或質疑時，可以出示這張海報。請在下方選擇語言。")}</p>
+    <nav class="tabs plang" aria-label="${t("Poster language", "海報語言")}">${POSTERS.map(([k, n]) => `<a href="#posters" data-pl="${k}" lang="${k === "zh" ? "zh-Hant" : k}">${n}</a>`).join("")}</nav>
+    <div class="btns"><a class="btn sm" id="ppdf" target="_blank" rel="noopener">${t("Open PDF", "開啟 PDF")}</a></div>
+    <a id="pfull" target="_blank" rel="noopener"><img id="pimg" class="poster" alt=""></a>`;
+  const show = (k) => {
+    cur = k; store.set("poster", k, true);
+    $$("[data-pl]", v).forEach((a) => a.classList.toggle("on", a.dataset.pl === k));
+    $("#pimg").src = `posters/poster-${k}.jpg`;
+    $("#pimg").alt = t("Recruitment poster", "招募海報") + " (" + POSTERS.find(([x]) => x === k)[1] + ")";
+    $("#pfull").href = `posters/poster-${k}.jpg`;
+    $("#ppdf").href = `posters/poster-${k}.pdf`;
+  };
+  $$("[data-pl]", v).forEach((a) => (a.onclick = (e) => { e.preventDefault(); show(a.dataset.pl); }));
+  show(cur);
 }
 
 // ------------------------------------------------------------------ slides
