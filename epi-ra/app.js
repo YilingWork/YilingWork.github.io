@@ -734,14 +734,14 @@ async function viewManual(v) {
 
 // ------------------------------------------------------------------ posters
 // IRB-approved recruitment posters (static files in posters/), shown on site when someone asks
-const POSTERS = [["zh", "中文"], ["id", "Bahasa Indonesia"], ["vi", "Tiếng Việt"]];
+const POSTERS = [["id", "Bahasa Indonesia"], ["vi", "Tiếng Việt"]];
 function viewPosters(v) {
-  const def = S.me.team === "Indonesian" ? "id" : S.me.team === "Vietnamese" ? "vi" : "zh";
+  const def = S.me.team === "Indonesian" ? "id" : "vi";
   let cur = store.get("poster", true) || def;
   if (!POSTERS.some(([k]) => k === cur)) cur = def;
   v.innerHTML = `<h1>${t("Recruitment Posters", "招募海報")}</h1>
     <p class="lead">${t("Approved by the Shin Kong Hospital Institutional Review Board (IRB). Show this to anyone who asks about the study. Choose the language below.", "已經新光醫院人體研究倫理委員會（IRB）核准。現場有人詢問或質疑時，可以出示這張海報。請在下方選擇語言。")}</p>
-    <nav class="tabs plang" aria-label="${t("Poster language", "海報語言")}">${POSTERS.map(([k, n]) => `<a href="#posters" data-pl="${k}" lang="${k === "zh" ? "zh-Hant" : k}">${n}</a>`).join("")}</nav>
+    <nav class="tabs plang" aria-label="${t("Poster language", "海報語言")}">${POSTERS.map(([k, n]) => `<a href="#posters" data-pl="${k}" lang="${k}">${n}</a>`).join("")}</nav>
     <div class="btns"><a class="btn sm" id="ppdf" target="_blank" rel="noopener">${t("Open PDF", "開啟 PDF")}</a></div>
     <a id="pfull" target="_blank" rel="noopener"><img id="pimg" class="poster" alt=""></a>`;
   const show = (k) => {
