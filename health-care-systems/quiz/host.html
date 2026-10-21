@@ -15,6 +15,7 @@ button{font:inherit;border:0;border-radius:calc(var(--u)*.6);cursor:pointer}
 .btn{background:var(--ac);color:#fff;font-weight:700;font-size:calc(var(--u)*1.5);padding:calc(var(--u)*.8) calc(var(--u)*2)}
 .btn.ghost{background:#fff;color:var(--ac);border:2px solid var(--ac)}
 .row{display:flex;gap:calc(var(--u)*1.2);align-items:center}
+.row .btn{white-space:nowrap}
 .sp{flex:1}
 .top{display:flex;align-items:center;gap:calc(var(--u)*1.5);font-size:calc(var(--u)*1.4);color:var(--sub)}
 .panel{background:var(--paper);border-radius:calc(var(--u)*1);padding:calc(var(--u)*2);box-shadow:0 1px 4px rgba(0,0,0,.08)}
@@ -74,7 +75,7 @@ const now = () => Date.now() + offset;
 const R = p => db.ref(`rooms/${room}/${p}`);
 
 // ================= 音效（Web Audio 即時合成，無版權問題） =================
-const AU = { ctx: null, master: null, loop: null };
+const AU = { ctx: null, master: null, loop: null, muted: false };
 function audioInit() {
   if (AU.ctx) return AU.ctx.resume();
   AU.ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -129,6 +130,8 @@ function music(mode) {
   }, 25);
 }
 function stopMusic() { clearInterval(AU.loop); AU.loop = null; }
+// 中場靜音：把總音量歸零，按「開始第二堂」時自動恢復
+function setMute(m) { AU.muted = m; if (AU.master) AU.master.gain.value = m ? 0 : .5; if (st.phase === 'break') render(); }
 const sfx = {
   tick(hi) { AU.ctx && tone(hi ? 1320 : 880, AU.ctx.currentTime, .08, 'square', .12); },
   gong() { if (!AU.ctx) return; const t = AU.ctx.currentTime; tone(98, t, 2.2, 'sine', .7); tone(196, t, 1.5, 'triangle', .25); noise(t, .4, .2, 1500); },
@@ -223,6 +226,7 @@ function render() {
       <div id="qr"></div><div class="muted" style="font-size:calc(var(--u)*1.3);margin-top:8px">${esc(playUrl().replace(/^https?:\/\//, ''))}</div>
       <div class="muted" style="margin-top:calc(var(--u)*1)">房間代碼</div><div class="code">${room}</div></div>
       <div style="display:flex;flex-direction:column;min-height:0"><div class="row"><h1>${isBreak ? '第一堂結束・第二堂下課前繼續' : '掃描 QR code 加入'}</h1><span class="sp"></span>
+      ${isBreak ? `<button class="btn ghost" onclick="setMute(${!AU.muted})">${AU.muted ? '🔊 開啟音效' : '🔇 靜音'}</button>` : ''}
       <button class="btn" onclick="openQ(${Q.findIndex(q => q.round === nextRound)})">開始第${nextRound === 1 ? '一' : '二'}堂</button></div>
       <h2 class="muted" style="margin:calc(var(--u)*1) 0">已加入 ${nPlayers()} 人</h2>
       ${isBreak ? '<div class="board" style="margin-top:0">' + topN(5).map(([u, v]) => `<div class="lb"><span class="rk">${v.rank}</span>${esc(nick(u))}<span class="pt">${v.total}</span></div>`).join('') + '</div>' : ''}
@@ -241,7 +245,7 @@ function removePlayer(u) { if (confirm(`移出「${nick(u)}」？`)) { R(`player
 // 開題：題目與選項寫到 state（不含答案），計時用伺服器時間
 async function openQ(i) {
   if (i < 0 || i >= Q.length) return;
-  audioInit();
+  audioInit(); if (AU.muted) setMute(false);
   const q = Q[i], dur = q.multi ? CFG.secMulti : CFG.secSingle;
   await R('state').set({ phase: 'question', qi: i, qk: 'q' + i, n: Q.filter(x => x.round === q.round).indexOf(q) + 1,
     total: Q.filter(x => x.round === q.round).length, round: q.round, text: q.text, opts: q.opts, multi: q.multi, dur, startAt: SV.TIMESTAMP });
