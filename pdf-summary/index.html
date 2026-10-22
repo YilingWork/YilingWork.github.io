@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>文獻中文大意</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --bg: #f7f6f2; --card: #ffffff; --text: #1f2328; --muted: #5d6470;
+    --line: #dcd9d0; --accent: #b3261e; --accent-text: #ffffff; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a; --card: #222427; --text: #e8e6e1; --muted: #a3a7ad;
+      --line: #3a3d42; --accent: #e5736b; --accent-text: #17181a; --err: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 4px; }
+  .model { color: var(--muted); font-size: .9rem; margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .step { font-weight: 700; margin: 0 0 12px; }
+  label { display: block; font-size: .9rem; color: var(--muted); margin: 10px 0 4px; }
+  input[type=password], input[type=file] {
+    width: 100%; max-width: 420px; padding: 8px 10px; font: inherit;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text);
+  }
+  button {
+    margin-top: 14px; padding: 10px 18px; font: inherit; font-weight: 700; border: 0; border-radius: 6px;
+    background: var(--accent); color: var(--accent-text); cursor: pointer;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .status { margin: 12px 0 0; color: var(--muted); min-height: 1.6em; }
+  .status.err { color: var(--err); font-weight: 700; }
+  .notes { font-size: .9rem; color: var(--muted); padding-left: 1.2em; margin: 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { border-top: 1px solid var(--line); padding: 8px; vertical-align: top; text-align: left; }
+  td.where { white-space: nowrap; color: var(--muted); }
+  td.orig { color: var(--muted); max-width: 320px; }
+  textarea {
+    width: 100%; min-width: 260px; font: inherit; padding: 6px; border: 1px solid var(--line);
+    border-radius: 6px; background: var(--bg); color: var(--text);
+  }
+  @media (max-width: 640px) { td.orig { display: none; } th.orig { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>文獻中文大意</h1>
+  <p class="lead">上傳英文文獻 PDF，由 AI 為每個段落寫中文大意，以紅字標在段落旁邊，再下載成 PDF。</p>
+  <p class="model">使用模型：<span id="modelName">Claude Sonnet 5.5</span>（Anthropic）</p>
+
+  <section class="card">
+    <p class="step">1. 輸入密碼並上傳 PDF</p>
+    <label for="password">密碼</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <label for="file">PDF 檔案（文字型，掃描檔不適用）</label>
+    <input id="file" type="file" accept="application/pdf">
+    <div><button id="run" disabled>產生中文大意</button></div>
+    <p id="status" class="status" role="status"></p>
+  </section>
+
+  <section class="card" id="review" hidden>
+    <p class="step">2. 檢查大意，必要時直接修改</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>位置</th><th class="orig">原文開頭</th><th>中文大意</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <button id="build">產生 PDF 並下載</button>
+  </section>
+
+  <section class="card">
+    <p class="step">使用須知</p>
+    <ul class="notes">
+      <li>大意由 AI 產生，可能有誤，引用前請對照原文。</li>
+      <li>文件內容會傳送給 Anthropic 的 Claude 處理；非開放取用的論文，請先確認授權規定。</li>
+      <li>PDF 在你的瀏覽器內處理與產生，本網站不保存任何檔案。</li>
+      <li>自動分段無法適用所有期刊排版，橫式表格不會處理。</li>
+      <li>加註字型：Noto Sans TC（SIL Open Font License 1.1）。</li>
+    </ul>
+  </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
