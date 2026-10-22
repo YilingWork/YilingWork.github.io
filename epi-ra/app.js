@@ -278,12 +278,12 @@ function viewHome(v) {
   bindSched();
 }
 let SCHED_EDIT = false;
-const canEditSched = () => isAdmin() && !S.viewAs;
+const canEditSched = () => !S.viewAs;   // 2026-10-22: every signed-in RA can edit the schedule
 const teamTag = (l) => (/^ID\b/.test(l) ? "tm tm-id" : /^VI\b/.test(l) ? "tm tm-vi" : "tm");
 const teamCode = (team) => (team === "Indonesian" ? "ID: " : team === "Vietnamese" ? "VI: " : "");
 const lineIs = (l, short) => { const r = l.replace(/^(ID|VI)\b\s*:?\s*/i, "").trim().toLowerCase(), k = short.toLowerCase(); return r === k || r.startsWith(k + " "); };
 function schedSection() {
-  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2>${canEditSched() && S.schedule ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? "Done" : "Edit"}</button>` : ""}</div>${schedHtml()}`;
+  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2>${canEditSched() && S.schedule ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? t("Done", "完成") : t("Edit", "編輯")}</button>` : ""}</div>${schedHtml()}`;
 }
 function schedHtml() {
   const s = S.schedule;
@@ -295,16 +295,17 @@ function schedHtml() {
   const cell = (c, ri, ci) => {
     const ls = lines(c);
     if (!SCHED_EDIT) return `<td class="${mine(c) ? "me" : ""}">${ls.map((l) => `<span class="${teamTag(l)}${mine(l) ? " mine" : ""}">${esc(l)}</span>`).join("<br>")}</td>`;
-    const avail = ras.filter((p) => !ls.some((l) => lineIs(l, p.short)));
-    return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}<button class="x" title="Remove" data-sdel="${ri},${ci}" data-line="${esc(l)}">×</button></span>`).join("")}
-      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ Add</option>${avail.map((p) => `<option value="${esc(p.short)}">${teamCode(p.team)}${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
+    const own = isAdmin() ? null : S.me.short;   // an RA edits only their own name
+    const avail = ras.filter((p) => (!own || p.short === own) && !ls.some((l) => lineIs(l, p.short)));
+    return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}${own && !lineIs(l, own) ? "" : `<button class="x" title="${t("Remove", "移除")}" data-sdel="${ri},${ci}" data-line="${esc(l)}">×</button>`}</span>`).join("")}
+      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ ${t("Add", "新增")}</option>${avail.map((p) => `<option value="${esc(p.short)}">${teamCode(p.team)}${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
   };
   return `${s.title ? `<p class="sub" style="margin-bottom:6px"><b>${esc(s.title)}</b></p>` : ""}
     <div class="tw"><table class="sched"><thead><tr>${s.grid[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
     ${s.grid.slice(1).map((r, ri) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : cell(c, ri + 1, i)).join("")}</tr>`).join("")}
     </tbody></table></div>
-    ${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">Changes are saved to the schedule sheet immediately and shown to everyone.</p>` : ""}
-    ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted.", "標色的是你的班。")}</p>` : ""}
+    ${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">${t("Changes are saved immediately and shown to everyone. Each change is recorded with your name.", "修改會立即儲存並顯示給所有人；每次修改都會記錄修改者。")}</p>` : ""}
+    ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove your own name.", "標色的是你的班。按「編輯」可新增或移除自己的名字（只能改自己的）。")}</p>` : ""}
     ${s.notes.concat(s.after).filter((n) => !/^https?:|RA portal/.test(n)).map((n) => `<p class="sub">${esc(n)}</p>`).join("")}`;
 }
 function bindSched() {
@@ -313,7 +314,7 @@ function bindSched() {
   const redraw = () => { sec.innerHTML = schedSection(); bindSched(); };
   const save = async (data, el) => {
     $$("button,select", sec).forEach((x) => (x.disabled = true));
-    try { const j = await api("admin.schedule", data); S.schedule = j.schedule; toast("Schedule saved"); }
+    try { const j = await api("schedule.edit", data); S.schedule = j.schedule; toast(t("Schedule saved", "班表已儲存")); }
     catch (e) { toast(e.message); }
     redraw();
   };
