@@ -100,8 +100,8 @@ window.RPG = {
       no: 6, zone: "castle", name: "組織設計藍圖", date: "2026-10-21", type: "boss", bossNo: 3,
       story: "機構要從一張圖變成一棟建築。到遊戲裡的「藍圖工地」找總建築師，跟著安和醫院成立出院準備小組，學會畫組織圖、確認每個人知道該向誰報告。",
       tasks: [
-        { kind: "個人小關", text: "故事事件：跟著安和醫院院長、人事室主任、病房護理長、出院準備專案組長改組織圖，再回工地考驗結構選擇，共 7 件事、20 題；含實務任務「讀懂組織圖」：從職位清單算出管理層級、控制幅度，找出有兩位上司的職位（10/21（三）開放，作答到 11/3（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
-        { kind: "魔王關", text: "魔王關 2 前半（占學期成績 4%）：到藍圖工地找危樓巨像，填寫「職位｜直屬上司｜主要職責」，作答畫面即時畫出組織圖；說明部門化方式、雙重指揮的處理，以及結構偏向機械式或有機式的理由（10/21（三）開放，11/3（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" }
+        { kind: "個人小關", text: "故事事件：跟著安和醫院院長、人事室主任、病房護理長、出院準備專案組長改組織圖，再回工地考驗結構選擇，共 7 件事、20 題；含實務任務「讀懂組織圖」：從職位清單算出管理層級、控制幅度，找出有兩位上司的職位（10/21（三）開放，作答到 11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
+        { kind: "魔王關", text: "魔王關 2 前半（占學期成績 4%）：到藍圖工地找危樓巨像，填寫「職位｜直屬上司｜主要職責」，作答畫面即時畫出組織圖；說明部門化方式、雙重指揮的處理，以及結構偏向機械式或有機式的理由（10/21（三）開放，11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" }
       ],
       criteria: [
         { name: "組織圖四要素", desc: "任務、分工、管理層級、指揮鏈。", source: "W7 p3" },
@@ -115,9 +115,9 @@ window.RPG = {
       no: 7, zone: "castle", name: "變革危機", date: "2026-10-28", type: "boss", bossNo: 3,
       story: "房子蓋好了，環境卻一直在變。到遊戲裡找翻修總監，跟著安和醫院導入「智慧病床＋電子交班」，看一家醫院怎麼推動變革、怎麼面對同仁的抗拒。",
       tasks: [
-        { kind: "個人小關", text: "故事事件：跟著安和醫院院長、人事室主任、智慧病床專案組長、員工代表、品管中心主任走一遍變革，共 6 件事、9 題；含實務任務「力場分析」：從 8 張便條找出驅離的力量。最後回報一則你看過或聽過的組織變革事例（不計對錯，組員在魔王關 2 後半會用到）（10/28（三）開放，作答到 11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
-        { kind: "支線", text: "智慧病床上線記：到安和醫院找院長特助，擔任變革顧問走完 10 站，判斷變革七步驟每一步該做的事與四種抗拒理由；第一次就選對的站數計入遊戲分數，可分次完成，不需截圖、不上傳 Zuvio（10/28（三）開放，11/10（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
-        { kind: "魔王關", text: "魔王關 2 後半（占學期成績 4%）：找冰封巨人，替你們的機構規劃一項變革：類型與基礎、七步驟、力場分析、兩位抗拒者（要是前半組織圖上的職位）與降低抗拒的技術、黎溫三階段、評估指標（10/28（三）開放，11/17（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" }
+        { kind: "個人小關", text: "故事事件：跟著安和醫院院長、人事室主任、智慧病床專案組長、員工代表、品管中心主任走一遍變革，共 6 件事、9 題；含實務任務「力場分析」：從 8 張便條找出驅離的力量。最後回報一則你看過或聽過的組織變革事例（不計對錯，組員在魔王關 2 後半會用到）（10/28（三）開放，作答到 11/17（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
+        { kind: "支線", text: "智慧病床上線記：到安和醫院找院長特助，擔任變革顧問走完 10 站，判斷變革七步驟每一步該做的事與四種抗拒理由；第一次就選對的站數計入遊戲分數，可分次完成，不需截圖、不上傳 Zuvio（10/28（三）開放，11/17（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" },
+        { kind: "魔王關", text: "魔王關 2 後半（占學期成績 4%）：找冰封巨人，替你們的機構規劃一項變革：類型與基礎、七步驟、力場分析、兩位抗拒者（要是前半組織圖上的職位）與降低抗拒的技術、黎溫三階段、評估指標（10/28（三）開放，11/24（二）截止）", url: "https://script.google.com/macros/s/AKfycbxFO4Qrq3e4UJoslolF7IMLAari9c4lV6aMuzhRAfDr_iEOZ3ec9TmY0qE0MM7lXg_T/exec" }
       ],
       criteria: [
         { name: "計畫性與因應性變革", desc: "計畫性：預先規劃，基於未來事件預測；因應性：對突發事件的零星反應。", source: "W8 p4" },
