@@ -209,6 +209,9 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
 .roll h4 { margin: 12px 0 6px; font-size: 16px; }
 .roll ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 10px; font-size: 15px; }
 .roll ul.one { grid-template-columns: 1fr; }
+.roll .acc { font: inherit; font-size: 13px; padding: 2px 8px; margin-left: 4px; border-radius: 6px; border: 1px solid #0e6a63; background: #fff; color: #0e6a63; cursor: pointer; white-space: nowrap; }
+.roll .acc:disabled { opacity: .5; cursor: default; }
+.roll select { font: inherit; font-size: 13px; max-width: 100%; }
 .roll li small { color: #777; }
 .roll li.pd small { color: #8a5d00; }
 </style>
@@ -261,10 +264,10 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
       <button type="button" id="attStat">查看狀態</button>
       <button type="button" id="attClear">清除通行碼</button>
     </p>
-    <p class="att-btns"><button type="button" id="attList">查看簽到名單</button></p>
+    <p class="att-btns"><label>日期 <input id="attDate" type="date"></label> <button type="button" id="attList">查看簽到名單</button></p>
     <p id="attMsg" class="att-msg">輸入通行碼後按「查看狀態」。</p>
     <div id="attRoll"></div>
-    <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。名單只顯示在這個視窗，關閉或重新整理就會清除。</p>
+    <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。名單可改日期回看之前的上課日；「待確認」「代碼錯誤」「名冊找不到」核對後按「認列出席」，試算表「出席」會直接改為出席並註記教師認列。名單只顯示在這個視窗，關閉或重新整理就會清除。</p>
   </div>
 </dialog>
 
@@ -510,21 +513,48 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     var roll = document.getElementById('attRoll');
     function li(p, extra, cls) { return '<li' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(p.name) + ' <small>' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組' + (extra ? '｜' + esc(extra) : '') + '</small></li>'; }
     // 名單順序由伺服器依教師提供的學員名單排好（Config.gs ROSTER_ORDER）
-    document.getElementById('attList').addEventListener('click', function () {
+    // 2026-10-29：可選日期回看；「認列出席」直接改試算表（doPost action 'accept'）
+    var dateIn = document.getElementById('attDate');
+    (function () { var d = new Date(); dateIn.value = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); })();
+    function post(payload) {
       var c = code.value.replace(/\s/g, '');
-      if (!c) { msg.textContent = '請先輸入教師通行碼。'; return; }
+      if (!c) { msg.textContent = '請先輸入教師通行碼。'; return Promise.reject(new Error('no code')); }
+      payload.auth = { id: '教師試玩', code: c };
+      return fetch(R.gameUrl, { method: 'POST', body: JSON.stringify(payload) }).then(function (r) { return r.json(); })
+        .then(function (j) { if (!j.ok) throw new Error(j.error); return j; });
+    }
+    function small(p, extra) { return ' <small>' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組' + (extra ? '｜' + esc(extra) : '') + '</small>'; }
+    function render(j) {
+      var d = new Date();
+      msg.textContent = j.today + ' 簽到名單（' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' 更新）' + (j.accepted != null ? '，已認列 ' + j.accepted + ' 列' : '');
+      var unknown = j.unknown || [];
+      var pick = function (row) {
+        return '<select data-row="' + row + '"><option value="">選擇是哪位學生…</option>' +
+          j.absent.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + ' ' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組</option>'; }).join('') + '</select>';
+      };
+      roll.innerHTML = '<div class="roll"><div class="roll-sum"><span class="ok">已簽到 ' + j.present.length + '</span><span class="pd">待確認 ' + (j.pending.length + unknown.length) + '</span><span class="no">未簽到 ' + j.absent.length + '</span><span>共 ' + j.total + ' 人</span></div>' +
+        (j.pending.length ? '<h4>待確認／代碼錯誤（核對後按「認列出席」）</h4><ul class="one">' + j.pending.map(function (p) {
+          return '<li class="pd">' + esc(p.name) + small(p, p.time + ' ' + p.result + (p.note ? '：' + p.note.replace(/（待確認）/g, '') : '')) + ' <button type="button" class="acc" data-id="' + esc(p.id) + '">認列出席</button></li>';
+        }).join('') + '</ul>' : '') +
+        (unknown.length ? '<h4>名冊找不到（學號欄填錯或空白；先指定是哪位學生再認列）</h4><ul class="one">' + unknown.map(function (u) {
+          return '<li class="pd">' + esc(u.time) + ' 填寫姓名：' + esc(u.typedName || '（空白）') + ' <small>學號欄：' + esc(u.typedId || '（空白）') + (u.note ? '｜' + esc(u.note) : '') + '</small><br>' + pick(u.row) + ' <button type="button" class="acc" data-row="' + u.row + '">認列出席</button></li>';
+        }).join('') + '</ul>' : '') +
+        '<h4>未簽到</h4>' + (j.absent.length ? '<ul>' + j.absent.map(function (p) { return li(p); }).join('') + '</ul>' : '<p>全部都簽到了。</p>') +
+        '<h4>已簽到</h4>' + (j.present.length ? '<ul>' + j.present.map(function (p) { return li(p, p.time); }).join('') + '</ul>' : '<p>目前沒有人簽到。</p>') + '</div>';
+    }
+    document.getElementById('attList').addEventListener('click', function () {
       msg.textContent = '讀取名單中…（會先收進最新的簽到）';
-      fetch(R.gameUrl, { method: 'POST', body: JSON.stringify({ auth: { id: '教師試玩', code: c }, action: 'list' }) })
-        .then(function (r) { return r.json(); })
-        .then(function (j) {
-          if (!j.ok) { msg.textContent = '⚠️ ' + j.error; return; }
-          var d = new Date(); msg.textContent = j.today + ' 簽到名單（' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' 更新）';
-          roll.innerHTML = '<div class="roll"><div class="roll-sum"><span class="ok">已簽到 ' + j.present.length + '</span><span class="pd">待確認 ' + j.pending.length + '</span><span class="no">未簽到 ' + j.absent.length + '</span><span>共 ' + j.total + ' 人</span></div>' +
-            (j.pending.length ? '<h4>待確認（核對後到試算表「出席」改為出席）</h4><ul class="one">' + j.pending.map(function (p) { return li(p, p.result + (p.note ? '：' + p.note.replace(/（待確認）/g, '') : ''), 'pd'); }).join('') + '</ul>' : '') +
-            '<h4>未簽到</h4>' + (j.absent.length ? '<ul>' + j.absent.map(function (p) { return li(p); }).join('') + '</ul>' : '<p>全部都簽到了。</p>') +
-            '<h4>已簽到</h4>' + (j.present.length ? '<ul>' + j.present.map(function (p) { return li(p, p.time); }).join('') + '</ul>' : '<p>目前沒有人簽到。</p>') + '</div>';
-        })
-        .catch(function () { msg.textContent = '⚠️ 連線失敗，請稍後再試。'; });
+      post({ action: 'list', date: dateIn.value }).then(render)
+        .catch(function (e) { if (e.message !== 'no code') msg.textContent = '⚠️ ' + (e.message === 'Failed to fetch' ? '連線失敗，請稍後再試。' : e.message); });
+    });
+    roll.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.acc');
+      if (!b) return;
+      var id = b.dataset.id || '', row = b.dataset.row || '';
+      if (row) { var s = b.parentNode.querySelector('select'); id = s ? s.value : ''; if (!id) { msg.textContent = '請先選擇這筆簽到是哪位學生。'; return; } }
+      b.disabled = true; b.textContent = '處理中…';
+      post({ action: 'accept', id: id, row: row, date: dateIn.value }).then(render)
+        .catch(function (e) { b.disabled = false; b.textContent = '認列出席'; if (e.message !== 'no code') msg.textContent = '⚠️ ' + (e.message === 'Failed to fetch' ? '連線失敗，請稍後再試。' : e.message); });
     });
     dlg.addEventListener('close', function () { roll.innerHTML = ''; });
     document.getElementById('attClear').addEventListener('click', function () { code.value = ''; code.focus(); msg.textContent = '已清除，請重新輸入教師通行碼。'; });
