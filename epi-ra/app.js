@@ -285,7 +285,7 @@ const lineIs = (l, short) => { const r = l.replace(/^(ID|VI)\b\s*:?\s*/i, "").tr
 const schedWeeks = () => S.schedules || (S.schedule ? [S.schedule] : []);   // 2026-10-29: this week + next week, one sheet tab each
 function schedSection() {
   const ws = schedWeeks();
-  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2>${canEditSched() && ws.length ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? t("Done", "完成") : t("Edit", "編輯")}</button>` : ""}</div>
+  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2></div>
     ${ws.length ? ws.map((w, i) => schedHtml(w, i)).join("") : `<p class="empty">${t("The schedule is not available.", "目前無法顯示班表。")}</p>`}
     ${ws.length ? schedFoot(ws) : ""}`;
 }
@@ -304,7 +304,9 @@ function schedHtml(s, wi) {
   };
   const when = s.start ? (s.start === mondayOf(S.today) ? t("This week", "本週") : t("Next week", "下週")) : "";
   const title = (s.title || "").replace(/^.*?—\s*/, "");   // drop the "e-PI … Teams —" prefix
-  return `<p class="sub" style="margin:${wi ? 14 : 0}px 0 6px">${when ? `<span class="tm">${when}</span> ` : ""}<b>${esc(title)}</b></p>
+  const editBtn = canEditSched() ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" data-sedit="1">${SCHED_EDIT ? t("Done", "完成") : t("Edit", "編輯")}</button>` : "";
+  const copyBtn = canEditSched() && wi > 0 && S.me.short ? `<button class="btn sm" data-scopy="${wi}" title="${t("Adds your shifts from this week to this schedule; shifts already there are kept.", "把你本週的班加進這張班表；已有的保留。")}">${t("Copy my shifts from this week", "複製我本週的班")}</button>` : "";
+  return `<div class="cardhead" style="margin:${wi ? 14 : 0}px 0 6px"><p class="sub" style="margin:0">${when ? `<span class="tm">${when}</span> ` : ""}<b>${esc(title)}</b></p><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${copyBtn}${editBtn}</span></div>
     <div class="tw"><table class="sched"><thead><tr>${s.grid[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
     ${s.grid.slice(1).map((r, ri) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : cell(c, ri + 1, i)).join("")}</tr>`).join("")}
     </tbody></table></div>`;
@@ -327,9 +329,17 @@ function bindSched() {
     catch (e) { toast(e.message); }
     redraw();
   };
-  const ed = $("#sedit", sec);
-  if (ed) ed.onclick = () => { SCHED_EDIT = !SCHED_EDIT; redraw(); };
+  $$("[data-sedit]", sec).forEach((b) => (b.onclick = () => { SCHED_EDIT = !SCHED_EDIT; redraw(); }));
   const sheetOf = (wi) => schedWeeks()[Number(wi)]?.sheet;
+  $$("[data-scopy]", sec).forEach((b) => (b.onclick = async () => {
+    $$("button,select", sec).forEach((x) => (x.disabled = true));
+    try {
+      const j = await api("schedule.copy", { from: sheetOf(0), to: sheetOf(b.dataset.scopy) });
+      S.schedule = j.schedule; S.schedules = j.schedules;
+      toast(j.added ? t(`${j.added} shift${j.added > 1 ? "s" : ""} copied`, `已複製 ${j.added} 個班`) : t("Nothing to copy: you have no shifts this week, or they are already there.", "沒有可複製的班：你本週沒有排班，或下週已經有了。"));
+    } catch (e) { toast(e.message); }
+    redraw();
+  }));
   $$("[data-sdel]", sec).forEach((b) => (b.onclick = () => { const [wi, row, col] = b.dataset.sdel.split(","); save({ sheet: sheetOf(wi), row, col, op: "remove", line: b.dataset.line }); }));
   $$("[data-sadd]", sec).forEach((sl) => (sl.onchange = () => { if (!sl.value) return; const [wi, row, col] = sl.dataset.sadd.split(","); save({ sheet: sheetOf(wi), row, col, op: "add", name: sl.value }); }));
 }
