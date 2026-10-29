@@ -290,8 +290,8 @@ function schedHtml() {
   if (!s) return `<p class="empty">${t("The schedule is not available.", "目前無法顯示班表。")}</p>`;
   const key = (S.me.short || "").toLowerCase();
   const lines = (c) => c.split(/\n/).map((l) => l.trim()).filter(Boolean);
-  const mine = (c) => key && S.me.role === "RA" && lines(c.toLowerCase()).some((l) => l.includes(key));
-  const ras = S.people;
+  const mine = (c) => key && lines(c.toLowerCase()).some((l) => l.includes(key));
+  const ras = S.people.concat(S.admins || []);   // 2026-10-29: admins (PI, 子芸) can be scheduled too
   const cell = (c, ri, ci) => {
     const ls = lines(c);
     if (!SCHED_EDIT) return `<td class="${mine(c) ? "me" : ""}">${ls.map((l) => `<span class="${teamTag(l)}${mine(l) ? " mine" : ""}">${esc(l)}</span>`).join("<br>")}</td>`;
@@ -305,7 +305,7 @@ function schedHtml() {
     ${s.grid.slice(1).map((r, ri) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : cell(c, ri + 1, i)).join("")}</tr>`).join("")}
     </tbody></table></div>
     ${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">${t("Changes are saved immediately and shown to everyone. Each change is recorded with your name.", "修改會立即儲存並顯示給所有人；每次修改都會記錄修改者。")}</p>` : ""}
-    ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove your own name.", "標色的是你的班。按「編輯」可新增或移除自己的名字（只能改自己的）。")}</p>` : ""}
+    ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove your own name.", "標色的是你的班。按「編輯」可新增或移除自己的名字（只能改自己的）。")}</p>` : `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove anyone, including yourself.", "標色的是你的班。按「編輯」可新增或移除任何人的名字，包括自己。")}</p>`}
     ${s.notes.concat(s.after).filter((n) => !/^https?:|RA portal/.test(n)).map((n) => `<p class="sub">${esc(n)}</p>`).join("")}`;
 }
 function bindSched() {
