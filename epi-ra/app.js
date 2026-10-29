@@ -282,46 +282,56 @@ const canEditSched = () => !S.viewAs;   // 2026-10-22: every signed-in RA can ed
 const teamTag = (l) => (/^ID\b/.test(l) ? "tm tm-id" : /^VI\b/.test(l) ? "tm tm-vi" : "tm");
 const teamCode = (team) => (team === "Indonesian" ? "ID: " : team === "Vietnamese" ? "VI: " : "");
 const lineIs = (l, short) => { const r = l.replace(/^(ID|VI)\b\s*:?\s*/i, "").trim().toLowerCase(), k = short.toLowerCase(); return r === k || r.startsWith(k + " "); };
+const schedWeeks = () => S.schedules || (S.schedule ? [S.schedule] : []);   // 2026-10-29: this week + next week, one sheet tab each
 function schedSection() {
-  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2>${canEditSched() && S.schedule ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? t("Done", "完成") : t("Edit", "編輯")}</button>` : ""}</div>${schedHtml()}`;
+  const ws = schedWeeks();
+  return `<div class="cardhead"><h2>${t("Shift schedule", "班表")}</h2>${canEditSched() && ws.length ? `<button class="btn sm ${SCHED_EDIT ? "pri" : ""}" id="sedit">${SCHED_EDIT ? t("Done", "完成") : t("Edit", "編輯")}</button>` : ""}</div>
+    ${ws.length ? ws.map((w, i) => schedHtml(w, i)).join("") : `<p class="empty">${t("The schedule is not available.", "目前無法顯示班表。")}</p>`}
+    ${ws.length ? schedFoot(ws) : ""}`;
 }
-function schedHtml() {
-  const s = S.schedule;
-  if (!s) return `<p class="empty">${t("The schedule is not available.", "目前無法顯示班表。")}</p>`;
+function schedHtml(s, wi) {
   const key = (S.me.short || "").toLowerCase();
   const lines = (c) => c.split(/\n/).map((l) => l.trim()).filter(Boolean);
   const mine = (c) => key && lines(c.toLowerCase()).some((l) => l.includes(key));
-  const ras = S.people.concat(S.admins || []);   // 2026-10-29: admins (PI, 子芸) can be scheduled too
+  const ras = S.people.concat(S.admins || []);   // admins (PI, 子芸) can be scheduled too
   const cell = (c, ri, ci) => {
     const ls = lines(c);
     if (!SCHED_EDIT) return `<td class="${mine(c) ? "me" : ""}">${ls.map((l) => `<span class="${teamTag(l)}${mine(l) ? " mine" : ""}">${esc(l)}</span>`).join("<br>")}</td>`;
     const own = isAdmin() ? null : S.me.short;   // an RA edits only their own name
     const avail = ras.filter((p) => (!own || p.short === own) && !ls.some((l) => lineIs(l, p.short)));
-    return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}${own && !lineIs(l, own) ? "" : `<button class="x" title="${t("Remove", "移除")}" data-sdel="${ri},${ci}" data-line="${esc(l)}">×</button>`}</span>`).join("")}
-      ${avail.length ? `<select class="sadd" data-sadd="${ri},${ci}"><option value="">＋ ${t("Add", "新增")}</option>${avail.map((p) => `<option value="${esc(p.short)}">${teamCode(p.team)}${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
+    return `<td class="edit">${ls.map((l) => `<span class="${teamTag(l)}">${esc(l)}${own && !lineIs(l, own) ? "" : `<button class="x" title="${t("Remove", "移除")}" data-sdel="${wi},${ri},${ci}" data-line="${esc(l)}">×</button>`}</span>`).join("")}
+      ${avail.length ? `<select class="sadd" data-sadd="${wi},${ri},${ci}"><option value="">＋ ${t("Add", "新增")}</option>${avail.map((p) => `<option value="${esc(p.short)}">${teamCode(p.team)}${esc(p.short)}</option>`).join("")}</select>` : ""}</td>`;
   };
-  return `${s.title ? `<p class="sub" style="margin-bottom:6px"><b>${esc(s.title)}</b></p>` : ""}
+  const when = s.start ? (s.start === mondayOf(S.today) ? t("This week", "本週") : t("Next week", "下週")) : "";
+  const title = (s.title || "").replace(/^.*?—\s*/, "");   // drop the "e-PI … Teams —" prefix
+  return `<p class="sub" style="margin:${wi ? 14 : 0}px 0 6px">${when ? `<span class="tm">${when}</span> ` : ""}<b>${esc(title)}</b></p>
     <div class="tw"><table class="sched"><thead><tr>${s.grid[0].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
     ${s.grid.slice(1).map((r, ri) => `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : cell(c, ri + 1, i)).join("")}</tr>`).join("")}
-    </tbody></table></div>
-    ${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">${t("Changes are saved immediately and shown to everyone. Each change is recorded with your name.", "修改會立即儲存並顯示給所有人；每次修改都會記錄修改者。")}</p>` : ""}
-    ${S.me.role === "RA" ? `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove your own name.", "標色的是你的班。按「編輯」可新增或移除自己的名字（只能改自己的）。")}</p>` : `<p class="sub" style="margin-top:6px">${t("Your shifts are highlighted. Press Edit to add or remove anyone, including yourself.", "標色的是你的班。按「編輯」可新增或移除任何人的名字，包括自己。")}</p>`}
-    ${s.notes.concat(s.after).filter((n) => !/^https?:|RA portal/.test(n)).map((n) => `<p class="sub">${esc(n)}</p>`).join("")}`;
+    </tbody></table></div>`;
 }
+function schedFoot(ws) {
+  const s = ws[0];
+  return `${SCHED_EDIT ? `<p class="sub" style="margin-top:6px">${t("Changes are saved immediately and shown to everyone. Each change is recorded with your name.", "修改會立即儲存並顯示給所有人；每次修改都會記錄修改者。")}</p>` : ""}
+    <p class="sub" style="margin-top:6px">${S.me.role === "RA" ? t("Your shifts are highlighted. Press Edit to add or remove your own name.", "標色的是你的班。按「編輯」可新增或移除自己的名字（只能改自己的）。") : t("Your shifts are highlighted. Press Edit to add or remove anyone, including yourself.", "標色的是你的班。按「編輯」可新增或移除任何人的名字，包括自己。")}
+    ${t("Next week's schedule appears automatically; please fill in your shifts for next week during this week.", "下週班表會自動出現，請在本週內填好下週的班。")}</p>
+    ${s.notes.concat(s.after).filter((n) => !/^https?:|RA portal|^Shifts per person/i.test(n)).map((n) => `<p class="sub">${esc(n)}</p>`).join("")}`;
+}
+const mondayOf = (ymd) => { const d = new Date(ymd + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
 function bindSched() {
   const sec = $("#schedsec");
   if (!sec) return;
   const redraw = () => { sec.innerHTML = schedSection(); bindSched(); };
-  const save = async (data, el) => {
+  const save = async (data) => {
     $$("button,select", sec).forEach((x) => (x.disabled = true));
-    try { const j = await api("schedule.edit", data); S.schedule = j.schedule; toast(t("Schedule saved", "班表已儲存")); }
+    try { const j = await api("schedule.edit", data); S.schedule = j.schedule; S.schedules = j.schedules; toast(t("Schedule saved", "班表已儲存")); }
     catch (e) { toast(e.message); }
     redraw();
   };
   const ed = $("#sedit", sec);
   if (ed) ed.onclick = () => { SCHED_EDIT = !SCHED_EDIT; redraw(); };
-  $$("[data-sdel]", sec).forEach((b) => (b.onclick = () => { const [row, col] = b.dataset.sdel.split(","); save({ row, col, op: "remove", line: b.dataset.line }); }));
-  $$("[data-sadd]", sec).forEach((sl) => (sl.onchange = () => { if (!sl.value) return; const [row, col] = sl.dataset.sadd.split(","); save({ row, col, op: "add", name: sl.value }); }));
+  const sheetOf = (wi) => schedWeeks()[Number(wi)]?.sheet;
+  $$("[data-sdel]", sec).forEach((b) => (b.onclick = () => { const [wi, row, col] = b.dataset.sdel.split(","); save({ sheet: sheetOf(wi), row, col, op: "remove", line: b.dataset.line }); }));
+  $$("[data-sadd]", sec).forEach((sl) => (sl.onchange = () => { if (!sl.value) return; const [wi, row, col] = sl.dataset.sadd.split(","); save({ sheet: sheetOf(wi), row, col, op: "add", name: sl.value }); }));
 }
 
 // ------------------------------------------------------------------ shared form bits
