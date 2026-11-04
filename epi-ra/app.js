@@ -30,7 +30,8 @@ if (/\bLine\//i.test(UA) && !/openExternalBrowser=1/.test(location.search)) {
 let S = null, SCHEMA = null, MANUAL = null, SLIDES = null;
 
 // ------------------------------------------------------------------ language
-const ZH = () => (S ? S.me.ui === "zh" : store.get("lang") === "zh");
+let FORCE_ZH = false;   // 2026-11-04: the Chinese questionnaire page (#zh…) is always shown in Chinese
+const ZH = () => FORCE_ZH || (S ? S.me.ui === "zh" : store.get("lang") === "zh");
 const t = (en, zh) => (ZH() ? zh : en);
 const TEAM_ZH = { Vietnamese: "越南文", Indonesian: "印尼文", Both: "越南文＋印尼文" };
 const teamName = (x) => (ZH() ? TEAM_ZH[x] || x : x === "Both" ? "Vietnamese & Indonesian" : x);
@@ -193,6 +194,7 @@ const ROUTES = [["home", "Home", "首頁"], ["refusal", "Refusal Log", "拒絕�
 const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
+  FORCE_ZH = route === "zh";
   const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat(isAdmin() ? [["admin", "Admin"]] : []);
   $("#app").innerHTML = `
     <header class="top"><div class="topin">
@@ -559,12 +561,58 @@ async function viewOnsite(v) {
 // ------------------------------------------------------------------ Chinese questionnaire (2026-11-04)
 // The last 10 Chinese questionnaires (IRB cap 470). Chinese-only page: the questions and options follow the Chinese team's forms
 // (研究助理訪談訓練手冊), not the foreign-language on-site record. Stored values are the Chinese labels themselves.
-const ZH_OLD = ["65–69歲", "70–79歲", "80歲以上"];
-function viewZh(v) {
+const ZH_OLD = ["65-69歲", "70-79歲", "80歲以上"];
+// Chinese paper questionnaires: double entry, same form as the foreign one but with the Chinese fields
+async function viewZhEntry(v) {
+  const e = S.zh.entry, want = location.hash.slice(1).split("/")[2];
+  v.innerHTML = `${zhNav("zh/entry")}
+    <h1>登錄中文問卷</h1>
+    <p class="lead">每份紙本問卷由兩個不同的人各自獨立登錄一次，網站會自動比對。紙本上寫什麼就登錄什麼。線上填答的問卷不用登錄。</p>
+    <div class="kv" style="font-size:15px;gap:6px 18px;margin-bottom:12px"><span>紙本 <b>${e.progress.paper}</b> 份</span><span>已登錄兩次 <b>${e.progress.two}</b></span><span>待核對差異 <b>${e.progress.open}</b></span></div>
+    ${e.canEnter ? `<section class="card" id="zstart"><h2>開始登錄</h2>
+      <div class="f"><label class="q" for="zes">封面上的流水號</label><input class="serialin" id="zes" type="text" inputmode="numeric" maxlength="4" value="${esc(want || "")}"></div>
+      <button class="btn pri" id="zego">開始</button></section>` : `<p class="note info">你沒有登錄中文問卷的權限。</p>`}
+    <div id="zeform"></div>
+    <section class="card" style="margin-top:16px"><h2>等待登錄</h2>
+      ${e.queue.length ? `<div class="tw"><table><thead><tr><th>流水號</th><th>收案者</th><th>日期</th><th>登錄次數</th></tr></thead><tbody>
+      ${e.queue.map((q) => `<tr><td class="mono">${q.mine || !e.canEnter ? esc(q.serial) : `<a href="#zh/entry/${esc(q.serial)}">${esc(q.serial)}</a>`}</td><td>${esc(q.collector)}</td><td class="mono">${esc(q.date.slice(5))}</td><td>${q.entries}/2 ${q.mine ? '<span class="tag">你已登錄</span>' : ""}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="empty">目前沒有。</p>`}</section>
+    <section class="card" style="margin-top:16px"><h2>我的登錄</h2>
+      ${e.myEntries.length ? `<div class="tw"><table><tbody>${e.myEntries.map((x) => `<tr><td class="mono">${esc(x.serial)}</td><td>第 ${esc(x.round)} 次</td><td class="mono faint">${esc(x.at)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">還沒有。</p>`}</section>`;
+  if (!e.canEnter) return;
+  $("#zego").onclick = async () => {
+    const serial = $("#zes").value.trim(), b = $("#zego");
+    if (!/^[0-9]{4}$/.test(serial)) return toast("請輸入 4 位數流水號。");
+    busy(b, true, "檢查中…");
+    try {
+      const [c, sc] = await Promise.all([api("zh.entry.check", { serial }), schema()]);
+      busy(b, false);
+      $("#zstart").hidden = true;
+      entryForm($("#zeform"), c, sc.zhEntry, ZH_ENTRY_CFG);
+    } catch (err) { busy(b, false); toast(err.message, 5000); }
+  };
+  if (/^[0-9]{4}$/.test(want || "")) $("#zego").click();
+}
+const ZH_ENTRY_CFG = { na: "未填寫", add: "zh.entry.add", valid: ["有效", "無效", "不確定"], own: true, back: "#zh/entry" };
+function zhNav(cur) {
+  const n = S.zh.entry.mismatches.length;
+  return `<div class="btns" style="margin:0 0 14px">${[["zh", "收案紀錄"], ["zh/entry", "登錄問卷"], ["zh/check", `核對差異${n ? `（${n}）` : ""}`]]
+    .map(([h, l]) => `<a class="btn sm ${h === cur ? "pri" : ""}" href="#${h}">${l}</a>`).join("")}</div>`;
+}
+async function viewZh(v) {
+  const sub = location.hash.slice(1).split("/")[1];
+  if (sub === "entry") return viewZhEntry(v);
+  if (sub === "check") {
+    const sc = await schema();
+    await viewCheck(v, { list: S.zh.entry.mismatches, fields: sc.zhEntry, fix: "zh.mismatch.fix", back: "#zh/entry", sep: ", ", confirm: "admin.zhconfirm" });
+    v.insertAdjacentHTML("afterbegin", zhNav("zh/check"));
+    return;
+  }
   const z = S.zh, o = z.opts, left = z.cap.irb - z.cap.collected;
   const own = z.q || z.r;
   const zhOther = (x) => (x && x.startsWith("Other: ") ? "其他：" + x.slice(7) : x);
   v.innerHTML = `
+    ${zhNav("zh")}
     <h1>中文問卷</h1>
     <p class="lead">中文版 IRB 上限 ${z.cap.irb} 份、學生組已收 ${z.cap.collected} 份，最後 ${left} 份記在這裡。題目與選項依中文版，和外文版的當場紀錄不同。</p>
     <section class="card"><h2>本批進度</h2>
@@ -601,7 +649,7 @@ function viewZh(v) {
         ${radios("zrq", o.quick)}<div class="h" style="margin-top:6px">「不想了解」是快問快答的答案，不是拒絕原因。</div></div>
       <div class="formbar"><button class="btn pri" id="zrsave">儲存拒絕紀錄</button></div>
     </form>
-    </div>` : `<p class="note info" style="margin-top:16px">你沒有中文版流水號區間，這裡只顯示紀錄。</p>`}
+    </div>` : `<p class="note info" style="margin-top:16px">你沒有中文版流水號區間，不必記錄收案；${z.entry.canEnter ? "要登錄紙本問卷請按上方「登錄問卷」。" : "這裡只顯示紀錄。"}</p>`}
     <section class="card" style="margin-top:16px"><h2>${isAdmin() ? "中文問卷紀錄（全部）" : "我的中文問卷紀錄"}</h2>
       ${z.onsite.length ? `<div class="tw"><table><thead><tr><th>流水號</th><th>日期</th><th>形式</th><th>年齡</th><th>填答方式</th><th>回覆時機</th><th>現場檢查</th><th></th></tr></thead><tbody>
       ${z.onsite.map((r) => `<tr><td class="mono">${esc(r.serial)}</td><td class="mono faint">${esc(r.date)} ${esc(r.time)}</td><td>${esc(r.mode)}</td><td class="${ZH_OLD.includes(r.age) ? "bad" : ""}">${esc(r.age)}</td><td>${esc(r.c1)}</td><td>${esc(String(r.c2).split("（")[0])}</td><td>${esc(r.check)}${r.cover !== "是" ? ' · <span class="bad">缺封面標記</span>' : ""}</td>
@@ -651,12 +699,12 @@ function viewZh(v) {
 
 // ------------------------------------------------------------------ data entry
 // §9.2 validity rules, applied to Q15–Q48 values ("1".."5" or NA)
-function validity(vals) {
-  const a = vals.filter((x) => x === NA).length >= 4;
-  const b = ["Q23", "Q34", "Q45"].every((k) => vals[+k.slice(1) - 15] === NA);
+function validity(vals, na = NA) {
+  const a = vals.filter((x) => x === na).length >= 4;
+  const b = ["Q23", "Q34", "Q45"].every((k) => vals[+k.slice(1) - 15] === na);
   let run = 1, c = false;
   for (let i = 1; i < vals.length; i++) {
-    run = vals[i] && vals[i] !== NA && vals[i] === vals[i - 1] ? run + 1 : 1;
+    run = vals[i] && vals[i] !== na && vals[i] === vals[i - 1] ? run + 1 : 1;
     if (run >= 12 && vals[i] !== "3") c = true;
   }
   return { a, b, c, unanswered: vals.filter((x) => !x).length };
@@ -712,15 +760,17 @@ async function viewEntry(v) {
   if (/^\d{4}$/.test(sub || "")) { $("#es").value = sub; $("#ego").click(); }
 }
 
-function entryForm(box, c, fields) {
+// cfg (2026-11-04, Chinese questionnaire): {na, add, valid: [valid, invalid, unsure] prefixes, own: true = use the field's own help text, back: hash after save/cancel}
+function entryForm(box, c, fields, cfg = {}) {
+  const na = cfg.na || NA, addAction = cfg.add || "entry.add", [vOK, vBAD, vUNS] = cfg.valid || ["Valid", "Invalid", "Unsure"];
   const key = "entry-draft-" + c.serial;
   let draft = {};
   try { draft = JSON.parse(store.get(key) || "{}"); } catch {}
-  store.set("entry-serial", c.serial);
+  if (!cfg.back) store.set("entry-serial", c.serial);   // the foreign Data Entry page offers to resume this draft
   const scaleStart = fields.findIndex((f) => f.k === "Q15");
   let html = `<form class="card" id="ef" autocomplete="off">
     <h2>${t(`Serial ${esc(c.serial)} · Entry ${c.round} of 2`, `流水號 ${esc(c.serial)} · 第 ${c.round} 次登錄（共 2 次）`)}</h2>
-    <div class="kv"><span>${t("Collector", "收案者")} <b>${esc(c.collector)}</b></span><span>${t("Language", "語言")} <b>${esc(teamName(c.language))}</b></span><span>${t("On-site record", "當場紀錄")} <b>${esc(c.date)}</b></span></div>
+    <div class="kv"><span>${t("Collector", "收案者")} <b>${esc(c.collector)}</b></span><span>${t("Language", "語言")} <b>${esc(c.language === "Chinese" ? t("Chinese", "中文") : teamName(c.language))}</b></span><span>${t("On-site record", "當場紀錄")} <b>${esc(c.date)}</b></span></div>
     <p class="note info">${t(`Blank item: choose "Not answered". Unclear mark (two boxes, between boxes, crossed out): choose "Not answered" and describe it in "Problems found".`, "空白題：選「未填寫」。勾選不清楚（勾兩格、勾在格子中間、塗改）：選「未填寫」，並在「登錄問題」說明。")}</p>`;
   fields.forEach((f, i) => {
     if (f.sec && f.k !== "Q15") html += `<div class="sec">${esc(f.sec)}</div>`;
@@ -734,7 +784,7 @@ function entryForm(box, c, fields) {
       html += `<div class="f" data-k="${esc(f.k)}"><span class="q">${esc(f.l)}</span><div class="h">${t("From the on-site record. Not entered again.", "沿用當場紀錄，不必再輸入。")}</div><div class="opt" style="cursor:default"><b>${esc(c.fixed[f.k])}</b></div></div>`;
       return;
     }
-    const help = (ZH() && HELP_ZH[f.k]) || f.h;
+    const help = (!cfg.own && ZH() && HELP_ZH[f.k]) || f.h;
     html += `<div class="f" data-k="${esc(f.k)}"><span class="q">${esc(f.l)}${f.opt ? ` <span class="faint">${t("(optional)", "（選填）")}</span>` : ""}</span>${help ? `<div class="h">${esc(help)}</div>` : ""}`;
     if (f.t === "mc") html += radios(f.k, f.o, draft[f.k], f.other);
     else if (f.t === "cb") html += checks(f.k, f.o, draft[f.k] || [], f.other);
@@ -759,7 +809,7 @@ function entryForm(box, c, fields) {
   };
   const scaleVals = (a) => Array.from({ length: 34 }, (_, i) => a["Q" + (15 + i)] || "");
   const suggest = () => {
-    const a = collect(), r = validity(scaleVals(a));
+    const a = collect(), r = validity(scaleVals(a), na);
     const why = [r.a && t("(a) 4 or more blanks in Q15–Q48", "(a) Q15–Q48 有 4 題以上空白"), r.b && t("(b) Q23, Q34 and Q45 all blank", "(b) Q23、Q34、Q45 皆空白"), r.c && t("(c) 12 or more identical non-3 answers in a row", "(c) 連續 12 題以上相同且不是 3 的答案")].filter(Boolean);
     $("#vsug").innerHTML = r.unanswered ? `<p class="note info">${t(`Suggestion appears when all of Q15–Q48 are entered (${r.unanswered} left).`, `Q15–Q48 全部輸入後會顯示建議（還剩 ${r.unanswered} 題）。`)}</p>`
       : why.length ? `<p class="note warn">${t("By the study rules this questionnaire looks <b>invalid</b>: ", "依研究規則，這份問卷看起來<b>無效</b>：")}${why.join(t("; ", "；"))}${t(". Check the paper, then choose the matching option.", "。請核對紙本後選擇相符的選項。")}</p>`
@@ -773,11 +823,11 @@ function entryForm(box, c, fields) {
     const x = e.target;
     if (x.type !== "checkbox" || !x.checked) return;
     const group = $$(`input[name="${CSS.escape(x.name)}"]`, form);
-    if (x.value === NA) group.forEach((y) => { if (y !== x) y.checked = false; });
-    else group.forEach((y) => { if (y.value === NA) y.checked = false; });
+    if (x.value === na) group.forEach((y) => { if (y !== x) y.checked = false; });
+    else group.forEach((y) => { if (y.value === na) y.checked = false; });
   });
   suggest();
-  $("#ecancel").onclick = () => { store.set("entry-serial", null); render(); };
+  $("#ecancel").onclick = () => { store.set("entry-serial", null); if (cfg.back) location.hash = cfg.back; render(); };
   form.onsubmit = async (ev) => {
     ev.preventDefault();
     const a = collect();
@@ -788,9 +838,9 @@ function entryForm(box, c, fields) {
       const el = $(`[data-k="${CSS.escape(missing[0])}"]`, form); el && el.scrollIntoView({ block: "center", behavior: "smooth" });
       return;
     }
-    const r = validity(scaleVals(a)), vchoice = a.validity;
-    const expect = r.a || r.b || r.c ? "Invalid" : "Valid";
-    if (!vchoice.startsWith(expect) && !vchoice.startsWith("Unsure") && $("#emsg").dataset.warned !== "1") {
+    const r = validity(scaleVals(a), na), vchoice = a.validity;
+    const expect = r.a || r.b || r.c ? vBAD : vOK;
+    if (!vchoice.startsWith(expect) && !vchoice.startsWith(vUNS) && $("#emsg").dataset.warned !== "1") {
       $("#emsg").dataset.warned = "1";
       $("#emsg").innerHTML = `<span class="bad">${t("Your validity choice differs from the rule check. Check again, then press Save once more to keep your choice.", "你選的有效性和規則檢查結果不同。請再核對一次，確定要保留你的選擇就再按一次儲存。")}</span>`;
       return;
@@ -798,8 +848,9 @@ function entryForm(box, c, fields) {
     const b = $("#esave");
     busy(b, true);
     try {
-      const j = await api("entry.add", { serial: c.serial, answers: a });
+      const j = await api(addAction, { serial: c.serial, answers: a });
       store.set(key, null); store.set("entry-serial", null);
+      if (cfg.back) location.hash = cfg.back;
       toast(j.round === 2 ? (j.differences ? t(`Saved. ${j.differences} difference(s) found; the collector will check them.`, `已儲存。發現 ${j.differences} 個差異，收案者會核對。`) : t("Saved. Both entries agree.", "已儲存。兩次登錄一致。")) : t(`Saved entry 1 for ${j.saved}.`, `已儲存 ${j.saved} 第 1 次登錄。`), 4500);
       await refresh();
     } catch (e) { busy(b, false); toast(e.message, 5000); }
@@ -807,22 +858,23 @@ function entryForm(box, c, fields) {
 }
 
 // differences between entry 1 and entry 2: the collector checks the paper and records the correct value
-async function viewCheck(v) {
-  const sc = await schema(), list = S.my.mismatches;
-  const byLabel = Object.fromEntries(sc.entry.map((f) => [f.l, f]));
+// cfg (2026-11-04, Chinese questionnaire): {list, fields, fix, back, sep, confirm: admin confirm action}
+async function viewCheck(v, cfg = {}) {
+  const sc = await schema(), list = cfg.list || S.my.mismatches, sep = cfg.sep || "; ";
+  const byLabel = Object.fromEntries((cfg.fields || sc.entry).map((f) => [f.l, f]));
   v.innerHTML = `<h1>${t("Check entry differences", "核對登錄差異")}</h1>
     <p class="lead">${t("The two entries differ for these items. Look at the <b>original paper questionnaire</b> and choose what is written there. Do not answer from memory.", "這些題目兩次登錄不一致。請看<b>紙本問卷原件</b>，選擇紙本上寫的答案，不要憑記憶回答。")}</p>
-    <p><a href="#entry">${t("← Data Entry", "← 登錄問卷")}</a></p>
+    <p><a href="${cfg.back || "#entry"}">${t("← Data Entry", "← 登錄問卷")}</a></p>
     ${list.length ? list.map((m) => {
       const f = byLabel[m.field] || { t: "para" };
       let input;
       if (f.t === "mc" || f.t === "scale") input = `<select data-row="${m.row}"><option value="">${t("Choose what the paper shows…", "選擇紙本上的答案…")}</option>${f.o.map((o) => `<option ${m.correct === o ? "selected" : ""}>${esc(o)}</option>`).join("")}${f.other ? `<option value="__other">${t("Other (type below)", "其他（在下方輸入）")}</option>` : ""}</select>${f.other ? `<input type="text" data-oth="${m.row}" placeholder="${t("Other: text as written", "其他：照原文輸入")}" style="margin-top:6px">` : ""}`;
-      else if (f.t === "cb") input = `<div data-cbrow="${m.row}">${checks("cb" + m.row, f.o, (m.correct || "").split("; ").filter(Boolean), f.other)}</div>`;
+      else if (f.t === "cb") input = `<div data-cbrow="${m.row}">${checks("cb" + m.row, f.o, (m.correct || "").split(sep).filter(Boolean), f.other)}</div>`;
       else if (f.t === "date") input = `<input type="date" data-row="${m.row}" value="${esc(m.correct)}">`;
       else input = `<textarea data-row="${m.row}">${esc(m.correct)}</textarea>`;
       return `<div class="mm card"><div><b class="mono">${esc(m.serial)}</b> · ${esc(m.field)} ${m.correct ? `<span class="tag ok">${t(`checked by ${esc(m.by)}`, `${esc(m.by)} 已核對`)}</span>` : `<span class="tag warn">${t("to check", "待核對")}</span>`}</div>
         <div class="vals"><span class="faint">${t("Entry 1", "第 1 次")}</span><span>${esc(m.e1) || `<span class="faint">${t("(empty)", "（空白）")}</span>`}</span><span class="faint">${t("Entry 2", "第 2 次")}</span><span>${esc(m.e2) || `<span class="faint">${t("(empty)", "（空白）")}</span>`}</span></div>
-        ${input}<div class="btns"><button class="btn pri sm" data-save="${m.row}" data-t="${f.t}">${t("Save", "儲存")}</button></div></div>`;
+        ${input}<div class="btns"><button class="btn pri sm" data-save="${m.row}" data-t="${f.t}">${t("Save", "儲存")}</button>${cfg.confirm && isAdmin() && m.correct ? `<button class="btn sm" data-conf="${m.row}">主持人確認</button>` : ""}</div></div>`;
     }).join("") : `<p class="empty">${t("Nothing to check.", "沒有要核對的項目。")}</p>`}`;
   $$("[data-save]", v).forEach((b) => (b.onclick = async () => {
     const row = b.dataset.save, ft = b.dataset.t, card = b.closest(".mm");
@@ -834,7 +886,12 @@ async function viewCheck(v) {
     }
     if (!value || (Array.isArray(value) && !value.length)) return toast(t("Choose the value written on the paper.", "請選擇紙本上寫的答案。"));
     busy(b, true);
-    try { await api("mismatch.fix", { row, value }); toast(t("Saved", "已儲存")); S = await api("state"); viewCheck(v); }
+    try { await api(cfg.fix || "mismatch.fix", { row, value }); toast(t("Saved", "已儲存")); S = await api("state"); render(); }
+    catch (e) { busy(b, false); toast(e.message, 4500); }
+  }));
+  $$("[data-conf]", v).forEach((b) => (b.onclick = async () => {
+    busy(b, true);
+    try { await api(cfg.confirm, { rows: [b.dataset.conf] }); toast("已確認"); S = await api("state"); render(); }
     catch (e) { busy(b, false); toast(e.message, 4500); }
   }));
 }
@@ -927,7 +984,7 @@ function viewAdmin(v) {
     </section>
 
     <section class="card"><h2>Download (CSV)</h2>
-      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"], ["worklog", "Work log"], ["zh-onsite", "中文問卷紀錄"], ["zh-refusals", "中文拒絕紀錄"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
+      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"], ["worklog", "Work log"], ["zh-onsite", "中文問卷紀錄"], ["zh-refusals", "中文拒絕紀錄"], ["zh-final", "中文最終資料（兩次一致）"], ["zh-entries", "中文全部登錄"], ["zh-mismatches", "中文登錄差異"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
       <p class="sub" style="margin-top:8px">Final dataset: one row per questionnaire entered twice; status "pending" until every difference is checked and confirmed.</p>
     </section></div>`;
   $$("[data-viewas]", v).forEach((b) => (b.onclick = () => { store.set("viewAs", b.dataset.viewas, true); location.hash = "home"; load(); }));
