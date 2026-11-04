@@ -193,7 +193,7 @@ const ROUTES = [["home", "Home", "首頁"], ["refusal", "Refusal Log", "拒絕�
 const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
-  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(isAdmin() ? [["admin", "Admin"]] : []);
+  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat(isAdmin() ? [["admin", "Admin"]] : []);
   $("#app").innerHTML = `
     <header class="top"><div class="topin">
       <div class="brand"><b>${t("e-PI RA Portal", "電子仿單收案網站")}</b><span>${t("Shin Kong Hospital · B1 outpatient pharmacy", "新光醫院 · B1 門診藥局")}</span></div>
@@ -204,7 +204,7 @@ function render() {
     <main id="view"></main>`;
   $("#out").onclick = signOut;
   if (S.viewAs) $("#vaexit").onclick = () => { store.set("viewAs", null, true); location.hash = "admin"; load(); };
-  const view = { home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, posters: viewPosters, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
+  const view = { zh: viewZh, home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, posters: viewPosters, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
   view($("#view"));
   window.scrollTo(0, 0);
 }
@@ -241,6 +241,13 @@ function viewHome(v) {
         <div class="btns"><a class="btn pri" href="#onsite">${t("+ On-site record", "＋ 當場紀錄")}</a><a class="btn" href="#refusal">${t("+ Refusal", "＋ 拒絕紀錄")}</a></div>
         <p class="sub" style="margin-top:10px">${t(`Today: ${m.todayOnsite.length} questionnaire${m.todayOnsite.length === 1 ? "" : "s"}, ${m.todayRefusals.length} refusal${m.todayRefusals.length === 1 ? "" : "s"}.`, `今天：問卷 ${m.todayOnsite.length} 份、拒絕 ${m.todayRefusals.length} 位。`)}</p>
       </section>` : ""}
+      ${S.zh?.q ? `<section class="card"><h2>中文問卷（最後 10 份）</h2>
+        <div class="serials">
+          <div class="serial"><div class="t">中文問卷</div><div class="n">${S.zh.nextQ ?? "—"}</div><div class="t">區間 ${S.zh.q[0]}–${S.zh.q[1]}</div></div>
+          <div class="serial"><div class="t">中文拒絕紀錄</div><div class="n">${S.zh.nextR ?? "—"}</div><div class="t">區間 ${S.zh.r[0]}–${S.zh.r[1]}</div></div>
+        </div>
+        <p class="sub" style="margin-top:8px">已記錄 ${S.zh.summary.done} / ${S.zh.cap.irb - S.zh.cap.collected} 份、拒絕 ${S.zh.summary.refusals} 位。</p>
+        <div class="btns"><a class="btn pri" href="#zh">＋ 中文快速紀錄／拒絕紀錄</a></div></section>` : ""}
       <section class="card"><h2>${t("To do", "待辦")}</h2>${todo.length ? `<ul class="todo">${todo.join("")}</ul>` : `<p class="empty">${t("Nothing waiting. Thank you!", "目前沒有待辦，謝謝你！")}</p>`}</section>
 
       <section class="card span2"><h2>${t("Collection progress", "收案進度")}</h2>
@@ -549,6 +556,99 @@ async function viewOnsite(v) {
   };
 }
 
+// ------------------------------------------------------------------ Chinese questionnaire (2026-11-04)
+// The last 10 Chinese questionnaires (IRB cap 470). Chinese-only page: the questions and options follow the Chinese team's forms
+// (研究助理訪談訓練手冊), not the foreign-language on-site record. Stored values are the Chinese labels themselves.
+const ZH_OLD = ["65–69歲", "70–79歲", "80歲以上"];
+function viewZh(v) {
+  const z = S.zh, o = z.opts, left = z.cap.irb - z.cap.collected;
+  const own = z.q || z.r;
+  const zhOther = (x) => (x && x.startsWith("Other: ") ? "其他：" + x.slice(7) : x);
+  v.innerHTML = `
+    <h1>中文問卷</h1>
+    <p class="lead">中文版 IRB 上限 ${z.cap.irb} 份、學生組已收 ${z.cap.collected} 份，最後 ${left} 份記在這裡。題目與選項依中文版，和外文版的當場紀錄不同。</p>
+    <section class="card"><h2>本批進度</h2>
+      <div class="kv" style="font-size:15px;gap:6px 18px"><span>已記錄 <b>${z.summary.done}</b> / ${left} 份</span><span>65 歲以下 <b>${z.summary.under65}</b></span><span>65 歲以上 <b>${z.summary.over65}</b></span><span>拒絕 <b>${z.summary.refusals}</b> 位</span></div>
+      <p class="note warn" style="margin-top:10px">本批只收 <b>65 歲以下（18–64 歲）</b>：主分析中 65 歲以上已超過配額，18–39 歲與 40–64 歲兩組仍不足，兩組各約 5 份。</p>
+    </section>
+    ${own ? `<div class="grid two" style="margin-top:16px">
+    <form class="card" id="zq">
+      <h2>快速紀錄（每回收一份記一筆）</h2>
+      <p class="sub">給完禮品、寫好封面標記後立即記錄。</p>
+      <div class="f"><label class="q" for="zqs">流水號（寫在封面）</label><div class="h">已帶入你的下一個號碼。區間 ${z.q[0]}–${z.q[1]}。紙本與線上都用這組號碼；線上表單的「流水號」欄也填這個號碼。</div>
+        <input class="serialin" id="zqs" type="text" inputmode="numeric" maxlength="4" value="${z.nextQ ?? ""}"></div>
+      <div class="f"><span class="q">問卷形式</span>${radios("zmode", o.mode)}</div>
+      <div class="f"><span class="q">填答者年齡（問卷第 1 題）</span>${radios("zage", o.age)}<p class="note warn" id="zold" hidden>這位是 65 歲以上。本批只收 65 歲以下，請確認是否仍要計入。</p></div>
+      <div class="f"><span class="q">填答方式</span>${radios("zc1", o.c1)}</div>
+      <div class="f"><span class="q">回覆時機</span><div class="h">早期＝主動配合；晚期＝考慮後才同意填寫。</div>${radios("zc2", o.c2)}</div>
+      <div class="f"><span class="q">現場檢查（30 秒目視確認）：發現什麼？</span><div class="h">符合的都要勾。依 9/12 有效性規則，連續相同的答案若是「3」不算問題，不要質疑填答者。</div>${checks("zchk", o.check)}</div>
+      <div class="f"><span class="q">後續處理</span>${radios("zfollow", o.follow)}</div>
+      <div class="f"><label class="opt"><input type="checkbox" id="zgift"><span><b>已給禮品。</b>每位交回問卷的填答者都要給禮品，不論有沒有修改答案。</span></label></div>
+      <div class="f"><span class="q">封面標記已完成？（填答方式、回覆時機、流水號）</span>${radios("zcover", ["是", "否"], "是")}</div>
+      <div class="f"><label class="q" for="znotes">備註（選填）</label><textarea id="znotes" maxlength="1000"></textarea></div>
+      <div class="formbar"><button class="btn pri" id="zqsave">儲存快速紀錄</button></div>
+    </form>
+    <form class="card" id="zr">
+      <h2>拒絕紀錄（每位拒絕者一筆）</h2>
+      <p class="sub">立即記錄。不符合資格的人（未滿 18 歲、急診、想填外文版）不要記錄。</p>
+      <div class="f"><label class="q" for="zrs">流水號</label><div class="h">已帶入你的下一個號碼。區間 ${z.r[0]}–${z.r[1]}。</div>
+        <input class="serialin" id="zrs" type="text" inputmode="numeric" maxlength="4" value="${z.nextR ?? ""}"></div>
+      <div class="f"><span class="q">性別（目測）</span>${radios("zrg", o.gender)}</div>
+      <div class="f"><span class="q">目測年齡（不要詢問）</span>${radios("zra", o.refAge)}</div>
+      <div class="f"><span class="q">主要拒絕原因</span>${radios("zrr", o.reason, "", true)}</div>
+      <div class="f"><span class="q">快問快答</span>
+        <div class="note info">「沒關係，謝謝您！最後一個問題：政府有新的藥品資訊查詢管道，您是否會想了解？」對方沒有回應就記「未回覆」。</div>
+        ${radios("zrq", o.quick)}<div class="h" style="margin-top:6px">「不想了解」是快問快答的答案，不是拒絕原因。</div></div>
+      <div class="formbar"><button class="btn pri" id="zrsave">儲存拒絕紀錄</button></div>
+    </form>
+    </div>` : `<p class="note info" style="margin-top:16px">你沒有中文版流水號區間，這裡只顯示紀錄。</p>`}
+    <section class="card" style="margin-top:16px"><h2>${isAdmin() ? "中文問卷紀錄（全部）" : "我的中文問卷紀錄"}</h2>
+      ${z.onsite.length ? `<div class="tw"><table><thead><tr><th>流水號</th><th>日期</th><th>形式</th><th>年齡</th><th>填答方式</th><th>回覆時機</th><th>現場檢查</th><th></th></tr></thead><tbody>
+      ${z.onsite.map((r) => `<tr><td class="mono">${esc(r.serial)}</td><td class="mono faint">${esc(r.date)} ${esc(r.time)}</td><td>${esc(r.mode)}</td><td class="${ZH_OLD.includes(r.age) ? "bad" : ""}">${esc(r.age)}</td><td>${esc(r.c1)}</td><td>${esc(String(r.c2).split("（")[0])}</td><td>${esc(r.check)}${r.cover !== "是" ? ' · <span class="bad">缺封面標記</span>' : ""}</td>
+        <td style="text-align:right">${r.deletable ? `<button class="btn sm danger" onclick="delRecord('zh-onsite','${esc(r.serial)}')">刪除</button>` : ""}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="empty">還沒有紀錄。</p>`}
+      <h3>拒絕紀錄</h3>
+      ${z.refusals.length ? `<div class="tw"><table><thead><tr><th>流水號</th><th>日期</th><th>性別</th><th>目測年齡</th><th>拒絕原因</th><th>快問快答</th><th></th></tr></thead><tbody>
+      ${z.refusals.map((r) => `<tr><td class="mono">${esc(r.serial)}</td><td class="mono faint">${esc(r.date)} ${esc(r.time)}</td><td>${esc(r.gender)}</td><td>${esc(r.age)}</td><td>${esc(r.reason)}</td><td>${esc(r.quick)}</td>
+        <td style="text-align:right">${r.deletable ? `<button class="btn sm danger" onclick="delRecord('zh-refusal','${esc(r.serial)}')">刪除</button>` : ""}</td></tr>`).join("")}
+      </tbody></table></div>` : `<p class="empty">還沒有紀錄。</p>`}
+      <p class="sub" style="margin-top:6px">輸入錯了？刪除後重新輸入（限當天）。</p>
+    </section>`;
+  if (!own) return;
+  const fq = $("#zq"), fr = $("#zr");
+  fq.addEventListener("change", (e) => {
+    if (e.target.name === "zage") $("#zold").hidden = !ZH_OLD.includes(e.target.value);
+    if (e.target.name !== "zchk") return;
+    const none = o.check[0];
+    if (e.target.value === none && e.target.checked) $$('input[name="zchk"]', fq).forEach((x) => { if (x.value !== none) x.checked = false; });
+    else if (e.target.checked) $$('input[name="zchk"]', fq).forEach((x) => { if (x.value === none) x.checked = false; });
+    if (getChecks(fq, "zchk").join() === none) $$('input[name="zfollow"]', fq).forEach((x) => (x.checked = x.value === o.follow[0]));
+  });
+  fq.onsubmit = async (ev) => {
+    ev.preventDefault();
+    const b = $("#zqsave");
+    const body = { serial: $("#zqs").value.trim(), mode: getRadio(fq, "zmode"), age: getRadio(fq, "zage"), c1: getRadio(fq, "zc1"), c2: getRadio(fq, "zc2"),
+      checks: getChecks(fq, "zchk"), follow: getRadio(fq, "zfollow"), gift: $("#zgift").checked, cover: getRadio(fq, "zcover"), notes: $("#znotes").value };
+    const miss = [["serial", "流水號"], ["mode", "問卷形式"], ["age", "年齡"], ["c1", "填答方式"], ["c2", "回覆時機"], ["follow", "後續處理"], ["cover", "封面標記"]].filter(([k]) => !body[k]).map(([, l]) => l);
+    if (!body.checks.length) miss.push("現場檢查");
+    if (miss.length) return toast("請填寫：" + miss.join("、"));
+    if (!body.gift) return toast("請給禮品並勾選「已給禮品」。");
+    busy(b, true, "儲存中…");
+    try { const j = await api("zh.onsite.add", body); toast(`已儲存中文問卷 ${j.saved}`); await refresh(); }
+    catch (e) { busy(b, false); toast(e.message, 4500); }
+  };
+  fr.onsubmit = async (ev) => {
+    ev.preventDefault();
+    const b = $("#zrsave");
+    const body = { serial: $("#zrs").value.trim(), gender: getRadio(fr, "zrg"), age: getRadio(fr, "zra"), reason: zhOther(getRadio(fr, "zrr")), quick: getRadio(fr, "zrq") };
+    const miss = [["serial", "流水號"], ["gender", "性別"], ["age", "目測年齡"], ["reason", "拒絕原因"], ["quick", "快問快答"]].filter(([k]) => !body[k]).map(([, l]) => l);
+    if (miss.length) return toast("請填寫：" + miss.join("、"));
+    busy(b, true, "儲存中…");
+    try { const j = await api("zh.refusal.add", body); toast(`已儲存中文拒絕紀錄 ${j.saved}`); await refresh(); }
+    catch (e) { busy(b, false); toast(e.message, 4500); }
+  };
+}
+
 // ------------------------------------------------------------------ data entry
 // §9.2 validity rules, applied to Q15–Q48 values ("1".."5" or NA)
 function validity(vals) {
@@ -827,7 +927,7 @@ function viewAdmin(v) {
     </section>
 
     <section class="card"><h2>Download (CSV)</h2>
-      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"], ["worklog", "Work log"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
+      <div class="btns">${[["final", "Final dataset (agreed entries)"], ["entries", "All entries"], ["mismatches", "Differences"], ["onsite", "On-site records"], ["refusals", "Refusals"], ["returned", "Returned"], ["worklog", "Work log"], ["zh-onsite", "中文問卷紀錄"], ["zh-refusals", "中文拒絕紀錄"]].map(([k, l]) => `<button class="btn sm" data-exp="${k}">${l}</button>`).join("")}</div>
       <p class="sub" style="margin-top:8px">Final dataset: one row per questionnaire entered twice; status "pending" until every difference is checked and confirmed.</p>
     </section></div>`;
   $$("[data-viewas]", v).forEach((b) => (b.onclick = () => { store.set("viewAs", b.dataset.viewas, true); location.hash = "home"; load(); }));
