@@ -207,10 +207,14 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
 .roll-sum span { padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 15px; }
 .roll-sum .ok { background: #e3f1e8; color: #2c7a4f; } .roll-sum .pd { background: #fbf0d9; color: #8a5d00; } .roll-sum .no { background: #f8e3e0; color: #b8392c; }
 .roll h4 { margin: 12px 0 6px; font-size: 16px; }
-.roll ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 10px; font-size: 15px; }
+.roll ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 10px; font-size: 15px; }
 .roll ul.one { grid-template-columns: 1fr; }
 .roll .acc { font: inherit; font-size: 13px; padding: 2px 8px; margin-left: 4px; border-radius: 6px; border: 1px solid #0e6a63; background: #fff; color: #0e6a63; cursor: pointer; white-space: nowrap; }
 .roll .acc:disabled { opacity: .5; cursor: default; }
+.roll .spk { white-space: nowrap; }
+.roll .sp-add, .roll .sp-undo { font: inherit; font-size: 13px; padding: 1px 6px; margin-left: 4px; border-radius: 6px; border: 1px solid #8a5d00; background: #fff; color: #8a5d00; cursor: pointer; }
+.roll .sp-add.on { background: #fbf0d9; font-weight: 700; }
+.roll .sp-add:disabled, .roll .sp-undo:disabled { opacity: .5; cursor: default; }
 .roll select { font: inherit; font-size: 13px; max-width: 100%; }
 .roll li small { color: #777; }
 .roll li.pd small { color: #8a5d00; }
@@ -267,7 +271,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     <p class="att-btns"><label>日期 <input id="attDate" type="date"></label> <button type="button" id="attList">查看簽到名單</button></p>
     <p id="attMsg" class="att-msg">輸入通行碼後按「查看狀態」。</p>
     <div id="attRoll"></div>
-    <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。名單可改日期回看之前的上課日；「待確認」「代碼錯誤」「名冊找不到」核對後按「認列出席」，試算表「出席」會直接改為出席並註記教師認列。名單只顯示在這個視窗，關閉或重新整理就會清除。</p>
+    <p class="note-sm">時間到會自動關閉表單（最多延遲 5 分鐘）；時段外送出的簽到記為「簽到時間外」，不計出席。名單可改日期回看之前的上課日；「待確認」「代碼錯誤」「名冊找不到」核對後按「認列出席」，試算表「出席」會直接改為出席並註記教師認列。<b>課堂發言加分</b>：按「查看簽到名單」後，點學生旁的 🎤 記一次（每次 0.5 分，學期上限 5 分，記在目前顯示的名單日期），點錯按 ↩ 撤銷該生當日最後一筆；紀錄在試算表「發言加分」。名單只顯示在這個視窗，關閉或重新整理就會清除。</p>
   </div>
 </dialog>
 
@@ -285,6 +289,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
       <li><b>課堂出勤及參與 40%</b>：出席 16%（9/9～12/16）、Zuvio 課堂參與 6%（9/9～10/7），以及遊戲 18%：個人小關在遊戲中以故事事件進行（你是本組的創院團隊成員，到顧問醫院「安和醫院」觀摩；關主派任務，劇情角色遇到事件才提問），只看第一次作答，每關開放 7 天後截止，和遊戲裡的支線（依遊戲內得分）合併計分。</li>
       <li><b>練習作業 25%</b>：3 個魔王關（小組）：魔王關 1 占 9%（前半 4%、後半 5%），魔王關 2、魔王關 3 各占 8%；組員的魔王關分數都等於小組得分。</li>
       <li><b>期末考 25%</b>、<b>參觀心得報告 10%</b>。</li>
+      <li><b>課堂發言加分（外加）</b>：上課回答問題每次加 0.5 分，不看答對答錯，整學期最多加 5 分，加在學期成績上，不占上面 100% 的配分，學期總分最高以 100 分計；遊戲「成績」面板看得到自己的加分。</li>
       <li>魔王關部分項目由程式檢查（例如欄位完整、計算正確），部分項目由人工智慧（AI）依公開的評分規準評分；對結果有疑問可以申訴。</li>
       <li><b>只能交一次</b>：魔王關是小組作業，每組只採計第一次送出，請全組同意後再由一人送出。</li><li><b>回頭升級</b>：後面的魔王關會要求修正前面的內容，修正寫在新的魔王關作答裡評分。</li>
       <li>排行榜只公布組名與機構分數，不顯示學號或個人分數。</li>
@@ -511,7 +516,15 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     document.getElementById('attClose').addEventListener('click', function () { call('close'); });
     document.getElementById('attStat').addEventListener('click', function () { call('status'); });
     var roll = document.getElementById('attRoll');
-    function li(p, extra, cls) { return '<li' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(p.name) + ' <small>' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組' + (extra ? '｜' + esc(extra) : '') + '</small></li>'; }
+    // 課堂發言加分（2026-11-11）：名單每人一顆 🎤（顯示當日次數）與 ↩ 撤銷；資料來自伺服器回傳的 speak
+    var last = null;
+    function sp(p) {
+      var S = last && last.speak; if (!S) return '';
+      var k = String(p.id).toUpperCase(), n = S.today[k] || 0, t = S.total[k] || 0;
+      return ' <span class="spk"><button type="button" class="sp-add' + (n ? ' on' : '') + '" data-id="' + esc(p.id) + '" data-name="' + esc(p.name) + '" title="記一次發言（' + S.per + ' 分）；學期已加 ' + t + '／' + S.cap + ' 分">🎤' + (n ? '×' + n : '') + '</button>' +
+        (n ? '<button type="button" class="sp-undo" data-id="' + esc(p.id) + '" data-name="' + esc(p.name) + '" title="撤銷這位同學當日最後一筆發言">↩</button>' : '') + '</span>';
+    }
+    function li(p, extra, cls) { return '<li' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(p.name) + ' <small>' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組' + (extra ? '｜' + esc(extra) : '') + '</small>' + sp(p) + '</li>'; }
     // 名單順序由伺服器依教師提供的學員名單排好（Config.gs ROSTER_ORDER）
     // 2026-10-29：可選日期回看；「認列出席」直接改試算表（doPost action 'accept'）
     var dateIn = document.getElementById('attDate');
@@ -525,6 +538,7 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
     }
     function small(p, extra) { return ' <small>' + esc(p.id) + '｜第 ' + esc(p.group) + ' 組' + (extra ? '｜' + esc(extra) : '') + '</small>'; }
     function render(j) {
+      last = j;
       var d = new Date();
       msg.textContent = j.today + ' 簽到名單（' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' 更新）' + (j.accepted != null ? '，已認列 ' + j.accepted + ' 列' : '');
       var unknown = j.unknown || [];
@@ -534,11 +548,12 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
       };
       roll.innerHTML = '<div class="roll"><div class="roll-sum"><span class="ok">已簽到 ' + j.present.length + '</span><span class="pd">待確認 ' + (j.pending.length + unknown.length) + '</span><span class="no">未簽到 ' + j.absent.length + '</span><span>共 ' + j.total + ' 人</span></div>' +
         (j.pending.length ? '<h4>待確認／代碼錯誤（核對後按「認列出席」）</h4><ul class="one">' + j.pending.map(function (p) {
-          return '<li class="pd">' + esc(p.name) + small(p, p.time + ' ' + p.result + (p.note ? '：' + p.note.replace(/（待確認）/g, '') : '')) + ' <button type="button" class="acc" data-id="' + esc(p.id) + '">認列出席</button></li>';
+          return '<li class="pd">' + esc(p.name) + small(p, p.time + ' ' + p.result + (p.note ? '：' + p.note.replace(/（待確認）/g, '') : '')) + ' <button type="button" class="acc" data-id="' + esc(p.id) + '">認列出席</button>' + sp(p) + '</li>';
         }).join('') + '</ul>' : '') +
         (unknown.length ? '<h4>名冊找不到（學號欄填錯或空白；先指定是哪位學生再認列）</h4><ul class="one">' + unknown.map(function (u) {
           return '<li class="pd">' + esc(u.time) + ' 填寫姓名：' + esc(u.typedName || '（空白）') + ' <small>學號欄：' + esc(u.typedId || '（空白）') + (u.note ? '｜' + esc(u.note) : '') + '</small><br>' + pick(u.row) + ' <button type="button" class="acc" data-row="' + u.row + '">認列出席</button></li>';
         }).join('') + '</ul>' : '') +
+        (j.speak ? '' : '<p class="pd">⚠️ 伺服器還是舊版，發言加分按鈕暫不顯示（請先執行上傳部署）。</p>') +
         '<h4>未簽到</h4>' + (j.absent.length ? '<ul>' + j.absent.map(function (p) { return li(p); }).join('') + '</ul>' : '<p>全部都簽到了。</p>') +
         '<h4>已簽到</h4>' + (j.present.length ? '<ul>' + j.present.map(function (p) { return li(p, p.time); }).join('') + '</ul>' : '<p>目前沒有人簽到。</p>') + '</div>';
     }
@@ -548,6 +563,24 @@ a.go { display: inline-block; background: var(--accent); color: var(--accent-tex
         .catch(function (e) { if (e.message !== 'no code') msg.textContent = '⚠️ ' + (e.message === 'Failed to fetch' ? '連線失敗，請稍後再試。' : e.message); });
     });
     roll.addEventListener('click', function (ev) {
+      var s = ev.target.closest('.sp-add, .sp-undo');
+      if (s) {
+        if (!last) return;
+        var undo = s.classList.contains('sp-undo'), nm = s.dataset.name, dt = last.today;
+        roll.querySelectorAll('.sp-add, .sp-undo').forEach(function (x) { x.disabled = true; });
+        msg.textContent = (undo ? '撤銷 ' : '記錄 ') + nm + ' 的發言中…';
+        post({ action: undo ? 'unspeak' : 'speak', id: s.dataset.id, date: dt }).then(function (j) {
+          if (!j.speak) throw new Error('伺服器還是舊版，沒有記錄發言加分；請先執行上傳部署。');
+          last.speak = j.speak; render(last);
+          var k = String(s.dataset.id).toUpperCase();
+          msg.textContent = (undo ? (j.changed ? '↩ 已撤銷 ' + nm + ' ' + dt + ' 最後一筆發言' : '⚠️ ' + nm + ' ' + dt + ' 沒有發言紀錄可撤銷')
+            : '🎤 已記錄 ' + nm + ' ' + dt + ' 發言＋' + j.speak.per + ' 分') + '（當日 ' + (j.speak.today[k] || 0) + ' 次，學期加分 ' + (j.speak.total[k] || 0) + '／' + j.speak.cap + ' 分）';
+        }).catch(function (e) {
+          roll.querySelectorAll('.sp-add, .sp-undo').forEach(function (x) { x.disabled = false; });
+          if (e.message !== 'no code') msg.textContent = '⚠️ ' + (e.message === 'Failed to fetch' ? '連線失敗，請稍後再試（這一筆可能沒記到，請重新查看名單確認）。' : e.message);
+        });
+        return;
+      }
       var b = ev.target.closest('.acc');
       if (!b) return;
       var id = b.dataset.id || '', row = b.dataset.row || '';
