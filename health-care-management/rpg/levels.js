@@ -150,7 +150,7 @@ window.RPG = {
       ],
       criteria: [
         { name: "實證醫學", desc: "三大要素、五步驟（Ask、Acquire、Appraise、Apply、Audit）、6S 資源。", source: "W11 實證 p5–17" },
-        { name: "醫院公共關係", desc: "對象、各類關係的檢核與方法、危機公關、對外與對內工具、效果評估。", source: "W11 公關 p2–15" }
+        { name: "醫院公共關係", desc: "對象、各類關係的檢核與方法、危機公關、對外與對內工具、效果評估。", source: "W11 公關 p2–16" }
       ],
       upgrade: ""
     },
