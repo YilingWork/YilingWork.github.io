@@ -221,7 +221,8 @@ const pct = (a, b) => (b ? Math.min(100, Math.round((a / b) * 100)) : 0);
 function viewHome(v) {
   const m = S.my, me = S.me, R = myRanges(), N = myNext(), langs = Object.keys(R);
   const todo = [];
-  if (m.mismatches.length) todo.push(`<li><a href="#entry/check">${t(`${m.mismatches.length} entry difference${m.mismatches.length > 1 ? "s" : ""} to check against the paper questionnaire`, `${m.mismatches.length} 個登錄差異要對照紙本問卷核對`)}</a></li>`);
+  const mmOpen = m.mismatches.filter((x) => !x.checked).length;   // 2026-11-18: checked items wait for the PI, not for the collector
+  if (mmOpen) todo.push(`<li><a href="#entry/check">${t(`${mmOpen} entry difference${mmOpen > 1 ? "s" : ""} to check against the paper questionnaire`, `${mmOpen} 個登錄差異要對照紙本問卷核對`)}</a></li>`);
   if (m.toReturn.length) todo.push(`<li>${t("Ready to return to the PI office (F814):", "可以交回主持人辦公室（F814）：")} <span class="mono">${m.toReturn.map(esc).join(", ")}</span></li>`);
   const coverNo = m.todayOnsite.filter((r) => r.cover !== "Yes");
   if (coverNo.length) todo.push(`<li>${t("Cover marks not done today:", "今天還沒完成封面標記：")} <span class="mono">${coverNo.map((r) => esc(r.serial)).join(", ")}</span>${t(". Complete them before you leave.", "。離開前請完成。")}</li>`);
@@ -595,7 +596,7 @@ async function viewZhEntry(v) {
 }
 const ZH_ENTRY_CFG = { na: "未填寫", add: "zh.entry.add", valid: ["有效", "無效", "不確定"], own: true, back: "#zh/entry" };
 function zhNav(cur) {
-  const n = S.zh.entry.mismatches.length;
+  const n = S.zh.entry.mismatches.filter((x) => !x.checked).length;
   return `<div class="btns" style="margin:0 0 14px">${[["zh", "收案紀錄"], ["zh/entry", "登錄問卷"], ["zh/check", `核對差異${n ? `（${n}）` : ""}`]]
     .map(([h, l]) => `<a class="btn sm ${h === cur ? "pri" : ""}" href="#${h}">${l}</a>`).join("")}</div>`;
 }
@@ -731,7 +732,7 @@ async function viewEntry(v) {
   v.innerHTML = `
     <h1>${t("Data Entry", "登錄問卷")}</h1>
     <p class="lead">${t("Every paper questionnaire is entered twice, by two different people, independently. Enter exactly what is on the paper.", "每份紙本問卷由兩個不同的人各自獨立登錄一次。紙本上寫什麼就登錄什麼。")}</p>
-    ${S.my.mismatches.length ? `<p class="note warn"><a href="#entry/check">${t(`${S.my.mismatches.length} difference${S.my.mismatches.length > 1 ? "s" : ""} to check against the paper`, `${S.my.mismatches.length} 個差異要對照紙本核對`)}</a></p>` : ""}
+    ${S.my.mismatches.some((x) => !x.checked) ? (() => { const k = S.my.mismatches.filter((x) => !x.checked).length; return `<p class="note warn"><a href="#entry/check">${t(`${k} difference${k > 1 ? "s" : ""} to check against the paper`, `${k} 個差異要對照紙本核對`)}</a></p>`; })() : ""}
     <section class="card" id="start"><h2>${t("Start an entry", "開始登錄")}</h2>
       <div class="f"><label class="q" for="es">${t("Serial number on the cover", "封面上的流水號")}</label><input class="serialin" id="es" type="text" inputmode="numeric" maxlength="4" value="${esc(draftSerial || "")}"></div>
       <button class="btn pri" id="ego">${t("Start", "開始")}</button>
@@ -872,9 +873,9 @@ async function viewCheck(v, cfg = {}) {
       else if (f.t === "cb") input = `<div data-cbrow="${m.row}">${checks("cb" + m.row, f.o, (m.correct || "").split(sep).filter(Boolean), f.other)}</div>`;
       else if (f.t === "date") input = `<input type="date" data-row="${m.row}" value="${esc(m.correct)}">`;
       else input = `<textarea data-row="${m.row}">${esc(m.correct)}</textarea>`;
-      return `<div class="mm card"><div><b class="mono">${esc(m.serial)}</b> · ${esc(m.field)} ${m.correct ? `<span class="tag ok">${t(`checked by ${esc(m.by)}`, `${esc(m.by)} 已核對`)}</span>` : `<span class="tag warn">${t("to check", "待核對")}</span>`}</div>
+      return `<div class="mm card"><div><b class="mono">${esc(m.serial)}</b> · ${esc(m.field)} ${m.checked ? `<span class="tag ok">${t(`checked by ${esc(m.by)}`, `${esc(m.by)} 已核對`)}</span>` : `<span class="tag warn">${t("to check", "待核對")}</span>`}</div>
         <div class="vals"><span class="faint">${t("Entry 1", "第 1 次")}</span><span>${esc(m.e1) || `<span class="faint">${t("(empty)", "（空白）")}</span>`}</span><span class="faint">${t("Entry 2", "第 2 次")}</span><span>${esc(m.e2) || `<span class="faint">${t("(empty)", "（空白）")}</span>`}</span></div>
-        ${input}<div class="btns"><button class="btn pri sm" data-save="${m.row}" data-t="${f.t}">${t("Save", "儲存")}</button>${cfg.confirm && isAdmin() && m.correct ? `<button class="btn sm" data-conf="${m.row}">主持人確認</button>` : ""}</div></div>`;
+        ${f.opt ? `<p class="faint" style="font-size:13px;margin:4px 0">${t("If nothing is written on the paper, leave it empty and press Save.", "紙本上沒有寫就留空白，直接按儲存。")}</p>` : ""}${input}<div class="btns"><button class="btn pri sm" data-save="${m.row}" data-t="${f.t}" data-opt="${f.opt ? 1 : ""}">${t("Save", "儲存")}</button>${cfg.confirm && isAdmin() && m.checked && m.canConfirm ? `<button class="btn sm" data-conf="${m.row}">主持人確認</button>` : ""}</div></div>`;
     }).join("") : `<p class="empty">${t("Nothing to check.", "沒有要核對的項目。")}</p>`}`;
   $$("[data-save]", v).forEach((b) => (b.onclick = async () => {
     const row = b.dataset.save, ft = b.dataset.t, card = b.closest(".mm");
@@ -884,7 +885,7 @@ async function viewCheck(v, cfg = {}) {
       value = $(`[data-row="${row}"]`, card).value;
       if (value === "__other") { const o = $(`[data-oth="${row}"]`, card).value.trim(); value = o ? "Other: " + o : ""; }
     }
-    if (!value || (Array.isArray(value) && !value.length)) return toast(t("Choose the value written on the paper.", "請選擇紙本上寫的答案。"));
+    if (!b.dataset.opt && (!value || (Array.isArray(value) && !value.length))) return toast(t("Choose the value written on the paper.", "請選擇紙本上寫的答案。"));
     busy(b, true);
     try { await api(cfg.fix || "mismatch.fix", { row, value }); toast(t("Saved", "已儲存")); S = await api("state"); render(); }
     catch (e) { busy(b, false); toast(e.message, 4500); }
@@ -965,7 +966,7 @@ function viewAdmin(v) {
 
     <section class="card"><h2>Entry differences</h2>
       ${S.my.mismatches.length ? `<div class="tw"><table><thead><tr><th></th><th>Serial</th><th>Item</th><th>Entry 1</th><th>Entry 2</th><th>Correct value</th></tr></thead><tbody>
-      ${S.my.mismatches.map((m) => `<tr><td>${m.correct ? `<input type="checkbox" data-mm="${m.row}">` : ""}</td><td class="mono">${esc(m.serial)}</td><td>${esc(m.field)}</td><td>${esc(m.e1)}</td><td>${esc(m.e2)}</td><td>${m.correct ? `${esc(m.correct)}<div class="faint" style="font-size:12px">${esc(m.by)}</div>` : '<span class="tag warn">collector to check</span>'}</td></tr>`).join("")}
+      ${S.my.mismatches.map((m) => `<tr><td>${m.checked && m.canConfirm ? `<input type="checkbox" data-mm="${m.row}">` : m.checked ? '<span class="tag warn">PI</span>' : ""}</td><td class="mono">${esc(m.serial)}</td><td>${esc(m.field)}</td><td>${esc(m.e1)}</td><td>${esc(m.e2)}</td><td>${m.checked ? `${esc(m.correct) || '<span class="faint">(empty)</span>'}<div class="faint" style="font-size:12px">${esc(m.by)}</div>` : '<span class="tag warn">collector to check</span>'}</td></tr>`).join("")}
       </tbody></table></div><div class="btns"><button class="btn pri sm" id="mconf">Confirm ticked</button><a class="btn sm" href="#entry/check">Check items myself</a></div>` : `<p class="empty">No open differences.</p>`}
     </section>
 
