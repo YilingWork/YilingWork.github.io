@@ -103,7 +103,7 @@ const trErr = (msg) => {
 };
 
 // Admin "view as": state is loaded for another person; every write is blocked in the browser.
-const VIEW_OK = { state: 1, schema: 1, manual: 1, slides: 1, signout: 1 };
+const VIEW_OK = { state: 1, schema: 1, manual: 1, slides: 1, signout: 1, efficiency: 1 };
 async function api(action, data = {}) {
   const va = store.get("viewAs", true);
   if (va && !VIEW_OK[action]) throw Object.assign(new Error(trErr(`View only: you are viewing as ${va}. Go back to your own view to make changes.`)), { code: 0 });
@@ -195,7 +195,7 @@ const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
   FORCE_ZH = route === "zh";
-  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat(isAdmin() ? [["admin", "Admin"]] : []);
+  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat([["eff", t("Efficiency", "收案效率")]]).concat(isAdmin() ? [["admin", "Admin"]] : []);
   $("#app").innerHTML = `
     <header class="top"><div class="topin">
       <div class="brand"><b>${t("e-PI RA Portal", "電子仿單收案網站")}</b><span>${t("Shin Kong Hospital · B1 outpatient pharmacy", "新光醫院 · B1 門診藥局")}</span></div>
@@ -206,7 +206,7 @@ function render() {
     <main id="view"></main>`;
   $("#out").onclick = signOut;
   if (S.viewAs) $("#vaexit").onclick = () => { store.set("viewAs", null, true); location.hash = "admin"; load(); };
-  const view = { zh: viewZh, home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, posters: viewPosters, manual: viewManual, slides: viewSlides, admin: viewAdmin }[route] || viewHome;
+  const view = { zh: viewZh, home: viewHome, refusal: viewRefusal, onsite: viewOnsite, entry: viewEntry, work: viewWork, posters: viewPosters, manual: viewManual, slides: viewSlides, admin: viewAdmin, eff: viewEff }[route] || viewHome;
   view($("#view"));
   window.scrollTo(0, 0);
 }
@@ -1020,6 +1020,83 @@ function viewAdmin(v) {
     } catch (e) { toast(e.message); }
     busy(b, false);
   }));
+}
+
+// ------------------------------------------------------------------ 2026-11-24 collection efficiency dashboard (everyone signed in; PI 2026-11-24)
+// Live from the PI sheet via the 'efficiency' action (Efficiency.gs). Red = strictly below the median (50th percentile) of that column.
+let EFF_PERIOD = "all";
+const effMedian = (a) => { const s = a.filter((x) => x != null).sort((x, y) => x - y); if (!s.length) return null; const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const effCell = (v, med, fmt = (x) => x.toFixed(2)) => (v == null ? '<span class="faint">—</span>' : `<span class="${med != null && v < med ? "eff-low" : ""}">${fmt(v)}</span>`);
+const effPct = (x) => Math.round(x * 100) + "%";
+const effTeam = (x) => (x === "Vietnamese" ? t("Vietnamese", "越南組") : x === "Indonesian" ? t("Indonesian", "印尼組") : teamName(x));
+async function viewEff(v) {
+  const title = t("Collection efficiency", "收案效率");
+  const from = EFF_PERIOD === "all" ? "" : (() => { const d = new Date(S.today + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() - Number(EFF_PERIOD) + 1); return d.toISOString().slice(0, 10); })();
+  v.innerHTML = `<h1>${title}</h1><p class="sub">${t("Loading…", "讀取中…")}</p>`;
+  let E;
+  try { E = await api("efficiency", { from }); } catch (e) { v.innerHTML = `<h1>${title}</h1><div class="note err">${esc(e.message)}</div>`; return; }
+  if (location.hash.slice(1) !== "eff") return;
+  const P = E.people, T = E.total, f2 = (x) => (x == null ? "—" : x.toFixed(2));
+  const med = { d: effMedian(P.map((p) => p.donePerH)), c: effMedian(P.map((p) => p.contactPerH)), s: effMedian(P.map((p) => p.success)) };
+  const maxD = Math.max(0.01, ...P.map((p) => p.contactPerH || 0));
+  const SL = E.slots, sm = (k, f) => effMedian(SL.filter((r) => r[k].shifts).map((r) => r[k][f]));
+  const smed = { d: sm("all", "donePerH"), c: sm("all", "contactPerH"), s: sm("all", "success"), vi: sm("vi", "donePerH"), id: sm("id", "donePerH") };
+  const WD = ZH() ? ["週一", "週二", "週三", "週四", "週五"] : ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const half = (s) => (s === "AM" ? t("Morning", "上午") : t("Afternoon", "下午"));
+  const small = `<span class="tag warn" title="${t(`fewer than ${E.fewShifts} shifts or ${E.fewHours} hours`, `班次少於 ${E.fewShifts} 班或工時少於 ${E.fewHours} 小時`)}">${t("small sample", "樣本少")}</span>`;
+  const slotCell = (o, m) => (o.shifts ? `<div class="eff-big">${effCell(o.donePerH, m)}</div><div class="faint eff-meta">${t(`${o.shifts} shifts · ${o.hours.toFixed(1)} h`, `${o.shifts} 班・${o.hours.toFixed(1)} 時`)}<br>${t(`done ${o.done} · refused ${o.ref}`, `完成 ${o.done}・拒絕 ${o.ref}`)}</div>` : `<span class="faint">${t("no shifts", "沒排班")}</span>`);
+  const warnRows = P.filter((p) => p.unmatched);
+  const nm = (p) => esc(p.short || p.name);
+  const periods = [["all", t("All", "全部")], ["28", t("Last 4 weeks", "近 4 週")], ["14", t("Last 2 weeks", "近 2 週")]];
+  v.innerHTML = `<h1>${title}</h1>
+    <p class="lead">${t("Live from the study data sheet.", "即時讀取研究資料表。")} ${t("Period", "期間")} ${esc(E.range.from || "—")}～${esc(E.range.to || "—")}. <b class="eff-low">${t("Red", "紅字")}</b>${t(" = below the median (50th percentile) of that column.", "＝低於該欄中位數（第 50 百分位）。")}</p>
+    <nav class="tabs" style="margin-bottom:14px">${periods.map(([k, l]) => `<a href="#eff" data-per="${k}" class="${k === EFF_PERIOD ? "on" : ""}">${l}</a>`).join("")}
+      <a href="#eff" id="effre">${t("Refresh", "重新整理")}</a></nav>
+    <div class="eff-tiles">
+      <div class="card"><div class="sub">${t("Collection hours", "收案工時")}</div><div class="eff-num">${T.hours.toFixed(1)}<small> ${t("h", "時")}</small></div></div>
+      <div class="card"><div class="sub">${t("Completed / refused", "成功作答／拒絕")}</div><div class="eff-num">${T.done}<small> ／ ${T.ref}</small></div></div>
+      <div class="card"><div class="sub">${t("Completed per hour (average)", "平均成功作答／時")}</div><div class="eff-num">${f2(T.donePerH)}</div></div>
+      <div class="card"><div class="sub">${t("Agreed after approach", "接觸成功率")}</div><div class="eff-num">${T.success == null ? "—" : effPct(T.success)}</div></div>
+    </div>
+    ${warnRows.length ? `<div class="note warn">${t("These records have no work hours logged on the same day, so they are not counted. Please add your work hours:", "以下收案紀錄當天沒有工時紀錄，未計入效率，請補登工時：")} ${warnRows.map((p) => `${nm(p)} (${p.unmatched.days.map(esc).join(", ")}; ${t("done", "完成")} ${p.unmatched.done}, ${t("refused", "拒絕")} ${p.unmatched.ref})`).join("; ")}</div>` : ""}
+    <div class="grid">
+    <section class="card"><h2>${t("By research assistant", "各研究助理")}</h2>
+      ${P.length ? `<div class="tw"><table class="eff-nw"><thead><tr><th>${t("Name", "助理")}</th><th>${t("Team", "組別")}</th><th class="num">${t("Shifts", "班次")}</th><th class="num">${t("Hours", "工時")}</th><th class="num">${t("Done", "完成")}</th><th class="num">${t("Refused", "拒絕")}</th><th style="min-width:170px">${t("Completed / h", "成功作答／時")}</th><th class="num">${t("Approached / h", "接觸人數／時")}</th><th class="num">${t("Agreed", "成功率")}</th></tr></thead><tbody>
+      ${P.map((p) => `<tr class="${p.name === S.me.name ? "eff-me" : ""}"><td>${nm(p)} ${p.small ? small : ""}</td><td>${esc(effTeam(p.team))}</td><td class="num">${p.shifts}</td><td class="num">${p.hours.toFixed(1)}</td><td class="num">${p.done}</td><td class="num">${p.ref}</td>
+        <td><div class="eff-bar"><i class="d" style="width:${((p.donePerH || 0) / maxD) * 100}%"></i><i class="r" style="width:${(((p.contactPerH || 0) - (p.donePerH || 0)) / maxD) * 100}%"></i></div>${effCell(p.donePerH, med.d)}</td>
+        <td class="num">${effCell(p.contactPerH, med.c)}</td><td class="num">${effCell(p.success, med.s, effPct)}</td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:6px">${t("Bar: dark = completed per hour, light = refused per hour (together = people approached per hour).", "長條：深色＝成功作答／時，淺色＝拒絕／時（合起來＝接觸人數／時）。")} ${t("Medians", "中位數")}: ${f2(med.d)} · ${f2(med.c)} · ${med.s == null ? "—" : effPct(med.s)}</p>
+      <details style="margin-top:8px"><summary class="sub">${t("Hours not counted as collection (IRB course, meetings, training, data entry only)", "已扣除的非收案工時（IRB 課程、開會、訓練、單獨登錄）")}</summary>
+        <div class="tw"><table><thead><tr><th>${t("Name", "助理")}</th><th>${t("Date", "日期")}</th><th class="num">${t("Hours", "時數")}</th><th>${t("Description", "工時說明")}</th></tr></thead><tbody>
+        ${P.flatMap((p) => p.excludedRows.map((x) => `<tr><td>${nm(p)}</td><td class="mono">${esc(x.date)}</td><td class="num">${x.hours.toFixed(2)}</td><td>${esc(x.desc)}</td></tr>`)).join("") || `<tr><td colspan="4" class="faint">${t("None", "無")}</td></tr>`}
+        </tbody></table></div></details>` : `<p class="empty">${t("No collection hours in this period.", "這段期間沒有收案工時。")}</p>`}
+    </section>
+
+    <section class="card"><h2>${t("By weekday and time of day", "週一至週五各時段")}</h2>
+      <div class="tw"><table class="eff-slots"><thead><tr><th></th>${WD.map((w) => `<th>${w}</th>`).join("")}</tr></thead><tbody>
+      ${["AM", "PM"].map((s) => `<tr><th>${half(s)}</th>${SL.filter((r) => r.slot === s).map((r) => `<td>${slotCell(r.all, smed.d)}${r.all.small ? small : ""}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:6px">${t(`Large number = completed per hour (median ${f2(smed.d)}). Shifts starting before 12:00 count as morning; evening and weekend shifts count only in the totals above.`, `大字＝成功作答份數／時（中位數 ${f2(smed.d)}）。12:00 前開始的班算上午；晚上與週末的班只計入上方個人合計。`)}</p>
+      <h3>${t("Details and teams", "各時段明細與語言組")}</h3>
+      <div class="tw"><table class="eff-nw"><thead><tr><th>${t("Time slot", "時段")}</th><th class="num">${t("Shifts", "班次")}</th><th class="num">${t("Hours", "工時")}</th><th class="num">${t("Done", "完成")}</th><th class="num">${t("Refused", "拒絕")}</th><th class="num">${t("Completed / h", "成功作答／時")}</th><th class="num">${t("Approached / h", "接觸人數／時")}</th><th class="num">${t("Agreed", "成功率")}</th><th class="num"><span class="lbl-vi">${t("Vietnamese", "越南組")}</span> ${t("completed / h", "成功／時")}</th><th class="num"><span class="lbl-id">${t("Indonesian", "印尼組")}</span> ${t("completed / h", "成功／時")}</th></tr></thead><tbody>
+      ${SL.map((r) => `<tr><td>${WD[r.wd]} ${half(r.slot)}</td><td class="num">${r.all.shifts}</td><td class="num">${r.all.hours.toFixed(1)}</td><td class="num">${r.all.done}</td><td class="num">${r.all.ref}</td>
+        <td class="num">${effCell(r.all.donePerH, smed.d)}</td><td class="num">${effCell(r.all.contactPerH, smed.c)}</td><td class="num">${effCell(r.all.success, smed.s, effPct)}</td>
+        <td class="num">${effCell(r.vi.donePerH, smed.vi)}${r.vi.shifts ? ` <span class="faint">(${r.vi.shifts})</span>` : ""}</td><td class="num">${effCell(r.id.donePerH, smed.id)}${r.id.shifts ? ` <span class="faint">(${r.id.shifts})</span>` : ""}</td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:6px">${t("Brackets = number of shifts. Each team column is compared with its own median.", "括號＝班次數。語言組兩欄各自和同欄的中位數比較。")}</p>
+    </section>
+
+    <section class="card"><h2>${t("How it is calculated", "計算方式")}</h2>
+      <ul class="sub" style="padding-left:18px;margin:0">
+        <li>${t("Collection hours = Work Log hours minus IRB course, meetings, training, manual briefing and data-entry-only periods (see “Hours not counted” above).", "收案工時＝工時紀錄扣除 IRB 課程、開會、訓練、手冊說明與單獨登錄的時段（明細見上方「已扣除」）。")}</li>
+        <li>${t("Completed = On-site Records; refused = Refusal Log. Each record is matched to the collector’s shift on the same day (if there are two shifts that day, before 12:45 = morning).", "成功作答＝當場紀錄份數；拒絕＝拒絕紀錄份數；依日期對應到該助理當天的班次（同一天有上下午兩班時，以紀錄時間 12:45 為界）。")}</li>
+        <li>${t("Not included:", "不列入：")} ${E.excludedNames.map(esc).join(ZH() ? "、" : ", ")}${t(", and Admins without work hours.", "，以及沒有工時紀錄的 Admin。")}</li>
+        <li>${t(`“Small sample” = fewer than ${E.fewShifts} shifts or ${E.fewHours} hours; one shift can change the numbers a lot.`, `「樣本少」＝班次少於 ${E.fewShifts} 班或工時少於 ${E.fewHours} 小時，數字容易受單一班次影響。`)}</li>
+      </ul>
+    </section></div>`;
+  $$("[data-per]", v).forEach((a) => (a.onclick = (e) => { e.preventDefault(); EFF_PERIOD = a.dataset.per; viewEff(v); }));
+  $("#effre").onclick = (e) => { e.preventDefault(); viewEff(v); };
 }
 
 load();

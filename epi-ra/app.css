@@ -148,3 +148,17 @@ input.serialin{font-family:var(--mono);font-size:22px;max-width:160px}
 /* recruitment posters */
 .plang{order:0;flex-basis:auto;margin-bottom:4px}
 .poster{display:block;width:100%;max-width:760px;height:auto;margin:14px auto 0;border:1px solid var(--hairline);border-radius:var(--radius-sm);background:#fff}
+/* 2026-11-24 efficiency dashboard (#eff) */
+.eff-low{color:var(--err);font-weight:700}
+.eff-tiles{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:16px}
+@media (min-width:700px){.eff-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.eff-num{font-size:26px;font-weight:700;color:var(--ink);line-height:1.2;font-variant-numeric:tabular-nums}
+.eff-num small{font-size:14px;font-weight:400;color:var(--muted)}
+.eff-bar{display:flex;height:8px;border-radius:var(--pill);background:var(--paper-deep);overflow:hidden;margin:6px 0 2px}
+.eff-bar i{display:block;height:100%}.eff-bar i.d{background:var(--accent)}.eff-bar i.r{background:var(--hairline)}
+table.eff-slots td,table.eff-slots th{border:1px solid var(--hairline);text-align:center;min-width:96px}
+.eff-big{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.eff-meta{font-size:11.5px;line-height:1.4}
+.lbl-vi{color:var(--vi)}.lbl-id{color:var(--id)}
+table.eff-nw th,table.eff-nw td{white-space:nowrap}
+.eff-me td{background:var(--accent-bg)}
