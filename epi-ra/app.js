@@ -1067,10 +1067,10 @@ async function viewEff(v) {
         <td class="num">${effCell(p.contactPerH, med.c)}</td><td class="num">${effCell(p.success, med.s, effPct)}</td></tr>`).join("")}
       </tbody></table></div>
       <p class="sub" style="margin-top:6px">${t("Bar: dark = completed per hour, light = refused per hour (together = people approached per hour).", "長條：深色＝成功作答／時，淺色＝拒絕／時（合起來＝接觸人數／時）。")} ${t("Medians", "中位數")}: ${f2(med.d)} · ${f2(med.c)} · ${med.s == null ? "—" : effPct(med.s)}</p>
-      <details style="margin-top:8px"><summary class="sub">${t("Hours not counted as collection (IRB course, meetings, training, data entry only)", "已扣除的非收案工時（IRB 課程、開會、訓練、單獨登錄）")}</summary>
+      ${isAdmin() ? `<details style="margin-top:8px"><summary class="sub">${t("Hours not counted as collection (IRB course, meetings, training, data entry only)", "已扣除的非收案工時（IRB 課程、開會、訓練、單獨登錄）")}</summary>
         <div class="tw"><table><thead><tr><th>${t("Name", "助理")}</th><th>${t("Date", "日期")}</th><th class="num">${t("Hours", "時數")}</th><th>${t("Description", "工時說明")}</th></tr></thead><tbody>
         ${P.flatMap((p) => p.excludedRows.map((x) => `<tr><td>${nm(p)}</td><td class="mono">${esc(x.date)}</td><td class="num">${x.hours.toFixed(2)}</td><td>${esc(x.desc)}</td></tr>`)).join("") || `<tr><td colspan="4" class="faint">${t("None", "無")}</td></tr>`}
-        </tbody></table></div></details>` : `<p class="empty">${t("No collection hours in this period.", "這段期間沒有收案工時。")}</p>`}
+        </tbody></table></div></details>` : ""}` : `<p class="empty">${t("No collection hours in this period.", "這段期間沒有收案工時。")}</p>`}
     </section>
 
     <section class="card"><h2>${t("By weekday and time of day", "週一至週五各時段")}</h2>
@@ -1089,7 +1089,7 @@ async function viewEff(v) {
 
     <section class="card"><h2>${t("How it is calculated", "計算方式")}</h2>
       <ul class="sub" style="padding-left:18px;margin:0">
-        <li>${t("Collection hours = Work Log hours minus IRB course, meetings, training, manual briefing and data-entry-only periods (see “Hours not counted” above).", "收案工時＝工時紀錄扣除 IRB 課程、開會、訓練、手冊說明與單獨登錄的時段（明細見上方「已扣除」）。")}</li>
+        <li>${t("Collection hours = Work Log hours minus IRB course, meetings, training, manual briefing and data-entry-only periods.", "收案工時＝工時紀錄扣除 IRB 課程、開會、訓練、手冊說明與單獨登錄的時段。")}</li>
         <li>${t("Completed = On-site Records; refused = Refusal Log. Each record is matched to the collector’s shift on the same day (if there are two shifts that day, before 12:45 = morning).", "成功作答＝當場紀錄份數；拒絕＝拒絕紀錄份數；依日期對應到該助理當天的班次（同一天有上下午兩班時，以紀錄時間 12:45 為界）。")}</li>
         <li>${t("Not included:", "不列入：")} ${E.excludedNames.map(esc).join(ZH() ? "、" : ", ")}${t(", and Admins without work hours.", "，以及沒有工時紀錄的 Admin。")}</li>
         <li>${t(`“Small sample” = fewer than ${E.fewShifts} shifts or ${E.fewHours} hours; one shift can change the numbers a lot.`, `「樣本少」＝班次少於 ${E.fewShifts} 班或工時少於 ${E.fewHours} 小時，數字容易受單一班次影響。`)}</li>
