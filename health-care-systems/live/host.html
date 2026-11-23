@@ -139,25 +139,27 @@ const readFile = f => new Promise((ok, no) => { const r = new FileReader(); r.on
 // ================= 設定畫面 =================
 function setup(msg = '') {
   const last = LS.get('liveHostSess', null);
-  roster = LS.get('liveRoster', []);
   app.innerHTML = `<div class="setup panel"><h1 style="font-size:28px">課堂互動・投影端</h1>
     <label>班級</label><select id="cls"><option>A</option><option>B</option></select>
     <label>題目檔（CSV，可多選；只在這台電腦讀取，不上傳）</label><input type="file" id="qf" accept=".csv,.txt" multiple>
     <div id="qinfo" class="muted" style="margin-top:6px"></div>
-    <label>學生名單（CSV，需有「學號」「姓名」欄；只存在這台電腦，不上傳 Firebase）</label><input type="file" id="rf" accept=".csv,.txt">
+    <label>學生名單（CSV，需有「學號」「姓名」欄；A、B 班各存一份，只存在這台電腦，不上傳 Firebase）</label><input type="file" id="rf" accept=".csv,.txt">
     <div id="rinfo" class="muted" style="margin-top:6px"></div>
     <div><button class="btn" id="go">建立新課堂</button>${last ? `<button class="btn ghost" id="resume">繼續課堂 ${esc(last.code)}（${esc(last.cls)} 班）</button>` : ''}</div>
     <div class="ng" style="margin-top:10px">${esc(msg)}</div>
     <p class="muted" style="margin-top:16px;font-size:14px">A 班下課後請先「匯出」再「結束課堂」，B 班建新課堂。結束後學生手機會自動斷線，不會佔用 B 班的連線名額。</p></div>`;
   const qi = () => document.getElementById('qinfo').textContent = Q.length ? `已載入 ${Q.length} 題（第一堂 ${Q.filter(q => q.period === 1).length}、第二堂 ${Q.filter(q => q.period === 2).length}；文字雲 ${Q.filter(q => q.type === 'cloud').length}）` : '尚未載入題目（也可以上課時臨時出題）';
-  const ri = () => document.getElementById('rinfo').textContent = roster.length ? `名單 ${roster.length} 人（上次載入，保存在這台電腦）` : '尚未載入名單（點名時再載入也可以）';
+  const cl = () => document.getElementById('cls').value;
+  const ri = () => { roster = LS.get('liveRoster_' + cl(), []); document.getElementById('rinfo').textContent = roster.length ? `${cl()} 班名單 ${roster.length} 人（上次載入，保存在這台電腦）` : `尚未載入 ${cl()} 班名單（點名時再載入也可以）`; };
+  if (last && last.cls) document.getElementById('cls').value = last.cls;
+  document.getElementById('cls').onchange = ri;
   Q = LS.get('liveQ', []); qi(); ri();
   document.getElementById('qf').onchange = async e => {
     try { Q = []; for (const f of [...e.target.files].sort((a, b) => a.name.localeCompare(b.name))) Q = Q.concat(toQuestions(await readFile(f))); LS.set('liveQ', Q); qi(); }
     catch (err) { document.getElementById('qinfo').textContent = err.message; }
   };
   document.getElementById('rf').onchange = async e => {
-    try { roster = toRoster(await readFile(e.target.files[0])); LS.set('liveRoster', roster); ri(); }
+    try { LS.set('liveRoster_' + cl(), toRoster(await readFile(e.target.files[0]))); ri(); }
     catch (err) { document.getElementById('rinfo').textContent = err.message; }
   };
   document.getElementById('go').onclick = () => create(document.getElementById('cls').value);
@@ -181,7 +183,7 @@ async function create(cls) {
 async function attach(code) {
   const m = await db.ref(`live/${code}/meta`).get().catch(() => null);
   if (!m || !m.exists() || m.val().host !== uid) { LS.set('liveHostSess', null); return setup('找不到這個課堂，或不是這台電腦建立的'); }
-  sess = code; meta = m.val(); Q = LS.get('liveQ', []); roster = LS.get('liveRoster', []); hidden = LS.get('liveHidden_' + code, {});
+  sess = code; meta = m.val(); Q = LS.get('liveQ', []); roster = LS.get('liveRoster_' + meta.cls, []); hidden = LS.get('liveHidden_' + code, {});
   R('state').on('value', s => { st = s.val() || { phase: 'idle', period: 1 }; if (st.phase === 'ended') return; render(); });
   R('players').on('value', s => { players = s.val() || {}; tick(); });
   R('ids').on('value', s => { ids = s.val() || {}; tick(); });
@@ -377,7 +379,7 @@ function attHtml() {
     ${tabs[attTab][1]}`;
 }
 async function loadRoster(f) {
-  try { roster = toRoster(await readFile(f)); LS.set('liveRoster', roster); refreshLayer(); } catch (e) { alert(e.message); }
+  try { roster = toRoster(await readFile(f)); LS.set('liveRoster_' + meta.cls, roster); refreshLayer(); } catch (e) { alert(e.message); }
 }
 async function kick(u) {
   if (!confirm(`移出「${players[u] ? players[u].nick : u}」？（他的作答紀錄會保留在資料庫，但不列入點名）`)) return;
