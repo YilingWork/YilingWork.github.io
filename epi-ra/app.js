@@ -1045,7 +1045,7 @@ async function viewEff(v) {
   const WD = ZH() ? ["週一", "週二", "週三", "週四", "週五"] : ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const half = (s) => (s === "AM" ? t("Morning", "上午") : t("Afternoon", "下午"));
   const small = `<span class="tag warn" title="${t(`fewer than ${E.fewShifts} shifts or ${E.fewHours} hours`, `班次少於 ${E.fewShifts} 班或工時少於 ${E.fewHours} 小時`)}">${t("small sample", "樣本少")}</span>`;
-  const slotCell = (o, m) => (o.shifts ? `<div class="eff-big">${effCell(o.donePerH, m)}</div><div class="faint eff-meta">${t(`${o.shifts} shifts · ${o.hours.toFixed(1)} h`, `${o.shifts} 班・${o.hours.toFixed(1)} 時`)}<br>${t(`done ${o.done} · refused ${o.ref}`, `完成 ${o.done}・拒絕 ${o.ref}`)}</div>` : `<span class="faint">${t("no shifts", "沒排班")}</span>`);
+  const slotCell = (o, m) => (o.shifts ? `<div class="eff-big">${effCell(o.donePerH, m)}</div><div class="faint eff-meta">${t(`${o.shifts} shift${o.shifts > 1 ? "s" : ""} · ${o.hours.toFixed(1)} h`, `${o.shifts} 班・${o.hours.toFixed(1)} 時`)}<br>${t(`done ${o.done} · refused ${o.ref}`, `完成 ${o.done}・拒絕 ${o.ref}`)}</div>` : `<span class="faint">${t("no shifts", "沒排班")}</span>`);
   const warnRows = P.filter((p) => p.unmatched);
   const nm = (p) => esc(p.short || p.name);
   const periods = [["all", t("All", "全部")], ["28", t("Last 4 weeks", "近 4 週")], ["14", t("Last 2 weeks", "近 2 週")]];
@@ -1075,10 +1075,12 @@ async function viewEff(v) {
     </section>
 
     <section class="card"><h2>${t("By weekday and time of day", "週一至週五各時段")}</h2>
+      ${[["all", t("All teams", "全部"), smed.d], ["vi", t("Vietnamese team", "越南組"), smed.vi], ["id", t("Indonesian team", "印尼組"), smed.id]].map(([k, name, m]) => `
+      <h3 class="${k === "vi" ? "lbl-vi" : k === "id" ? "lbl-id" : ""}">${name} <span class="sub">${t("median", "中位數")} ${f2(m)}</span></h3>
       <div class="tw"><table class="eff-slots"><thead><tr><th></th>${WD.map((w) => `<th>${w}</th>`).join("")}</tr></thead><tbody>
-      ${["AM", "PM"].map((s) => `<tr><th>${half(s)}</th>${SL.filter((r) => r.slot === s).map((r) => `<td>${slotCell(r.all, smed.d)}${r.all.small ? small : ""}</td>`).join("")}</tr>`).join("")}
-      </tbody></table></div>
-      <p class="sub" style="margin-top:6px">${t(`Large number = completed per hour (median ${f2(smed.d)}). Shifts starting before 12:00 count as morning; evening and weekend shifts count only in the totals above.`, `大字＝成功作答份數／時（中位數 ${f2(smed.d)}）。12:00 前開始的班算上午；晚上與週末的班只計入上方個人合計。`)}</p>
+      ${["AM", "PM"].map((s) => `<tr><th>${half(s)}</th>${SL.filter((r) => r.slot === s).map((r) => `<td>${slotCell(r[k], m)}${r[k].shifts && r[k].shifts < E.fewShifts ? small : ""}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div>`).join("")}
+      <p class="sub" style="margin-top:6px">${t(`Large number = completed per hour; each table is compared with its own median. Shifts starting before 12:00 count as morning; evening and weekend shifts count only in the totals above.`, `大字＝成功作答份數／時，三張表各自和自己的中位數比較。12:00 前開始的班算上午；晚上與週末的班只計入上方個人合計。`)}</p>
     </section>
 
     <section class="card"><h2>${t("How it is calculated", "計算方式")}</h2>
