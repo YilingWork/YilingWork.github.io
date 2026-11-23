@@ -195,7 +195,8 @@ const isAdmin = () => S?.me?.role === "Admin";
 function render() {
   const route = (location.hash.slice(1) || "home").split("/")[0];
   FORCE_ZH = route === "zh";
-  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat([["eff", t("Efficiency", "收案效率")]]).concat(isAdmin() ? [["admin", "Admin"]] : []);
+  const tabs = ROUTES.map(([k, en, zh]) => [k, t(en, zh)]).concat(S.zh ? [["zh", t("Chinese version", "中文問卷")]] : []).concat(isAdmin() ? [["admin", "Admin"]] : []);
+  tabs.splice(1, 0, ["eff", t("Efficiency", "收案效率")]);   // 2026-11-24: right after Home so it is visible on phones
   $("#app").innerHTML = `
     <header class="top"><div class="topin">
       <div class="brand"><b>${t("e-PI RA Portal", "電子仿單收案網站")}</b><span>${t("Shin Kong Hospital · B1 outpatient pharmacy", "新光醫院 · B1 門診藥局")}</span></div>
