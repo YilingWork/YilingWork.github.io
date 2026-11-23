@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>課堂互動（投影端）</title>
+<style>
+:root{--ink:#16283c;--sub:#4a5c6e;--bg:#f2f4f6;--paper:#fff;--ac:#0e6a63;--ac2:#e7f1f0;--warn:#b3261e;
+  --c1:#e2483d;--c2:#2f6fdb;--c3:#d89a00;--c4:#2c9a52;--u:calc(min(100vw,177.78vh)*.01)}
+*{box-sizing:border-box;margin:0}
+body{font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden}
+#app{height:100vh;display:flex;flex-direction:column;padding:calc(var(--u)*1.6) calc(var(--u)*2.6)}
+button{font:inherit;border:0;border-radius:calc(var(--u)*.6);cursor:pointer}
+.btn{background:var(--ac);color:#fff;font-weight:700;font-size:calc(var(--u)*1.3);padding:calc(var(--u)*.6) calc(var(--u)*1.5);white-space:nowrap}
+.btn.ghost{background:#fff;color:var(--ac);border:2px solid var(--ac)}
+.btn.red{background:var(--warn)}
+.btn.sm{font-size:calc(var(--u)*1);padding:calc(var(--u)*.35) calc(var(--u)*.9)}
+.top{display:flex;align-items:center;gap:calc(var(--u)*1);font-size:calc(var(--u)*1.3);color:var(--sub);flex-wrap:wrap}
+.top b{color:var(--ink)}
+.sp{flex:1}
+.seg{display:inline-flex;border:2px solid var(--ac);border-radius:calc(var(--u)*.6);overflow:hidden}
+.seg button{background:#fff;color:var(--ac);font-weight:700;font-size:calc(var(--u)*1.2);padding:calc(var(--u)*.4) calc(var(--u)*1);border-radius:0}
+.seg button.on{background:var(--ac);color:#fff}
+.panel{background:var(--paper);border-radius:calc(var(--u)*1);padding:calc(var(--u)*1.6);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+h1{font-size:calc(var(--u)*2.6)}h2{font-size:calc(var(--u)*1.9)}
+.muted{color:var(--sub)}
+.main{flex:1;min-height:0;display:flex;flex-direction:column;margin-top:calc(var(--u)*1.2)}
+.home{display:grid;grid-template-columns:auto 1fr;gap:calc(var(--u)*3);flex:1;min-height:0;align-items:start}
+#qr{background:#fff;padding:calc(var(--u)*1);border-radius:calc(var(--u)*1)}
+.code{font-size:calc(var(--u)*6);font-weight:900;letter-spacing:.08em;color:var(--ac);line-height:1.1}
+.names{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.5);align-content:flex-start;overflow:auto;max-height:calc(var(--u)*24);margin-top:calc(var(--u)*1)}
+.names span{background:var(--ac2);color:var(--ac);font-weight:700;padding:calc(var(--u)*.3) calc(var(--u)*.9);border-radius:99px;font-size:calc(var(--u)*1.15)}
+.qtext{font-size:calc(var(--u)*2.4);font-weight:800;line-height:1.45;background:#fff;border-radius:calc(var(--u)*1);padding:calc(var(--u)*1.4) calc(var(--u)*2)}
+.qmeta{font-size:calc(var(--u)*1.2);color:var(--sub);margin-bottom:calc(var(--u)*.6)}
+.bar{display:flex;align-items:center;gap:calc(var(--u)*1);margin-top:calc(var(--u)*1);flex-wrap:wrap}
+.cnt{font-size:calc(var(--u)*1.6);color:var(--sub)}.cnt b{font-size:calc(var(--u)*2.6);color:var(--ink)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1);margin-top:calc(var(--u)*1.2);flex:1;min-height:0;align-content:start}
+.opt{position:relative;background:#fff;border-radius:calc(var(--u)*.8);display:flex;align-items:center;gap:calc(var(--u)*1.2);padding:calc(var(--u)*1.1) calc(var(--u)*1.6);font-size:calc(var(--u)*1.9);font-weight:700;overflow:hidden;border:calc(var(--u)*.25) solid transparent;min-height:calc(var(--u)*7)}
+.opt .L{flex:none;width:calc(var(--u)*4);height:calc(var(--u)*4);border-radius:calc(var(--u)*.6);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*2.2);z-index:1}
+.opt .t{z-index:1;line-height:1.35}
+.opt .n{margin-left:auto;z-index:1;font-size:calc(var(--u)*2.2);font-weight:900}
+.opt .fill{position:absolute;left:0;top:0;bottom:0;opacity:.16;transition:width .4s}
+.L1{background:var(--c1)}.L2{background:var(--c2)}.L3{background:var(--c3)}.L4{background:var(--c4)}
+.opt.right{border-color:var(--c4)}
+.opt.dim{opacity:.45}
+.cloud{flex:1;min-height:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;align-content:center;gap:calc(var(--u)*.6) calc(var(--u)*1.6);padding:calc(var(--u)*1.5);background:#fff;border-radius:calc(var(--u)*1);margin-top:calc(var(--u)*1.2);overflow:hidden}
+.cloud span{font-weight:800;line-height:1.1;cursor:pointer;transition:font-size .4s}
+.cloud span:hover{text-decoration:line-through;opacity:.5}
+.drawer,.att{position:fixed;inset:0;background:rgba(22,40,60,.55);display:flex;justify-content:flex-end;z-index:9}
+.drawer>div,.att>div{background:#fff;width:min(980px,96vw);height:100vh;overflow:auto;padding:22px 26px;font-size:15px}
+.drawer table,.att table{border-collapse:collapse;width:100%;margin-top:10px}
+.drawer td,.drawer th,.att td,.att th{border-bottom:1px solid #e1e6eb;padding:7px 6px;text-align:left;vertical-align:top}
+.drawer th,.att th{background:#f5f7f9;font-size:13px;color:var(--sub)}
+.drawer tr.opened td{color:#8a96a3}
+.drawer .btn,.att .btn{font-size:14px;padding:6px 12px}
+.adhoc{background:#f5f7f9;border-radius:10px;padding:12px 14px;margin-top:16px}
+.adhoc input,.adhoc select,.adhoc textarea{font:inherit;padding:6px;border:1px solid #c9d2da;border-radius:6px}
+.adhoc textarea{width:100%;height:54px}
+.adhoc .g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+.warnbar{background:#fdecea;color:var(--warn);font-weight:700;padding:10px 12px;border-radius:8px;margin-bottom:10px}
+.stat{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.stat div{background:#f5f7f9;border-radius:8px;padding:8px 12px}.stat b{font-size:22px;display:block}
+.tabs button{background:#eef2f5;color:var(--ink);padding:6px 12px;margin:0 6px 6px 0;font-size:14px}
+.tabs button.on{background:var(--ac);color:#fff}
+.setup{max-width:780px;margin:auto;font-size:16px}
+.setup label{display:block;margin:16px 0 6px;color:var(--sub);font-size:14px}
+.setup select,.setup input{font:inherit;padding:6px}
+.setup .btn{font-size:17px;padding:10px 20px;margin-top:18px;margin-right:8px}
+.ok{color:var(--c4)}.ng{color:var(--warn)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="layer"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script>
+// ================= 基本設定 =================
+const CFG = window.LIVE_CONFIG;
+firebase.initializeApp(CFG.firebase);
+const db = firebase.database(), TS = firebase.database.ServerValue.TIMESTAMP;
+const app = document.getElementById('app'), layer = document.getElementById('layer');
+const LET = ['A', 'B', 'C', 'D'];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS = { get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+             set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+let uid, sess = null, meta = {}, st = { phase: 'idle', period: 1 };
+let Q = [], roster = [], players = {}, ids = {}, ans = {}, log = {}, showDist = false, hidden = {};
+const R = p => db.ref(`live/${sess}/${p}`);
+
+// ================= CSV =================
+function parseCSV(txt) {
+  txt = txt.replace(/^﻿/, '');
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    if (q) { if (ch === '"') { if (txt[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',' || ch === '\t') { row.push(cur); cur = ''; }
+    else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (ch !== '\r') cur += ch;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+const csvCell = v => { v = String(v ?? ''); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+function download(name, rows) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv' }));
+  a.download = name; a.click();
+}
+// 題目檔欄位：題號,堂次,時機,題型,類別,題目,選項A,選項B,選項C,選項D,正解,來源
+function toQuestions(txt) {
+  const rows = parseCSV(txt), h = rows[0].map(s => s.trim());
+  const col = n => h.indexOf(n);
+  const need = ['題號', '堂次', '題型', '題目'];
+  if (need.some(n => col(n) < 0)) throw new Error('題目檔缺少欄位：' + need.filter(n => col(n) < 0).join('、'));
+  const g = (r, n) => col(n) < 0 ? '' : (r[col(n)] || '').trim();
+  return rows.slice(1).filter(r => g(r, '題號')).map(r => ({
+    id: g(r, '題號').replace(/[^A-Za-z0-9_-]/g, ''), period: g(r, '堂次') === '2' ? 2 : 1, slot: g(r, '時機'),
+    type: /雲|cloud/i.test(g(r, '題型')) ? 'cloud' : 'choice', cat: g(r, '類別'), text: g(r, '題目'),
+    opts: ['選項A', '選項B', '選項C', '選項D'].map(n => g(r, n)), correct: g(r, '正解').toUpperCase().replace(/[^A-D]/g, '').slice(0, 1), src: g(r, '來源')
+  }));
+}
+// 名單檔：找含「學號」「姓名」的標題列；只存在這台電腦的瀏覽器，不上傳
+function toRoster(txt) {
+  const rows = parseCSV(txt);
+  const hi = rows.findIndex(r => r.some(c => c.includes('學號')));
+  if (hi < 0) throw new Error('名單檔找不到「學號」欄');
+  const h = rows[hi], si = h.findIndex(c => c.includes('學號')), ni = h.findIndex(c => c.includes('姓名'));
+  return rows.slice(hi + 1).map(r => ({ sid: (r[si] || '').trim().toUpperCase(), name: ni < 0 ? '' : (r[ni] || '').trim() })).filter(x => /^[A-Z0-9]{5,12}$/.test(x.sid));
+}
+const readFile = f => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsText(f, 'utf-8'); });
+
+// ================= 設定畫面 =================
+function setup(msg = '') {
+  const last = LS.get('liveHostSess', null);
+  roster = LS.get('liveRoster', []);
+  app.innerHTML = `<div class="setup panel"><h1 style="font-size:28px">課堂互動・投影端</h1>
+    <label>班級</label><select id="cls"><option>A</option><option>B</option></select>
+    <label>題目檔（CSV，可多選；只在這台電腦讀取，不上傳）</label><input type="file" id="qf" accept=".csv,.txt" multiple>
+    <div id="qinfo" class="muted" style="margin-top:6px"></div>
+    <label>學生名單（CSV，需有「學號」「姓名」欄；只存在這台電腦，不上傳 Firebase）</label><input type="file" id="rf" accept=".csv,.txt">
+    <div id="rinfo" class="muted" style="margin-top:6px"></div>
+    <div><button class="btn" id="go">建立新課堂</button>${last ? `<button class="btn ghost" id="resume">繼續課堂 ${esc(last.code)}（${esc(last.cls)} 班）</button>` : ''}</div>
+    <div class="ng" style="margin-top:10px">${esc(msg)}</div>
+    <p class="muted" style="margin-top:16px;font-size:14px">A 班下課後請先「匯出」再「結束課堂」，B 班建新課堂。結束後學生手機會自動斷線，不會佔用 B 班的連線名額。</p></div>`;
+  const qi = () => document.getElementById('qinfo').textContent = Q.length ? `已載入 ${Q.length} 題（第一堂 ${Q.filter(q => q.period === 1).length}、第二堂 ${Q.filter(q => q.period === 2).length}；文字雲 ${Q.filter(q => q.type === 'cloud').length}）` : '尚未載入題目（也可以上課時臨時出題）';
+  const ri = () => document.getElementById('rinfo').textContent = roster.length ? `名單 ${roster.length} 人（上次載入，保存在這台電腦）` : '尚未載入名單（點名時再載入也可以）';
+  Q = LS.get('liveQ', []); qi(); ri();
+  document.getElementById('qf').onchange = async e => {
+    try { Q = []; for (const f of [...e.target.files].sort((a, b) => a.name.localeCompare(b.name))) Q = Q.concat(toQuestions(await readFile(f))); LS.set('liveQ', Q); qi(); }
+    catch (err) { document.getElementById('qinfo').textContent = err.message; }
+  };
+  document.getElementById('rf').onchange = async e => {
+    try { roster = toRoster(await readFile(e.target.files[0])); LS.set('liveRoster', roster); ri(); }
+    catch (err) { document.getElementById('rinfo').textContent = err.message; }
+  };
+  document.getElementById('go').onclick = () => create(document.getElementById('cls').value);
+  if (last) document.getElementById('resume').onclick = () => attach(last.code);
+}
+
+async function create(cls) {
+  let code;
+  for (let i = 0; i < 20; i++) {
+    code = 'C' + Math.floor(1000 + Math.random() * 9000);
+    const ex = await db.ref(`live/${code}/meta`).get();
+    if (!ex.exists()) break;
+  }
+  const d = new Date(), date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  try { await db.ref(`live/${code}`).set({ meta: { host: uid, cls, date, created: TS }, state: { phase: 'idle', period: 1 } }); }
+  catch (e) { return setup('建立失敗：' + e.message + '（若是 permission denied，請確認 Firebase 規則已更新）'); }
+  LS.set('liveHostSess', { code, cls }); hidden = {};
+  attach(code);
+}
+
+async function attach(code) {
+  const m = await db.ref(`live/${code}/meta`).get().catch(() => null);
+  if (!m || !m.exists() || m.val().host !== uid) { LS.set('liveHostSess', null); return setup('找不到這個課堂，或不是這台電腦建立的'); }
+  sess = code; meta = m.val(); Q = LS.get('liveQ', []); roster = LS.get('liveRoster', []); hidden = LS.get('liveHidden_' + code, {});
+  R('state').on('value', s => { st = s.val() || { phase: 'idle', period: 1 }; if (st.phase === 'ended') return; render(); });
+  R('players').on('value', s => { players = s.val() || {}; tick(); });
+  R('ids').on('value', s => { ids = s.val() || {}; tick(); });
+  R('ans').on('value', s => { ans = s.val() || {}; tick(); });
+  R('log').on('value', s => { log = s.val() || {}; tick(); });
+}
+let tickT = null;
+function tick() { clearTimeout(tickT); tickT = setTimeout(() => { if (st.phase !== 'ended') render(true); refreshLayer(); }, 120); }
+
+// ================= 主畫面 =================
+const joined = () => Object.keys(players).length;
+function topbar() {
+  const p = st.period || 1;
+  return `<div class="top"><b style="font-size:calc(var(--u)*1.6)">課堂互動</b><span>${esc(meta.cls)} 班・${esc(meta.date)}</span>
+    <span>代碼 <b>${esc(sess)}</b></span><span>已簽到 <b>${joined()}</b> 人</span>
+    <span class="seg"><button class="${p === 1 ? 'on' : ''}" onclick="setPeriod(1)">第一堂</button><button class="${p === 2 ? 'on' : ''}" onclick="setPeriod(2)">第二堂</button></span>
+    <span class="sp"></span>
+    ${st.phase !== 'idle' ? '<button class="btn ghost sm" onclick="goHome()">簽到畫面</button>' : ''}
+    <button class="btn sm" onclick="openDrawer()">題目</button>
+    <button class="btn ghost sm" onclick="openAtt()">點名（勿投影）</button>
+    <button class="btn ghost sm" onclick="exportAll()">匯出</button>
+    <button class="btn red sm" onclick="endSession()">結束課堂</button></div>`;
+}
+let lastView = '';
+function render(soft) {
+  const view = st.phase + ':' + (st.qk || '');
+  if (soft && view === lastView && st.phase === 'idle') { // 只更新人數與暱稱，不重畫 QR
+    const tb = document.getElementById('topbar'); if (tb) tb.innerHTML = topbar();
+    const nm = document.getElementById('names'); if (nm) nm.innerHTML = nameChips();
+    const jc = document.getElementById('jc'); if (jc) jc.textContent = joined();
+    return;
+  }
+  lastView = view;
+  let body = '';
+  if (st.phase === 'idle') body = homeHtml();
+  else if (st.phase === 'open' || st.phase === 'reveal') body = st.q.type === 'cloud' ? cloudHtml() : choiceHtml();
+  app.innerHTML = `<div id="topbar">${topbar()}</div><div class="main">${body}</div>`;
+  if (st.phase === 'idle') {
+    const url = `${CFG.playUrl}?s=${sess}`;
+    new QRCode(document.getElementById('qr'), { text: url, width: Math.round(innerHeight * .42), height: Math.round(innerHeight * .42), correctLevel: QRCode.CorrectLevel.M });
+  }
+}
+function nameChips() {
+  return Object.values(players).sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 80).map(p => `<span>${esc(p.nick)}</span>`).join('');
+}
+function homeHtml() {
+  return `<div class="home"><div id="qr"></div><div>
+    <div class="muted" style="font-size:calc(var(--u)*1.5)">手機掃 QR code 簽到，或開啟</div>
+    <div style="font-size:calc(var(--u)*1.6);font-weight:700">${esc(CFG.playUrl.replace(/^https?:\/\//, ''))}</div>
+    <div class="muted" style="font-size:calc(var(--u)*1.5);margin-top:calc(var(--u)*1)">課堂代碼</div><div class="code">${esc(sess)}</div>
+    <div style="font-size:calc(var(--u)*1.8);margin-top:calc(var(--u)*.6)">已簽到 <b id="jc">${joined()}</b> 人</div>
+    <div class="muted" style="font-size:calc(var(--u)*1.2)">手機會記住學號，下次上課掃碼就自動簽到；課堂題只記參與、不計對錯；出席以兩堂都有作答計算</div>
+    <div class="names" id="names">${nameChips()}</div></div></div>`;
+}
+function counts(qk) {
+  const a = ans[qk] || {}, c = { A: 0, B: 0, C: 0, D: 0 };
+  Object.values(a).forEach(x => { if (c[x.v] != null) c[x.v]++; });
+  return { c, n: Object.keys(a).length };
+}
+function qHead() {
+  const q = st.q, src = Q.find(x => x.id === st.qk);
+  return `<div class="qmeta">${st.period === 2 ? '第二堂' : '第一堂'}・${q.type === 'cloud' ? '文字雲' : '選擇題'}${src && src.cat ? '・' + esc(src.cat) : ''}</div><div class="qtext">${esc(q.text)}</div>`;
+}
+function choiceHtml() {
+  const { c, n } = counts(st.qk), rev = st.phase === 'reveal', show = rev || showDist, cor = rev ? st.correct : '';
+  const max = Math.max(1, ...Object.values(c));
+  const opts = st.q.opts.map((o, i) => o ? `<div class="opt${cor && cor === LET[i] ? ' right' : ''}${cor && cor !== LET[i] ? ' dim' : ''}">
+      ${show ? `<div class="fill L${i + 1}" style="width:${c[LET[i]] / max * 100}%"></div>` : ''}<span class="L L${i + 1}">${LET[i]}</span><span class="t">${esc(o)}</span>${show ? `<span class="n">${c[LET[i]]}</span>` : ''}</div>` : '').join('');
+  const btns = rev
+    ? `<button class="btn" onclick="goHome()">回簽到畫面</button>${nextBtn()}`
+    : `<button class="btn ghost" onclick="toggleDist()">${showDist ? '隱藏分布' : '顯示分布'}</button><button class="btn" onclick="reveal()">收題並公布${st.correct ? '答案' : '結果'}</button>`;
+  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${n}</b> / ${joined()}</span><span class="sp"></span>${btns}</div><div class="opts">${opts}</div>`;
+}
+const norm = s => String(s).trim().replace(/[\s。，、！？!?,.~～]+/g, '').toLowerCase();
+function cloudHtml() {
+  const a = ans[st.qk] || {}, m = {};
+  Object.values(a).forEach(x => { const k = norm(x.v); if (!k || hidden[st.qk + '|' + k]) return; (m[k] = m[k] || { t: x.v.trim(), n: 0 }).n++; });
+  const arr = Object.entries(m).sort((x, y) => y[1].n - x[1].n).slice(0, 70), max = arr.length ? arr[0][1].n : 1;
+  const cols = ['#0e6a63', '#2f6fdb', '#e2483d', '#d89a00', '#2c9a52', '#7b4bb7', '#16283c'];
+  const order = []; arr.forEach((w, i) => i % 2 ? order.push(w) : order.unshift(w)); // 大字放中間
+  const words = order.map(([k, w], i) => `<span data-k="${esc(k)}" onclick="hideWord(this.dataset.k)" title="點一下隱藏" style="font-size:calc(var(--u)*${(1.4 + 4.2 * Math.sqrt(w.n / max)).toFixed(2)});color:${cols[[...k].reduce((h, c) => h + c.codePointAt(0), 0) % cols.length]}">${esc(w.t)}</span>`).join('');
+  const btns = st.phase === 'reveal' ? `<button class="btn" onclick="goHome()">回簽到畫面</button>${nextBtn()}` : `<button class="btn" onclick="reveal()">收題</button>`;
+  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${Object.keys(a).length}</b> / ${joined()}</span><span class="muted" style="font-size:calc(var(--u)*1)">點文字可隱藏不當內容</span><span class="sp"></span>${btns}</div>
+    <div class="cloud">${words || '<span class="muted" style="font-size:calc(var(--u)*1.6);cursor:default">等待回答…</span>'}</div>`;
+}
+function hideWord(k) { hidden[st.qk + '|' + k] = 1; LS.set('liveHidden_' + sess, hidden); lastView = ''; render(); }
+function toggleDist() { showDist = !showDist; lastView = ''; render(); }
+function nextQ() { return Q.find(q => !log[q.id] && q.period === (st.period || 1)); }
+function nextBtn() { const q = nextQ(); return q ? `<button class="btn ghost" onclick="openQ('${q.id}')">下一題 ${esc(q.id)}${q.slot ? '（' + esc(q.slot) + '）' : ''}</button>` : ''; }
+
+// ================= 操作 =================
+async function setPeriod(p) { await R('state/period').set(p); }
+async function goHome() { showDist = false; await R('state').set({ phase: 'idle', period: st.period || 1 }); }
+async function openQ(id, adhoc) {
+  const q = adhoc || Q.find(x => x.id === id); if (!q) return;
+  closeLayer(); showDist = false;
+  const period = log[q.id] ? log[q.id].period : (st.period || 1);
+  if (!log[q.id]) await R(`log/${q.id}`).set({ period, type: q.type, cat: q.cat || '', text: q.text, opts: q.opts, correct: q.correct || '', slot: q.slot || '', src: q.src || '', openedAt: TS });
+  await R('state').set({ phase: 'open', period: st.period || 1, qk: q.id, q: { type: q.type, text: q.text, opts: q.type === 'cloud' ? [] : q.opts } });
+}
+async function reveal() { await R('state').update({ phase: 'reveal', correct: (Q.find(x => x.id === st.qk) || log[st.qk] || {}).correct || '' }); }
+async function endSession() {
+  if (!confirm('結束課堂？\n學生手機會顯示「互動結束」並斷線，之後不能再作答。\n（建議先按「匯出」）')) return;
+  await R('state').set({ phase: 'ended', period: st.period || 1 });
+  LS.set('liveHostSess', null);
+  ['state', 'players', 'ids', 'ans', 'log'].forEach(p => R(p).off());
+  sess = null; players = {}; ids = {}; ans = {}; log = {};
+  setup('課堂已結束。B 班請建立新課堂。');
+}
+
+// ================= 題目清單（不在投影畫面時操作） =================
+function openDrawer() {
+  layer.innerHTML = `<div class="drawer" onclick="if(event.target===this)closeLayer()"><div id="dr"></div></div>`; refreshLayer();
+}
+function drawerHtml() {
+  const rows = Q.map(q => `<tr class="${log[q.id] ? 'opened' : ''}"><td>${esc(q.id)}</td><td>${q.period}</td><td>${esc(q.slot)}</td><td>${q.type === 'cloud' ? '文字雲' : '選擇'}</td><td>${esc(q.cat)}</td>
+     <td>${esc(q.text)}${q.correct ? `<div class="muted" style="font-size:12px">正解 ${q.correct}</div>` : ''}</td>
+     <td><button class="btn${log[q.id] ? ' ghost' : ''}" onclick="openQ('${q.id}')">${log[q.id] ? '再開' : '開題'}</button></td></tr>`).join('');
+  return `<div style="display:flex;align-items:center;gap:10px"><h2 style="font-size:22px">題目清單</h2><span class="muted">目前：${st.period === 2 ? '第二堂' : '第一堂'}（開題會記在目前堂次）</span><span class="sp"></span><button class="btn ghost" onclick="closeLayer()">關閉</button></div>
+    ${Q.length ? `<table><tr><th>題號</th><th>堂</th><th>時機</th><th>題型</th><th>類別</th><th>題目</th><th></th></tr>${rows}</table>` : '<p class="muted" style="margin-top:12px">沒有載入題目檔，可用下方臨時出題。</p>'}
+    <div class="adhoc"><b>臨時出題</b>
+      <div style="margin:6px 0"><select id="ahT" onchange="document.getElementById('ahO').style.display=this.value==='cloud'?'none':''"><option value="choice">選擇題</option><option value="cloud">文字雲</option></select></div>
+      <textarea id="ahQ" placeholder="題目"></textarea>
+      <div id="ahO"><div class="g">${LET.map(l => `<input id="ah${l}" placeholder="選項 ${l}（可留空）">`).join('')}</div>
+      正解 <select id="ahC"><option value="">無（意見調查）</option>${LET.map(l => `<option>${l}</option>`).join('')}</select></div>
+      <button class="btn" style="margin-top:8px" onclick="adhoc()">開題</button></div>`;
+}
+function adhoc() {
+  const type = document.getElementById('ahT').value, text = document.getElementById('ahQ').value.trim();
+  if (!text) return alert('請輸入題目');
+  const opts = LET.map(l => document.getElementById('ah' + l).value.trim());
+  if (type === 'choice' && opts.filter(Boolean).length < 2) return alert('選擇題至少兩個選項');
+  const q = { id: 'X' + Date.now().toString(36).toUpperCase().slice(-5), type, text, opts, correct: type === 'choice' ? document.getElementById('ahC').value : '', cat: '臨時', slot: '', src: '' };
+  openQ(q.id, q);
+}
+function closeLayer() { layer.innerHTML = ''; }
+function refreshLayer() {
+  const dr = document.getElementById('dr');
+  if (dr && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('.adhoc'))) dr.innerHTML = drawerHtml();
+  const at = document.getElementById('at'); if (at) at.innerHTML = attHtml();
+}
+
+// ================= 點名 =================
+// 出席判定：該堂有開題，就要在該堂至少作答 1 題；兩堂都符合才算出席。完全沒開題時，簽到即出席。
+function attendance() {
+  const per = { 1: [], 2: [] };
+  Object.entries(log).forEach(([k, v]) => per[v.period === 2 ? 2 : 1].push(k));
+  const bySid = {};
+  Object.keys(players).forEach(u => {
+    const sid = ids[u] && ids[u].sid ? ids[u].sid.toUpperCase() : '(未填)';
+    const r = bySid[sid] = bySid[sid] || { sid, uids: [], nicks: [], at: Infinity, a1: 0, a2: 0, answers: {} };
+    r.uids.push(u); r.nicks.push(players[u].nick); r.at = Math.min(r.at, players[u].at || Infinity);
+    [1, 2].forEach(p => per[p].forEach(k => { if (ans[k] && ans[k][u]) { r.answers[k] = ans[k][u].v; } }));
+  });
+  Object.values(bySid).forEach(r => {
+    r.a1 = per[1].filter(k => r.answers[k] != null).length; r.a2 = per[2].filter(k => r.answers[k] != null).length;
+    const need1 = per[1].length > 0, need2 = per[2].length > 0;
+    r.ok = (!need1 || r.a1 > 0) && (!need2 || r.a2 > 0);
+    r.status = r.ok ? '出席' : (r.a1 + r.a2 === 0 ? '已簽到未作答' : (need1 && !r.a1 ? '缺第一堂作答' : '缺第二堂作答'));
+  });
+  const inRoster = new Set(roster.map(x => x.sid));
+  return { per, bySid, inRoster };
+}
+let attTab = 'absent';
+function openAtt() { layer.innerHTML = `<div class="att" onclick="if(event.target===this)closeLayer()"><div id="at"></div></div>`; refreshLayer(); }
+function setTab(t) { attTab = t; refreshLayer(); }
+function attHtml() {
+  const { per, bySid, inRoster } = attendance();
+  const recs = Object.values(bySid), name = sid => (roster.find(x => x.sid === sid) || {}).name || '';
+  const absent = roster.filter(x => !bySid[x.sid]);
+  const partial = recs.filter(r => !r.ok && inRoster.has(r.sid));
+  const notIn = roster.length ? recs.filter(r => !inRoster.has(r.sid)) : [];
+  const dup = recs.filter(r => r.uids.length > 1);
+  const present = recs.filter(r => r.ok && (!roster.length || inRoster.has(r.sid)));
+  const tbl = (head, rows) => rows.length ? `<table><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>${rows.join('')}</table>` : '<p class="muted" style="margin-top:8px">（無）</p>';
+  const tm = t => t && t < Infinity ? new Date(t).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '';
+  const recRow = r => `<tr><td>${esc(r.sid)}</td><td>${esc(name(r.sid))}</td><td>${esc(r.nicks.join('／'))}</td><td>${tm(r.at)}</td><td>${r.a1}/${per[1].length}</td><td>${r.a2}/${per[2].length}</td><td>${r.status}</td>
+      <td>${r.uids.map(u => `<button class="btn ghost" style="font-size:12px;padding:3px 8px" onclick="kick('${u}')">移出 ${esc(players[u].nick)}</button>`).join(' ')}</td></tr>`;
+  const H = ['學號', '姓名', '暱稱', '簽到', '第一堂作答', '第二堂作答', '判定', ''];
+  const tabs = { absent: [`未簽到（${absent.length}）`, tbl(['學號', '姓名'], absent.map(x => `<tr><td>${esc(x.sid)}</td><td>${esc(x.name)}</td></tr>`))],
+    partial: [`簽到但未達出席（${partial.length}）`, tbl(H, partial.map(recRow))],
+    notin: [`學號不在名單（${notIn.length}）`, tbl(H, notIn.map(recRow))],
+    dup: [`同學號多支手機（${dup.length}）`, tbl(H, dup.map(recRow))],
+    present: [`出席（${present.length}）`, tbl(H, present.map(recRow))] };
+  return `<div class="warnbar">此頁含學生姓名，請勿投影（把這個視窗拖到筆電螢幕，或先關閉投影再打開）</div>
+    <div style="display:flex;align-items:center;gap:10px"><h2 style="font-size:22px">點名</h2><span class="sp"></span>
+      <label class="btn ghost" style="cursor:pointer">載入／更換名單<input type="file" accept=".csv,.txt" style="display:none" onchange="loadRoster(this.files[0])"></label>
+      <button class="btn" onclick="exportAll()">匯出</button><button class="btn ghost" onclick="closeLayer()">關閉</button></div>
+    <div class="stat"><div>名單<b>${roster.length || '未載入'}</b></div><div>已簽到（學號數）<b>${recs.length}</b></div><div>出席<b>${present.length}</b></div>
+      <div>已開題<b>${per[1].length}＋${per[2].length}</b><span class="muted" style="font-size:12px">第一堂＋第二堂</span></div></div>
+    <p class="muted" style="font-size:13px">出席＝有開題的每一堂都至少作答 1 題。同一學號用兩支手機或換瀏覽器重新簽到會合併計算；學號打錯的同學請他點手機右上「更改」。</p>
+    <div class="tabs" style="margin-top:10px">${Object.entries(tabs).map(([k, v]) => `<button class="${attTab === k ? 'on' : ''}" onclick="setTab('${k}')">${v[0]}</button>`).join('')}</div>
+    ${tabs[attTab][1]}`;
+}
+async function loadRoster(f) {
+  try { roster = toRoster(await readFile(f)); LS.set('liveRoster', roster); refreshLayer(); } catch (e) { alert(e.message); }
+}
+async function kick(u) {
+  if (!confirm(`移出「${players[u] ? players[u].nick : u}」？（他的作答紀錄會保留在資料庫，但不列入點名）`)) return;
+  await R(`players/${u}`).remove(); await R(`ids/${u}`).remove();
+}
+
+// ================= 匯出 =================
+function exportAll() {
+  const { per, bySid, inRoster } = attendance();
+  const qks = Object.entries(log).sort((a, b) => (a[1].openedAt || 0) - (b[1].openedAt || 0)).map(x => x[0]);
+  const base = `${meta.date}_${meta.cls}班_${sess}`;
+  const head = ['學號', '姓名', '暱稱', '簽到時間', '第一堂作答題數', '第二堂作答題數', '參與題數', '已開題數', '出席判定', '備註', ...qks];
+  const rows = [], seen = new Set();
+  const tm = t => t && t < Infinity ? new Date(t).toLocaleString('zh-TW', { hour12: false }) : '';
+  const line = (sid, name, r) => {
+    if (!r) return [sid, name, '', '', 0, 0, 0, qks.length, '未簽到', '', ...qks.map(() => '')];
+    const note = [roster.length && !inRoster.has(sid) ? '學號不在名單' : '', r.uids.length > 1 ? `同學號 ${r.uids.length} 支手機` : ''].filter(Boolean).join('；');
+    return [sid, name, r.nicks.join('／'), tm(r.at), r.a1, r.a2, r.a1 + r.a2, qks.length, r.status, note, ...qks.map(k => r.answers[k] ?? '')];
+  };
+  roster.forEach(x => { seen.add(x.sid); rows.push(line(x.sid, x.name, bySid[x.sid])); });
+  Object.values(bySid).filter(r => !seen.has(r.sid)).forEach(r => rows.push(line(r.sid, '', r)));
+  download(`課堂互動_點名與參與_${base}.csv`, [head, ...rows]);
+  // 題目紀錄：期末考新聞題要依這份確認「哪些題目在 A、B 班實際問過」
+  const qh = ['題號', '堂次', '時機', '題型', '類別', '題目', '選項A', '選項B', '選項C', '選項D', '正解', '來源', '開題時間', '作答人數', 'A人數', 'B人數', 'C人數', 'D人數', '答對率', '文字雲回答（依次數）'];
+  const qr = qks.map(k => {
+    const v = log[k], a = ans[k] || {}, n = Object.keys(a).length, { c } = counts(k);
+    const cloud = v.type === 'cloud' ? Object.entries(Object.values(a).reduce((m, x) => (m[x.v.trim()] = (m[x.v.trim()] || 0) + 1, m), {})).sort((x, y) => y[1] - x[1]).map(([t, m]) => `${t}×${m}`).join('；') : '';
+    return [k, v.period, v.slot, v.type === 'cloud' ? '文字雲' : '選擇', v.cat, v.text, ...(v.opts || ['', '', '', '']), v.correct, v.src, tm(v.openedAt), n,
+      ...(v.type === 'cloud' ? ['', '', '', ''] : LET.map(l => c[l])), v.correct && n ? Math.round(c[v.correct] / n * 100) + '%' : '', cloud];
+  });
+  setTimeout(() => download(`課堂互動_題目紀錄_${base}.csv`, [qh, ...qr]), 400);
+}
+
+firebase.auth().signInAnonymously().catch(e => app.innerHTML = `<div class="panel">無法連線 Firebase：${esc(e.message)}</div>`);
+firebase.auth().onAuthStateChanged(u => { if (u && !uid) { uid = u.uid; setup(); } });
+</script>
+</body>
+</html>

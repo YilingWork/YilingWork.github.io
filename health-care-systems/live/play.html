@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>課堂互動</title>
+<style>
+:root{--ink:#16283c;--sub:#4a5c6e;--bg:#f2f4f6;--paper:#fff;--ac:#0e6a63;--ac2:#e7f1f0;
+  --c1:#e2483d;--c2:#2f6fdb;--c3:#d89a00;--c4:#2c9a52}
+*{box-sizing:border-box;margin:0}
+body{font-family:"PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--ac);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:15px;gap:8px}
+header a{color:#fff;font-size:13px;opacity:.85}
+main{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--paper);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+h1{font-size:22px}
+label{display:block;font-size:14px;color:var(--sub);margin:12px 0 4px}
+input{width:100%;font-size:18px;padding:10px;border:1px solid #c9d2da;border-radius:8px}
+button{font:inherit;border:0;border-radius:10px;cursor:pointer}
+.go{width:100%;margin-top:16px;padding:14px;font-size:18px;font-weight:700;background:var(--ac);color:#fff}
+.go:disabled{opacity:.5}
+.err{color:var(--c1);font-size:14px;margin-top:8px;min-height:1em}
+.center{text-align:center}
+.big{font-size:44px;font-weight:800;color:var(--ac)}
+.q{font-size:18px;line-height:1.55;font-weight:700}
+.tag{display:inline-block;font-size:12px;background:var(--ac2);color:var(--ac);padding:2px 8px;border-radius:99px;margin-bottom:8px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:3px solid #d7dee5;padding:12px 14px;font-size:16px;line-height:1.4;min-height:58px}
+.opt .L{flex:none;width:36px;height:36px;border-radius:8px;color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+.L1{background:var(--c1)}.L2{background:var(--c2)}.L3{background:var(--c3)}.L4{background:var(--c4)}
+.opt.sel{border-color:var(--ink);background:#eef3f7}
+.opt.right{border-color:var(--c4);background:#e9f6ee}
+.note{font-size:14px;color:var(--sub);text-align:center}
+.muted{color:var(--sub);font-size:14px}
+.sent{background:var(--ac2);color:var(--ac);border-radius:10px;padding:10px 12px;font-size:15px;text-align:center}
+</style>
+</head>
+<body>
+<header><span id="hdrS">課堂互動</span><span><span id="hdrMe"></span> <a href="#" id="hdrEdit" hidden>更改</a></span></header>
+<main id="app"><div class="card center">連線中…</div></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const CFG = window.LIVE_CONFIG;
+firebase.initializeApp(CFG.firebase);
+const db = firebase.database(), TS = firebase.database.ServerValue.TIMESTAMP;
+const app = document.getElementById('app');
+const LET = ['A', 'B', 'C', 'D'];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const show = h => { app.innerHTML = h; };
+// 學號與暱稱存在這支手機的瀏覽器裡，整學期有效；每次上課掃 QR code 就自動簽到
+const loadMe = () => { try { return JSON.parse(localStorage.getItem('liveMe') || 'null'); } catch (e) { return null; } };
+const saveMe = m => { try { localStorage.setItem('liveMe', JSON.stringify(m)); } catch (e) {} };
+const done = () => { try { return JSON.parse(localStorage.getItem('liveDone_' + sess) || '{}'); } catch (e) { return {}; } };
+const markDone = qk => { try { const d = done(); d[qk] = 1; localStorage.setItem('liveDone_' + sess, JSON.stringify(d)); } catch (e) {} };
+let uid, sess, me, st, mine = null, seq = 0, entered = false;
+
+firebase.auth().signInAnonymously().catch(e => show(`<div class="card">無法連線：${esc(e.message)}</div>`));
+firebase.auth().onAuthStateChanged(async u => {
+  if (!u || uid) return;
+  uid = u.uid;
+  const q = new URLSearchParams(location.search).get('s');
+  sess = (q || localStorage.getItem('liveSession') || '').toUpperCase().trim();
+  me = loadMe();
+  if (!sess) return form();
+  const ok = await sessionOpen(sess);
+  if (!ok) { sess = ''; return form(q ? '這堂課的互動已結束或代碼有誤' : ''); }
+  const p = await db.ref(`live/${sess}/players/${uid}`).get().catch(() => null);
+  if (p && p.exists()) return enter();
+  if (me) return join(sess, me.sid, me.nick, true);   // 記得的學號：自動簽到
+  form();
+});
+
+async function sessionOpen(s) {
+  if (!/^[A-Z0-9]{4,8}$/.test(s)) return false;
+  const [m, ph] = await Promise.all([db.ref(`live/${s}/meta`).get(), db.ref(`live/${s}/state/phase`).get()]).catch(() => [null, null]);
+  return !!(m && m.exists() && ph && ph.val() !== 'ended');
+}
+
+function form(msg = '') {
+  const m = me || {};
+  show(`<div class="card"><h1>課堂互動簽到</h1>
+    <label>課堂代碼（投影畫面上）</label><input id="fS" value="${esc(sess)}" autocapitalize="characters" autocomplete="off">
+    <label>學號（請填自己的，作為點名依據）</label><input id="fSid" value="${esc(m.sid || '')}" autocapitalize="characters" autocomplete="off">
+    <label>暱稱（隨便取，最多 12 字；投影畫面只顯示暱稱）</label><input id="fNick" maxlength="12" value="${esc(m.nick || '')}" autocomplete="off">
+    <button class="go" id="fGo">簽到</button><div class="err" id="fErr">${esc(msg)}</div>
+    <p class="muted" style="margin-top:10px">課堂題目只記錄有沒有參與，答錯不扣分。這支手機會記住你的學號和暱稱，之後上課掃 QR code 就自動簽到。</p></div>`);
+  document.getElementById('fGo').onclick = async () => {
+    const s = document.getElementById('fS').value.trim().toUpperCase();
+    const sid = document.getElementById('fSid').value.trim().toUpperCase();
+    const nick = document.getElementById('fNick').value.trim();
+    const err = document.getElementById('fErr');
+    if (!/^[A-Z0-9]{5,12}$/.test(sid)) return err.textContent = '學號格式不正確（英數字 5–12 碼）';
+    if (!nick) return err.textContent = '請輸入暱稱';
+    document.getElementById('fGo').disabled = true;
+    if (!(await sessionOpen(s))) { document.getElementById('fGo').disabled = false; return err.textContent = '找不到這個課堂代碼，或本堂互動已結束'; }
+    join(s, sid, nick, false);
+  };
+}
+
+async function join(s, sid, nick, auto) {
+  show('<div class="card center"><h1>簽到中…</h1></div>');
+  try {
+    await db.ref(`live/${s}/ids/${uid}`).set({ sid });
+    await db.ref(`live/${s}/players/${uid}`).set({ nick, at: TS });
+  } catch (e) { sess = s; return form('簽到失敗：' + e.message); }
+  sess = s; me = { sid, nick }; saveMe(me);
+  try { localStorage.setItem('liveSession', s); } catch (e) {}
+  enter();
+}
+
+function enter() {
+  if (entered) return; entered = true;
+  document.getElementById('hdrS').textContent = '課堂 ' + sess;
+  document.getElementById('hdrMe').textContent = me ? `${me.nick}（${me.sid}）` : '';
+  const ed = document.getElementById('hdrEdit'); ed.hidden = false;
+  ed.onclick = e => { e.preventDefault(); editMe(); };
+  db.ref(`live/${sess}/state`).on('value', s => { st = s.val() || { phase: 'idle' }; render(); });
+}
+
+function editMe() {
+  const m = me || {};
+  show(`<div class="card"><h1>更改學號或暱稱</h1>
+    <label>學號</label><input id="eSid" value="${esc(m.sid || '')}" autocapitalize="characters">
+    <label>暱稱（最多 12 字）</label><input id="eNick" maxlength="12" value="${esc(m.nick || '')}">
+    <button class="go" id="eGo">儲存</button><button class="go" style="background:#8a96a3" id="eNo">取消</button><div class="err" id="eErr"></div></div>`);
+  document.getElementById('eNo').onclick = render;
+  document.getElementById('eGo').onclick = async () => {
+    const sid = document.getElementById('eSid').value.trim().toUpperCase(), nick = document.getElementById('eNick').value.trim();
+    const err = document.getElementById('eErr');
+    if (!/^[A-Z0-9]{5,12}$/.test(sid)) return err.textContent = '學號格式不正確';
+    if (!nick) return err.textContent = '請輸入暱稱';
+    try {
+      await db.ref(`live/${sess}/ids/${uid}`).set({ sid });
+      await db.ref(`live/${sess}/players/${uid}`).set({ nick, at: TS });
+    } catch (e) { return err.textContent = '儲存失敗：' + e.message; }
+    me = { sid, nick }; saveMe(me);
+    document.getElementById('hdrMe').textContent = `${nick}（${sid}）`;
+    render();
+  };
+}
+
+const periodTxt = () => st && st.period === 2 ? '第二堂' : '第一堂';
+
+async function render() {
+  const my = ++seq;
+  if (!st || st.phase === 'idle') {
+    const n = Object.keys(done()).length;
+    return show(`<div class="card center"><div class="big">✓</div><h1>已簽到</h1><p class="muted" style="margin-top:6px">${periodTxt()}・老師出題時這裡會自動跳出題目，網頁不用關</p>
+      <p style="margin-top:12px">今天已參與 <b>${n}</b> 題</p></div>
+      <p class="note">出席以「第一堂、第二堂都有作答」計算</p>`);
+  }
+  if (st.phase === 'ended') {
+    show(`<div class="card center"><div class="big">👋</div><h1>今天的課堂互動結束</h1><p class="muted" style="margin-top:8px">參與紀錄已儲存，可以關閉網頁</p></div>`);
+    try { localStorage.removeItem('liveSession'); } catch (e) {}
+    setTimeout(() => db.goOffline(), 1500);
+    return;
+  }
+  const qk = st.qk;
+  const a = await db.ref(`live/${sess}/ans/${qk}/${uid}`).get().catch(() => null);
+  if (my !== seq) return;
+  mine = a && a.exists() ? a.val().v : null;
+  if (mine) markDone(qk);
+  if (st.phase === 'open') return st.q.type === 'cloud' ? cloudQ() : choiceQ();
+  if (st.phase === 'reveal') return reveal();
+}
+
+function head() {
+  const t = st.q.type === 'cloud' ? '文字雲' : '選擇題';
+  return `<div><span class="tag">${periodTxt()}・${t}</span><div class="q">${esc(st.q.text)}</div></div>`;
+}
+
+function choiceQ() {
+  const opts = (st.q.opts || []).map((o, i) => o ? `<button class="opt${mine === LET[i] ? ' sel' : ''}" data-v="${LET[i]}"><span class="L L${i + 1}">${LET[i]}</span><span>${esc(o)}</span></button>` : '').join('');
+  show(`${head()}<div class="opts">${opts}</div>
+    ${mine ? `<div class="sent">已送出 ${mine}，老師收題前都可以改</div>` : '<p class="note">點選項就會送出；答錯不扣分</p>'}`);
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => send(b.dataset.v));
+}
+
+function cloudQ() {
+  show(`${head()}<div class="card"><input id="cv" maxlength="${CFG.cloudMax}" placeholder="寫一個詞或短句（最多 ${CFG.cloudMax} 字）" value="${esc(mine || '')}" autocomplete="off">
+    <button class="go" id="cGo">送出</button><div class="err" id="cErr"></div></div>
+    ${mine ? `<div class="sent">已送出「${esc(mine)}」，老師收題前都可以改</div>` : '<p class="note">答案會匿名出現在投影畫面的文字雲</p>'}`);
+  const go = () => { const v = document.getElementById('cv').value.trim(); if (v) send(v.slice(0, CFG.cloudMax)); else document.getElementById('cErr').textContent = '請先輸入內容'; };
+  document.getElementById('cGo').onclick = go;
+  document.getElementById('cv').onkeydown = e => { if (e.key === 'Enter') go(); };
+}
+
+async function send(v) {
+  const qk = st.qk;
+  try {
+    await db.ref(`live/${sess}/ans/${qk}/${uid}`).set({ v, t: TS });
+    mine = v; markDone(qk);
+    if (st.phase === 'open' && st.qk === qk) st.q.type === 'cloud' ? cloudQ() : choiceQ();
+  } catch (e) {
+    show(`<div class="card center"><h1>沒有送出成功</h1><p class="muted">老師可能已經收題</p></div>`);
+  }
+}
+
+function reveal() {
+  if (st.q.type === 'cloud') return show(`${head()}<div class="card center"><h1>本題已收</h1><p class="muted" style="margin-top:6px">${mine ? `你的回答：「${esc(mine)}」` : '這題你沒有作答'}　請看投影畫面</p></div>`);
+  const c = st.correct || '';
+  const opts = (st.q.opts || []).map((o, i) => o ? `<div class="opt${c === LET[i] ? ' right' : ''}${mine === LET[i] ? ' sel' : ''}"><span class="L L${i + 1}">${LET[i]}</span><span>${esc(o)}</span></div>` : '').join('');
+  const msg = !c ? '本題沒有標準答案' : `正確答案是 <b>${c}</b>`;
+  show(`${head()}<div class="opts">${opts}</div><div class="sent">${msg}　${mine ? `你選了 ${mine}` : '這題你沒有作答'}</div>
+    <p class="note">課堂題只記錄參與，不計對錯</p>`);
+}
+</script>
+</body>
+</html>
