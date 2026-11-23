@@ -1079,13 +1079,6 @@ async function viewEff(v) {
       ${["AM", "PM"].map((s) => `<tr><th>${half(s)}</th>${SL.filter((r) => r.slot === s).map((r) => `<td>${slotCell(r.all, smed.d)}${r.all.small ? small : ""}</td>`).join("")}</tr>`).join("")}
       </tbody></table></div>
       <p class="sub" style="margin-top:6px">${t(`Large number = completed per hour (median ${f2(smed.d)}). Shifts starting before 12:00 count as morning; evening and weekend shifts count only in the totals above.`, `大字＝成功作答份數／時（中位數 ${f2(smed.d)}）。12:00 前開始的班算上午；晚上與週末的班只計入上方個人合計。`)}</p>
-      <h3>${t("Details and teams", "各時段明細與語言組")}</h3>
-      <div class="tw"><table class="eff-nw"><thead><tr><th>${t("Time slot", "時段")}</th><th class="num">${t("Shifts", "班次")}</th><th class="num">${t("Hours", "工時")}</th><th class="num">${t("Done", "完成")}</th><th class="num">${t("Refused", "拒絕")}</th><th class="num">${t("Completed / h", "成功作答／時")}</th><th class="num">${t("Approached / h", "接觸人數／時")}</th><th class="num">${t("Agreed", "成功率")}</th><th class="num"><span class="lbl-vi">${t("Vietnamese", "越南組")}</span> ${t("completed / h", "成功／時")}</th><th class="num"><span class="lbl-id">${t("Indonesian", "印尼組")}</span> ${t("completed / h", "成功／時")}</th></tr></thead><tbody>
-      ${SL.map((r) => `<tr><td>${WD[r.wd]} ${half(r.slot)}</td><td class="num">${r.all.shifts}</td><td class="num">${r.all.hours.toFixed(1)}</td><td class="num">${r.all.done}</td><td class="num">${r.all.ref}</td>
-        <td class="num">${effCell(r.all.donePerH, smed.d)}</td><td class="num">${effCell(r.all.contactPerH, smed.c)}</td><td class="num">${effCell(r.all.success, smed.s, effPct)}</td>
-        <td class="num">${effCell(r.vi.donePerH, smed.vi)}${r.vi.shifts ? ` <span class="faint">(${r.vi.shifts})</span>` : ""}</td><td class="num">${effCell(r.id.donePerH, smed.id)}${r.id.shifts ? ` <span class="faint">(${r.id.shifts})</span>` : ""}</td></tr>`).join("")}
-      </tbody></table></div>
-      <p class="sub" style="margin-top:6px">${t("Brackets = number of shifts. Each team column is compared with its own median.", "括號＝班次數。語言組兩欄各自和同欄的中位數比較。")}</p>
     </section>
 
     <section class="card"><h2>${t("How it is calculated", "計算方式")}</h2>
