@@ -54,6 +54,11 @@
   .f-blue{background:var(--blue)} .f-green{background:var(--green)} .f-yellow{background:var(--yellow)} .f-red{background:var(--red)}
   .center{text-align:center}
   footer{color:var(--muted);font-size:14px;text-align:center;margin-top:22px}
+  .actions button{margin:4px}
+  @media print{
+    body{background:#fff} .actions,.bar{display:none}
+    .fill,.notice,.track{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
 </style>
 </head>
 <body>
@@ -71,7 +76,7 @@
     <ol class="how">
       <li>請點選所有你覺得<b>最能描述自己</b>的形容詞，數量不限。</li>
       <li>按下「看結果」後，畫面會統計你在藍、綠、黃、紅四種顏色各選了幾個。</li>
-      <li>作答只在你的手機或電腦上計算，不會上傳，也不會儲存。</li>
+      <li><b>本測驗不留存任何紀錄。</b>作答只在你的手機或電腦上計算，不會上傳，離開或重新整理頁面後結果就會消失；需要保留結果請自行截圖或列印。</li>
     </ol>
 
     <div class="grid" id="grid"></div>
@@ -84,6 +89,10 @@
   </section>
 
   <section id="result">
+    <div class="notice keep">
+      <b>本測驗不留存紀錄</b>
+      系統不會儲存你的作答與結果，離開或重新整理頁面後就會消失。需要保留請自行截圖或列印。
+    </div>
     <div class="res">
       <p class="top" id="top"></p>
       <div id="rows"></div>
@@ -92,7 +101,7 @@
       <b>提醒</b>
       四種顏色的形容詞數量不同（藍 16、綠 14、黃 13、紅 11），所以每一色都同時列出「選了幾個／該色共幾個」。本結果來自教學用的簡易版練習，並非官方授權的正式測評。
     </div>
-    <p class="center"><button type="button" class="ghost" id="again">重新測驗</button></p>
+    <p class="center actions"><button type="button" id="print">列印結果</button> <button type="button" class="ghost" id="again">重新測驗</button></p>
   </section>
 
   <footer>教學用簡易版練習，非官方授權測評｜國立臺北護理健康大學 健康事業管理系 蔡懿玲</footer>
@@ -162,6 +171,8 @@ $('submit').addEventListener('click', () => {
   });
   $('quiz').style.display = 'none'; $('result').style.display = 'block'; window.scrollTo(0,0);
 });
+
+$('print').addEventListener('click', () => window.print());
 
 $('again').addEventListener('click', () => {
   checked().forEach(x => x.checked = false); $('n').textContent = 0; $('msg').textContent = '';
