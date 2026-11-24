@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>費德勒模型 LPC 量表｜健康照護管理學</title>
+<meta name="description" content="健康照護管理學課堂活動：費德勒模型 LPC 量表（最不受歡迎同事量表），16 組形容詞，自動加總。">
+<meta name="color-scheme" content="light dark">
+<style>
+:root{
+  --paper:#EBEEEC; --surface:#F6F8F6; --surface-2:#FFFFFF;
+  --ink:#15211E; --ink-soft:#33433E; --muted:#5E6E69; --faint:#8A978F;
+  --line:#D6DCD8; --line-soft:#E3E8E4;
+  --brand:#0E4D45; --brand-2:#3C8C80;
+  --gold:#9C6E1E;
+  --shadow:0 1px 2px rgba(20,33,30,.05),0 10px 34px -14px rgba(20,33,30,.16);
+  --font-display:"Iowan Old Style","Palatino Linotype",Palatino,"Noto Serif TC","Songti TC",Georgia,serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --font-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1614; --surface:#151F1C; --surface-2:#1A2622;
+    --ink:#E9EEEB; --ink-soft:#C4CFCA; --muted:#94A29C; --faint:#6E7C77;
+    --line:#26332F; --line-soft:#202B28;
+    --brand:#56B7A7; --brand-2:#6FC9BA;
+    --gold:#D8AC57;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+    --paper:#0E1614; --surface:#151F1C; --surface-2:#1A2622;
+    --ink:#E9EEEB; --ink-soft:#C4CFCA; --muted:#94A29C; --faint:#6E7C77;
+    --line:#26332F; --line-soft:#202B28;
+    --brand:#56B7A7; --brand-2:#6FC9BA;
+    --gold:#D8AC57;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 34px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+nav{border-bottom:1px solid var(--line);background:var(--paper)}
+.nav-in{max-width:760px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:600;font-size:18px;text-decoration:none;color:var(--ink)}
+.brand .mono{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px}
+.back{font-size:14px;color:var(--brand-2);text-decoration:none;font-weight:600;white-space:nowrap}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand-2);font-weight:600}
+header.hd{padding:40px 0 18px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,6vw,38px);line-height:1.25;margin:8px 0 0}
+.sub{color:var(--muted);margin-top:8px;font-size:15px}
+.card{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+.howto{border-left:4px solid var(--brand-2);margin-bottom:18px}
+.howto p{margin:0 0 8px}.howto p:last-child{margin:0}
+fieldset{border:1px solid var(--line);border-radius:14px;background:var(--surface-2);margin:0 0 12px;padding:14px 14px 16px;min-width:0}
+fieldset.miss{border-color:#C62828;box-shadow:0 0 0 2px rgba(198,40,40,.18)}
+legend{font-weight:700;font-size:16px;padding:0 6px}
+legend .n{font-family:var(--font-mono);color:var(--brand-2);margin-right:6px}
+.ends{display:flex;justify-content:space-between;font-size:15px;color:var(--ink-soft);font-weight:600;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.opts label{position:relative;display:block}
+.opts input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.opts span{display:grid;place-items:center;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:700;font-size:17px;color:var(--ink-soft)}
+.opts input:checked+span{background:var(--brand);border-color:var(--brand);color:#fff}
+.opts input:focus-visible+span{outline:2px solid var(--brand-2);outline-offset:2px}
+.bar{position:sticky;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:12px 0;margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.prog{font-size:15px;color:var(--muted);margin-right:auto}
+button{font:inherit;font-weight:700;border-radius:12px;padding:12px 20px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:#fff}
+button.ghost{background:transparent;color:var(--brand)}
+:root[data-theme="dark"] button:not(.ghost){color:#0E1614}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button:not(.ghost){color:#0E1614}
+  :root:not([data-theme="light"]) .opts input:checked+span{color:#0E1614}}
+:root[data-theme="dark"] .opts input:checked+span{color:#0E1614}
+.warn{color:#C62828;font-weight:600;font-size:15px;flex-basis:100%}
+#result{margin:20px 0;display:none}
+#result.on{display:block}
+.score{font-family:var(--font-display);font-size:64px;font-weight:600;color:var(--brand);line-height:1.1}
+.type{font-size:24px;font-weight:700;margin:6px 0 4px}
+table{border-collapse:collapse;width:100%;margin-top:14px;font-size:15.5px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:var(--surface)}
+tr.me td{background:var(--surface);font-weight:700}
+.next{margin-top:14px;font-weight:600}
+.next a{color:var(--brand-2)}
+footer{color:var(--muted);font-size:13.5px;margin:26px 0 60px;border-top:1px solid var(--line);padding-top:14px}
+@media print{nav,.bar{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a class="brand" href="../../"><span class="mono">蔡</span>蔡懿玲研究室</a><a class="back" href="../">← 課堂活動列表</a></div></nav>
+<div class="wrap">
+  <header class="hd">
+    <span class="kicker">健康照護管理學　第 10 章　領導</span>
+    <h1>費德勒模型 LPC 量表</h1>
+    <div class="sub">Least Preferred Coworker Scale（LPC），最不受歡迎同事量表</div>
+  </header>
+
+  <div class="card howto">
+    <p>請回想你自己<strong>最難共事的一位同事（或同學）</strong>，他（她）可以是現在或過去與你共事過的人。</p>
+    <p>請用下列 16 組形容詞描述這位同事，每組點選最符合的分數（1 至 8 分）。全部填完後按「計算總分」，系統會自動加總。</p>
+  </div>
+
+  <form id="f" novalidate></form>
+
+  <div id="result" class="card" aria-live="polite">
+    <div class="sub" style="margin:0">你的 LPC 總分（16 至 128 分）</div>
+    <div class="score" id="score"></div>
+    <div class="type" id="type"></div>
+    <div id="desc"></div>
+    <table>
+      <tr><th>總分</th><th>類型</th></tr>
+      <tr data-k="hi"><td>高於 64</td><td>人際關係導向</td></tr>
+      <tr data-k="mid"><td>57 至 64</td><td>介於兩者之間</td></tr>
+      <tr data-k="lo"><td>低於 57</td><td>任務導向</td></tr>
+    </table>
+    <p class="next">請把總分填入<a href="../rpg/">醫療機構經營 RPG</a> 第 ⑪ 關。</p>
+  </div>
+
+  <div class="bar">
+    <span class="prog" id="prog">已填 0 / 16</span>
+    <button type="button" class="ghost" id="reset">重新填寫</button>
+    <button type="button" id="calc">計算總分</button>
+    <span class="warn" id="warn" hidden></span>
+  </div>
+
+  <footer>
+    量表題目與分數分界依本課程第 13 週補充資料「費德勒模型中的 LPC 量表」。本頁僅供課堂教學使用，不留存任何作答紀錄；需要保留結果請自行截圖或記下總分。
+  </footer>
+</div>
+<script>
+// [左側形容詞, 右側形容詞, 左側分數]：左側分數為 8 表示由左至右為 8→1，為 1 表示由左至右為 1→8
+var ITEMS=[
+ ["快樂","不快樂",8],["友善","不友善",8],["拒絕","接納",1],["有益","無益",8],
+ ["不熱情","熱情",1],["緊張","輕鬆",1],["疏遠","親密",1],["冷漠","熱心",1],
+ ["合作","不合作",8],["助人","敵意",8],["無聊","有趣",1],["好爭","融洽",1],
+ ["自信","猶豫",8],["高效","低效",8],["鬱悶","開朗",1],["開放","防備",8]
+];
+var f=document.getElementById("f"),h="";
+ITEMS.forEach(function(it,i){
+  h+='<fieldset id="q'+i+'"><legend><span class="n"></span>第 '+(i+1)+' 組</legend>'
+    +'<div class="ends"><span>'+it[0]+'</span><span>'+it[1]+'</span></div><div class="opts">';
+  for(var k=0;k<8;k++){var v=it[2]===8?8-k:k+1;
+    h+='<label><input type="radio" name="q'+i+'" value="'+v+'" aria-label="'+it[0]+'至'+it[1]+'，'+v+' 分"><span>'+v+'</span></label>';}
+  h+='</div></fieldset>';
+});
+f.innerHTML=h;
+var prog=document.getElementById("prog"),warn=document.getElementById("warn"),res=document.getElementById("result");
+function answers(){return ITEMS.map(function(_,i){var c=f.querySelector('input[name="q'+i+'"]:checked');return c?+c.value:null;});}
+f.addEventListener("change",function(e){
+  var a=answers();prog.textContent="已填 "+a.filter(function(x){return x!==null;}).length+" / 16";
+  var fs=e.target.closest("fieldset");if(fs)fs.classList.remove("miss");
+  res.classList.remove("on");
+  if(a.every(function(x){return x!==null;}))warn.hidden=true;
+});
+document.getElementById("calc").addEventListener("click",function(){
+  var a=answers(),miss=[];
+  a.forEach(function(x,i){var fs=document.getElementById("q"+i);fs.classList.toggle("miss",x===null);if(x===null)miss.push(i+1);});
+  if(miss.length){warn.hidden=false;warn.textContent="尚有 "+miss.length+" 組未填（已用紅框標示）";
+    res.classList.remove("on");document.getElementById("q"+(miss[0]-1)).scrollIntoView({behavior:"smooth",block:"center"});return;}
+  warn.hidden=true;
+  var t=a.reduce(function(s,x){return s+x;},0),k=t>64?"hi":(t<57?"lo":"mid");
+  document.getElementById("score").textContent=t;
+  document.getElementById("type").textContent={hi:"人際關係導向",mid:"介於兩者之間",lo:"任務導向"}[k];
+  document.getElementById("desc").textContent={hi:"總分高於 64：對最不喜歡共事的同事仍給予正面評價。",mid:"總分介於 57 至 64：介於人際關係導向與任務導向之間。",lo:"總分低於 57：著重提升生產力。"}[k];
+  [].forEach.call(res.querySelectorAll("tr[data-k]"),function(r){r.classList.toggle("me",r.getAttribute("data-k")===k);});
+  res.classList.add("on");res.scrollIntoView({behavior:"smooth",block:"start"});
+});
+document.getElementById("reset").addEventListener("click",function(){
+  f.reset();res.classList.remove("on");warn.hidden=true;prog.textContent="已填 0 / 16";
+  [].forEach.call(f.querySelectorAll("fieldset"),function(x){x.classList.remove("miss");});window.scrollTo({top:0,behavior:"smooth"});
+});
+</script>
+</body>
+</html>
