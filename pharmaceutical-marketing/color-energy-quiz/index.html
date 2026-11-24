@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>四色能量簡易測驗（教學用）</title>
+<style>
+  :root{
+    --bg:#f3f4f8; --card:#ffffff; --ink:#1f2733; --muted:#5b6675; --line:#d5dae3;
+    --accent:#3b4cca; --blue:#1f6fd1; --green:#2a9148; --yellow:#e2ab00; --red:#d43a3a;
+    --notice-bg:#fff6dc; --notice-line:#e2ab00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+    font-size:17px;line-height:1.6}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 16px 110px}
+  h1{font-size:26px;margin:4px 0 6px;text-align:center}
+  .sub{text-align:center;color:var(--muted);margin:0 0 14px}
+  .notice{background:var(--notice-bg);border-left:5px solid var(--notice-line);
+    border-radius:8px;padding:12px 16px;margin:0 0 14px;font-size:16px}
+  .notice b{display:block;margin-bottom:2px}
+  .how{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 16px 12px 36px;margin:0 0 18px}
+  .how li{margin:2px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .word{position:relative}
+  .word input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .word label{display:block;text-align:center;background:var(--card);border:2px solid var(--line);
+    border-radius:10px;padding:10px 6px;min-height:68px;user-select:none}
+  .word .zh{display:block;font-size:17px;font-weight:600}
+  .word .en{display:block;font-size:14px;color:var(--muted)}
+  .word input:checked + label{background:var(--accent);border-color:var(--accent);color:#fff}
+  .word input:checked + label .en{color:#e3e6ff}
+  .word input:focus-visible + label{outline:3px solid #9aa5ff;outline-offset:2px}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+    padding:10px 16px;display:flex;gap:12px;align-items:center;justify-content:center}
+  .count{color:var(--muted);font-size:16px}
+  button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 28px;cursor:pointer;
+    background:var(--accent);color:#fff}
+  button.ghost{background:#e6e9f2;color:var(--ink)}
+  .msg{color:var(--red);font-weight:700;text-align:center;min-height:1.6em;margin:10px 0 0}
+  #result{display:none}
+  .res{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 18px 8px;margin:0 0 16px}
+  .top{font-size:20px;font-weight:700;text-align:center;margin:0 0 14px}
+  .row{margin:0 0 16px}
+  .row .head{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}
+  .row .num{font-size:22px}
+  .row .den{font-size:15px;color:var(--muted);font-weight:400}
+  .track{height:22px;background:#e8ebf2;border-radius:11px;overflow:hidden;margin-top:4px}
+  .fill{height:100%;width:0;border-radius:11px;transition:width .6s}
+  .picked{font-size:15px;color:var(--muted);margin:4px 0 0}
+  .c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-yellow{color:#a87f00} .c-red{color:var(--red)}
+  .f-blue{background:var(--blue)} .f-green{background:var(--green)} .f-yellow{background:var(--yellow)} .f-red{background:var(--red)}
+  .center{text-align:center}
+  footer{color:var(--muted);font-size:14px;text-align:center;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>四色能量簡易測驗（教學用）</h1>
+  <p class="sub">醫藥行銷學　課堂活動</p>
+
+  <div class="notice">
+    <b>本測驗並非官方授權的測評工具</b>
+    這是授課教師為課堂教學自行製作的簡易版練習，未經 Insights Discovery 授權，也不是 Insights Discovery 的正式測評。結果只供課堂討論與自我覺察參考，不代表正式測評結果。
+  </div>
+
+  <section id="quiz">
+    <ol class="how">
+      <li>請點選所有你覺得<b>最能描述自己</b>的形容詞，數量不限。</li>
+      <li>按下「看結果」後，畫面會統計你在藍、綠、黃、紅四種顏色各選了幾個。</li>
+      <li>作答只在你的手機或電腦上計算，不會上傳，也不會儲存。</li>
+    </ol>
+
+    <div class="grid" id="grid"></div>
+    <p class="msg" id="msg" role="alert"></p>
+
+    <div class="bar">
+      <span class="count">已選 <b id="n">0</b> 個</span>
+      <button type="button" id="submit">看結果</button>
+    </div>
+  </section>
+
+  <section id="result">
+    <div class="res">
+      <p class="top" id="top"></p>
+      <div id="rows"></div>
+    </div>
+    <div class="notice">
+      <b>提醒</b>
+      四種顏色的形容詞數量不同（藍 16、綠 14、黃 13、紅 11），所以每一色都同時列出「選了幾個／該色共幾個」。本結果來自教學用的簡易版練習，並非官方授權的正式測評。
+    </div>
+    <p class="center"><button type="button" class="ghost" id="again">重新測驗</button></p>
+  </section>
+
+  <footer>教學用簡易版練習，非官方授權測評｜國立臺北護理健康大學 健康事業管理系 蔡懿玲</footer>
+</div>
+
+<script>
+const WORDS = [
+  ['快樂的','cheerful','yellow'],['深思熟慮的','reflective','green'],['簡潔扼要的','concise','blue'],
+  ['勇於挑戰的','challenging','red'],['關懷他人的','caring','green'],['果斷的','assertive','red'],
+  ['熱情的','enthusiastic','yellow'],['堅決的','determined','red'],['堅定的','firm','red'],
+  ['實事求是的','factual','blue'],['論證有力的','well-argued','blue'],['可靠的','reliable','green'],
+  ['樂於配合的','accommodating','green'],['客觀的','objective','blue'],['活躍的','active','yellow'],
+  ['穩健的','steady','green'],['應對得體的','tactful','blue'],['有趣的','fun','yellow'],
+  ['敏銳的','sensitive','green'],['精確的','accurate','blue'],['具驅動力的','driving','red'],
+  ['始終如一的','constant','green'],['有條理的','structured','blue'],['愛好和平的','harmonious','green'],
+  ['謹慎的','cautious','blue'],['意志堅強的','strong-willed','red'],['目標明確的','purposeful','red'],
+  ['具說服力的','convincing','yellow'],['善於遊說的','persuasive','yellow'],['有耐心的','patient','green'],
+  ['善於交際的','sociable','yellow'],['具影響力的','influencing','yellow'],['善於外交的','diplomatic','blue'],
+  ['合乎邏輯的','logical','blue'],['合作的','co-operative','green'],['強而有力的','forceful','red'],
+  ['外向的','outgoing','yellow'],['勇敢的','courageous','red'],['循規蹈矩的','conventional','blue'],
+  ['樂觀的','optimistic','yellow'],['機動性強的','mobile','yellow'],['友善的','friendly','green'],
+  ['穩定的','stable','green'],['前後一致的','consistent','blue'],['果決的','decisive','red'],
+  ['正確的','correct','blue'],['忠誠的','loyal','green'],['冷靜的','calm','green'],
+  ['大膽的','daring','red'],['善於分析的','analytical','blue'],['具感染力的','engaging','yellow'],
+  ['嚴謹的','exact','blue'],['衝動的','impulsive','yellow'],['務實的','realistic','blue']
+];
+const COLORS = [['blue','藍色 Blue'],['green','綠色 Green'],['yellow','黃色 Yellow'],['red','紅色 Red']];
+const $ = id => document.getElementById(id);
+
+const grid = $('grid');
+WORDS.forEach(([zh,en,color],i) => {
+  const d = document.createElement('div'); d.className = 'word';
+  const inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = 'w'+i; inp.dataset.i = i;
+  const lab = document.createElement('label'); lab.htmlFor = 'w'+i;
+  const a = document.createElement('span'); a.className = 'zh'; a.textContent = zh;
+  const b = document.createElement('span'); b.className = 'en'; b.textContent = en;
+  lab.append(a,b); d.append(inp,lab); grid.append(d);
+});
+
+const checked = () => [...grid.querySelectorAll('input:checked')];
+grid.addEventListener('change', () => { $('n').textContent = checked().length; $('msg').textContent = ''; });
+
+$('submit').addEventListener('click', () => {
+  const sel = checked().map(x => WORDS[+x.dataset.i]);
+  if (!sel.length) { $('msg').textContent = '請至少選一個形容詞'; return; }
+  const total = {}, got = {}, words = {};
+  COLORS.forEach(([c]) => { total[c] = WORDS.filter(w => w[2] === c).length; got[c] = 0; words[c] = []; });
+  sel.forEach(([zh,,c]) => { got[c]++; words[c].push(zh); });
+  const max = Math.max(...COLORS.map(([c]) => got[c]));
+  const tops = COLORS.filter(([c]) => got[c] === max).map(([,name]) => name.split(' ')[0]);
+  $('top').textContent = '你選得最多的顏色：' + tops.join('、') + '（' + max + ' 個）';
+  const rows = $('rows'); rows.textContent = '';
+  COLORS.forEach(([c,name]) => {
+    const row = document.createElement('div'); row.className = 'row';
+    const head = document.createElement('div'); head.className = 'head';
+    const l = document.createElement('span'); l.className = 'c-'+c; l.textContent = name;
+    const r = document.createElement('span');
+    const num = document.createElement('span'); num.className = 'num c-'+c; num.textContent = got[c];
+    const den = document.createElement('span'); den.className = 'den'; den.textContent = ' ／該色共 ' + total[c] + ' 個';
+    r.append(num,den); head.append(l,r);
+    const track = document.createElement('div'); track.className = 'track';
+    const fill = document.createElement('div'); fill.className = 'fill f-'+c; track.append(fill);
+    const p = document.createElement('p'); p.className = 'picked';
+    p.textContent = words[c].length ? '你選的：' + words[c].join('、') : '這個顏色沒有選';
+    row.append(head,track,p); rows.append(row);
+    requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = (got[c] / total[c] * 100) + '%'; }));
+  });
+  $('quiz').style.display = 'none'; $('result').style.display = 'block'; window.scrollTo(0,0);
+});
+
+$('again').addEventListener('click', () => {
+  checked().forEach(x => x.checked = false); $('n').textContent = 0; $('msg').textContent = '';
+  $('result').style.display = 'none'; $('quiz').style.display = 'block'; window.scrollTo(0,0);
+});
+</script>
+</body>
+</html>
