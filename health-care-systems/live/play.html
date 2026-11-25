@@ -25,6 +25,11 @@ button{font:inherit;border:0;border-radius:10px;cursor:pointer}
 .center{text-align:center}
 .big{font-size:44px;font-weight:800;color:var(--ac)}
 .q{font-size:18px;line-height:1.55;font-weight:700}
+.timer{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.timer .bar{flex:1;height:8px;border-radius:99px;background:#dfe7ec;overflow:hidden}
+.timer .bar i{display:block;height:100%;background:var(--ac);transition:width .2s linear}
+.timer b{font-size:22px;min-width:2.2em;text-align:right;color:var(--ac)}
+.timer.hurry .bar i{background:var(--c1)}.timer.hurry b{color:var(--c1)}
 .tag{display:inline-block;font-size:12px;background:var(--ac2);color:var(--ac);padding:2px 8px;border-radius:99px;margin-bottom:8px}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:3px solid #d7dee5;padding:12px 14px;font-size:16px;line-height:1.4;min-height:58px}
@@ -59,6 +64,20 @@ const saveMe = m => { try { localStorage.setItem('liveMe', JSON.stringify(m)); }
 const done = () => { try { return JSON.parse(localStorage.getItem('liveDone_' + sess) || '{}'); } catch (e) { return {}; } };
 const markDone = qk => { try { const d = done(); d[qk] = 1; localStorage.setItem('liveDone_' + sess, JSON.stringify(d)); } catch (e) {} };
 let uid, sess, me, st, mine = null, seq = 0, entered = false;
+// 倒數：依投影端寫入的 startAt（伺服器時間）＋dur 計算；時間到由投影端收題
+let srvOffset = 0;
+db.ref('.info/serverTimeOffset').on('value', s => srvOffset = s.val() || 0);
+const timeLeft = () => st && st.phase === 'open' && st.dur > 0 && st.startAt ? Math.max(0, (st.startAt + st.dur * 1000 - Date.now() - srvOffset) / 1000) : null;
+function timerHtml() {
+  const left = timeLeft(); if (left == null) return '';
+  return `<div class="timer${left <= 5 ? ' hurry' : ''}" id="tm"><div class="bar"><i style="width:${(left / st.dur * 100).toFixed(1)}%"></i></div><b>${Math.ceil(left)}</b></div>`;
+}
+setInterval(() => {
+  const el = document.getElementById('tm'), left = timeLeft(); if (!el || left == null) return;
+  el.classList.toggle('hurry', left <= 5);
+  el.querySelector('i').style.width = (left / st.dur * 100).toFixed(1) + '%';
+  el.querySelector('b').textContent = Math.ceil(left);
+}, 250);
 
 firebase.auth().signInAnonymously().catch(e => show(`<div class="card">無法連線：${esc(e.message)}</div>`));
 firebase.auth().onAuthStateChanged(async u => {
@@ -172,7 +191,7 @@ async function render() {
 
 function head() {
   const t = st.q.type === 'cloud' ? '文字雲' : '選擇題';
-  return `<div><span class="tag">${periodTxt()}・${t}</span><div class="q">${esc(st.q.text)}</div></div>`;
+  return `${timerHtml()}<div><span class="tag">${periodTxt()}・${t}</span><div class="q">${esc(st.q.text)}</div></div>`;
 }
 
 function choiceQ() {
@@ -183,12 +202,15 @@ function choiceQ() {
 }
 
 function cloudQ() {
-  show(`${head()}<div class="card"><input id="cv" maxlength="${CFG.cloudMax}" placeholder="寫一個詞或短句（最多 ${CFG.cloudMax} 字）" value="${esc(mine || '')}" autocomplete="off">
+  // 老師按「＋15 秒」等狀態更新會重畫畫面：保留學生正在打的字與游標
+  const old = document.getElementById('cv'), typing = old && old.dataset.qk === st.qk ? old.value : null, focused = old && document.activeElement === old;
+  show(`${head()}<div class="card"><input id="cv" data-qk="${esc(st.qk)}" maxlength="${CFG.cloudMax}" placeholder="寫一個詞或短句（最多 ${CFG.cloudMax} 字）" value="${esc(typing ?? mine ?? '')}" autocomplete="off">
     <button class="go" id="cGo">送出</button><div class="err" id="cErr"></div></div>
     ${mine ? `<div class="sent">已送出「${esc(mine)}」，老師收題前都可以改</div>` : '<p class="note">答案會匿名出現在投影畫面的文字雲</p>'}`);
   const go = () => { const v = document.getElementById('cv').value.trim(); if (v) send(v.slice(0, CFG.cloudMax)); else document.getElementById('cErr').textContent = '請先輸入內容'; };
   document.getElementById('cGo').onclick = go;
   document.getElementById('cv').onkeydown = e => { if (e.key === 'Enter') go(); };
+  if (focused) document.getElementById('cv').focus();
 }
 
 async function send(v) {

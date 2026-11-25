@@ -68,6 +68,10 @@ h1{font-size:calc(var(--u)*2.6)}h2{font-size:calc(var(--u)*1.9)}
 .setup select,.setup input{font:inherit;padding:6px}
 .setup .btn{font-size:17px;padding:10px 20px;margin-top:18px;margin-right:8px}
 .ok{color:var(--c4)}.ng{color:var(--warn)}
+.cd{--p:100;flex:none;width:calc(var(--u)*6.4);height:calc(var(--u)*6.4);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:calc(var(--u)*2.8);font-weight:900;color:var(--ac);background:radial-gradient(#fff 62%,transparent 63%),conic-gradient(var(--ac) calc(var(--p)*1%),#dfe7ec 0)}
+.cd.hurry{color:var(--warn);background:radial-gradient(#fff 62%,transparent 63%),conic-gradient(var(--warn) calc(var(--p)*1%),#f6d6d3 0);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
 </style>
 </head>
 <body>
@@ -91,6 +95,96 @@ const LS = { get: (k, d) => { try { const v = localStorage.getItem(k); return v 
 let uid, sess = null, meta = {}, st = { phase: 'idle', period: 1 };
 let Q = [], roster = [], players = {}, ids = {}, ans = {}, log = {}, showDist = false, hidden = {};
 const R = p => db.ref(`live/${sess}/${p}`);
+
+// ================= 音樂（Web Audio 即時合成，無版權問題；只在開題作答時播放） =================
+const AU = { ctx: null, master: null, loop: null, muted: LS.get('liveMuted', false) };
+function audioInit() {
+  try {
+    if (AU.ctx) return AU.ctx.resume();
+    AU.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    AU.master = AU.ctx.createGain(); AU.master.gain.value = AU.muted ? 0 : .45; AU.master.connect(AU.ctx.destination);
+  } catch (e) {}
+}
+function tone(f, t, d, type = 'sine', v = .3) {
+  const c = AU.ctx, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  o.connect(g).connect(AU.master); o.start(t); o.stop(t + d + .02);
+}
+function noise(t, d, v = .2, hp = 6000) {
+  const c = AU.ctx, b = c.createBuffer(1, Math.max(1, c.sampleRate * d | 0), c.sampleRate), a = b.getChannelData(0);
+  for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1;
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  f.type = 'highpass'; f.frequency.value = hp; s.buffer = b;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+  s.connect(f).connect(g).connect(AU.master); s.start(t);
+}
+function kick(t) {
+  const c = AU.ctx, o = c.createOscillator(), g = c.createGain();
+  o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .15);
+  g.gain.setValueAtTime(.7, t); g.gain.exponentialRampToValueAtTime(.001, t + .2);
+  o.connect(g).connect(AU.master); o.start(t); o.stop(t + .22);
+}
+// 作答配樂：輕快循環（沒有倒數，所以不加速）；選擇題與文字雲用不同和弦走向
+function music(kind) {
+  stopMusic(); if (!AU.ctx) return;
+  const c = AU.ctx; let next = c.currentTime + .05, step = 0, lastSec = null;
+  const chords = kind === 'cloud'
+    ? [[174.6, 523, 659, 880], [130.8, 523, 659, 784], [146.8, 440, 587, 698], [196, 494, 587, 784]]
+    : [[110, 440, 523, 659], [87.3, 440, 523, 698], [130.8, 392, 523, 659], [98, 392, 494, 587]];
+  AU.loop = setInterval(() => {
+    const left = timeLeft(), hurry = left != null && left <= HURRY;
+    if (hurry) { const sec = Math.ceil(left); if (sec !== lastSec && sec > 0) { lastSec = sec; sfx.tick(sec <= 3); } }
+    while (next < c.currentTime + .12) {
+      const bpm = hurry ? 172 : kind === 'cloud' ? 100 : 120, sx = 60 / bpm / 4; // 十六分音符；最後幾秒加速
+      const ch = chords[(step >> 4) % 4], s = step % 16;
+      if (s % 4 === 0) kick(next);
+      if (s % 8 === 4) noise(next, .08, .09, 2500);           // 拍手
+      if (s % 2 === 1) noise(next, .03, .035);                // 腳踏鈸
+      if (s % 4 === 0 || s % 4 === 3) tone(ch[0], next, .16, 'triangle', .2); // 貝斯
+      if (s % 2 === 0) tone(ch[1 + (s >> 1) % 3] * ((s >> 3) % 2 ? 2 : 1), next, .14, 'sine', .07); // 琶音
+      next += sx; step++;
+    }
+  }, 25);
+}
+function stopMusic() { clearInterval(AU.loop); AU.loop = null; }
+function setMute(m) { AU.muted = m; LS.set('liveMuted', m); if (AU.master) AU.master.gain.value = m ? 0 : .45; const b = document.getElementById('topbar'); if (b) b.innerHTML = topbar(); }
+const sfx = {
+  tick(hi) { AU.ctx && tone(hi ? 1320 : 880, AU.ctx.currentTime, .08, 'square', .1); },
+  gong() { if (!AU.ctx) return; const t = AU.ctx.currentTime; tone(98, t, 2, 'sine', .6); tone(196, t, 1.4, 'triangle', .22); noise(t, .4, .18, 1500); },
+  start() { if (!AU.ctx) return; const t = AU.ctx.currentTime; [523, 784, 1047].forEach((f, i) => tone(f, t + i * .07, .25, 'triangle', .15)); },
+  reveal() { if (!AU.ctx) return; const t = AU.ctx.currentTime; [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * .09, .4, 'triangle', .2)); }
+};
+// 依投影狀態切換音樂：開題→播放；收題→停止＋公布音效；其他→停止
+let musicKey = '';
+function syncMusic() {
+  const key = st.phase === 'open' ? 'open:' + st.qk : st.phase === 'reveal' ? 'reveal:' + st.qk : st.phase;
+  if (key === musicKey) return;
+  const prev = musicKey; musicKey = key;
+  if (st.phase === 'open') { sfx.start(); music(st.q && st.q.type === 'cloud' ? 'cloud' : 'choice'); }
+  else { stopMusic(); if (st.phase === 'reveal' && prev.startsWith('open:')) (st.timeUp ? sfx.gong : sfx.reveal)(); }
+}
+
+// ================= 倒數計時 =================
+// 預設秒數：選擇題 30 秒、文字雲 60 秒；題目檔可加「秒數」欄逐題指定（0＝不限時）
+const DEF_DUR = { choice: 30, cloud: 60 }, HURRY = 5; // 最後 5 秒音樂加速＋滴答聲
+let srvOffset = 0, cdTimer = null, timingUp = false;
+db.ref('.info/serverTimeOffset').on('value', s => srvOffset = s.val() || 0);
+const now = () => Date.now() + srvOffset;
+function timeLeft() { return st.phase === 'open' && st.dur > 0 && st.startAt ? Math.max(0, (st.startAt + st.dur * 1000 - now()) / 1000) : null; }
+function cdHtml() {
+  if (st.phase !== 'open' || !(st.dur > 0)) return '';
+  const left = timeLeft() ?? st.dur, s = Math.ceil(left); // 每次作答都會重畫，先填好數字避免閃爍
+  return `<span id="cd" class="cd${s <= HURRY ? ' hurry' : ''}" style="--p:${(left / st.dur * 100).toFixed(1)}">${s}</span><button class="btn ghost sm" onclick="addTime(15)">＋15 秒</button>`;
+}
+function cdTick() {
+  const left = timeLeft(), el = document.getElementById('cd');
+  if (left == null) return;
+  if (el) { const s = Math.ceil(left); el.textContent = s; el.classList.toggle('hurry', s <= HURRY); el.style.setProperty('--p', (left / st.dur * 100).toFixed(1)); }
+  if (left <= 0 && !timingUp) { timingUp = true; reveal(true).finally(() => timingUp = false); }
+}
+function syncTimer() { clearInterval(cdTimer); cdTimer = null; if (timeLeft() != null) { cdTimer = setInterval(cdTick, 200); cdTick(); } }
+async function addTime(sec) { audioInit(); const left = timeLeft() || 0; await R('state').update({ startAt: TS, dur: Math.ceil(left) + sec }); }
 
 // ================= CSV =================
 function parseCSV(txt) {
@@ -123,7 +217,8 @@ function toQuestions(txt) {
   return rows.slice(1).filter(r => g(r, '題號')).map(r => ({
     id: g(r, '題號').replace(/[^A-Za-z0-9_-]/g, ''), period: g(r, '堂次') === '2' ? 2 : 1, slot: g(r, '時機'),
     type: /雲|cloud/i.test(g(r, '題型')) ? 'cloud' : 'choice', cat: g(r, '類別'), text: g(r, '題目'),
-    opts: ['選項A', '選項B', '選項C', '選項D'].map(n => g(r, n)), correct: g(r, '正解').toUpperCase().replace(/[^A-D]/g, '').slice(0, 1), src: g(r, '來源')
+    opts: ['選項A', '選項B', '選項C', '選項D'].map(n => g(r, n)), correct: g(r, '正解').toUpperCase().replace(/[^A-D]/g, '').slice(0, 1), src: g(r, '來源'),
+    dur: /^\d+$/.test(g(r, '秒數')) ? +g(r, '秒數') : null // 選填；空白＝預設秒數，0＝不限時
   }));
 }
 // 名單檔：找含「學號」「姓名」的標題列；只存在這台電腦的瀏覽器，不上傳
@@ -162,8 +257,8 @@ function setup(msg = '') {
     try { LS.set('liveRoster_' + cl(), toRoster(await readFile(e.target.files[0]))); ri(); }
     catch (err) { document.getElementById('rinfo').textContent = err.message; }
   };
-  document.getElementById('go').onclick = () => create(document.getElementById('cls').value);
-  if (last) document.getElementById('resume').onclick = () => attach(last.code);
+  document.getElementById('go').onclick = () => { audioInit(); create(document.getElementById('cls').value); };
+  if (last) document.getElementById('resume').onclick = () => { audioInit(); attach(last.code); };
 }
 
 async function create(cls) {
@@ -184,7 +279,7 @@ async function attach(code) {
   const m = await db.ref(`live/${code}/meta`).get().catch(() => null);
   if (!m || !m.exists() || m.val().host !== uid) { LS.set('liveHostSess', null); return setup('找不到這個課堂，或不是這台電腦建立的'); }
   sess = code; meta = m.val(); Q = LS.get('liveQ', []); roster = LS.get('liveRoster_' + meta.cls, []); hidden = LS.get('liveHidden_' + code, {});
-  R('state').on('value', s => { st = s.val() || { phase: 'idle', period: 1 }; if (st.phase === 'ended') return; render(); });
+  R('state').on('value', s => { st = s.val() || { phase: 'idle', period: 1 }; syncMusic(); syncTimer(); if (st.phase === 'ended') return; render(); });
   R('players').on('value', s => { players = s.val() || {}; tick(); });
   R('ids').on('value', s => { ids = s.val() || {}; tick(); });
   R('ans').on('value', s => { ans = s.val() || {}; tick(); });
@@ -201,6 +296,7 @@ function topbar() {
     <span>代碼 <b>${esc(sess)}</b></span><span>已簽到 <b>${joined()}</b> 人</span>
     <span class="seg"><button class="${p === 1 ? 'on' : ''}" onclick="setPeriod(1)">第一堂</button><button class="${p === 2 ? 'on' : ''}" onclick="setPeriod(2)">第二堂</button></span>
     <span class="sp"></span>
+    <button class="btn ghost sm" onclick="audioInit();setMute(${!AU.muted})" title="作答時的背景音樂">${AU.muted ? '🔇 音樂關' : '🔊 音樂開'}</button>
     ${st.phase !== 'idle' ? '<button class="btn ghost sm" onclick="goHome()">簽到畫面</button>' : ''}
     <button class="btn sm" onclick="openDrawer()">題目</button>
     <button class="btn ghost sm" onclick="openAtt()">點名（勿投影）</button>
@@ -254,8 +350,8 @@ function choiceHtml() {
       ${show ? `<div class="fill L${i + 1}" style="width:${c[LET[i]] / max * 100}%"></div>` : ''}<span class="L L${i + 1}">${LET[i]}</span><span class="t">${esc(o)}</span>${show ? `<span class="n">${c[LET[i]]}</span>` : ''}</div>` : '').join('');
   const btns = rev
     ? `<button class="btn" onclick="goHome()">回簽到畫面</button>${nextBtn()}`
-    : `<button class="btn ghost" onclick="toggleDist()">${showDist ? '隱藏分布' : '顯示分布'}</button><button class="btn" onclick="reveal()">收題並公布${st.correct ? '答案' : '結果'}</button>`;
-  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${n}</b> / ${joined()}</span><span class="sp"></span>${btns}</div><div class="opts">${opts}</div>`;
+    : `${cdHtml()}<button class="btn ghost" onclick="toggleDist()">${showDist ? '隱藏分布' : '顯示分布'}</button><button class="btn" onclick="reveal()">收題並公布${st.correct ? '答案' : '結果'}</button>`;
+  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${n}</b> / ${joined()}</span>${timeUpTag()}<span class="sp"></span>${btns}</div><div class="opts">${opts}</div>`;
 }
 const norm = s => String(s).trim().replace(/[\s。，、！？!?,.~～]+/g, '').toLowerCase();
 function cloudHtml() {
@@ -265,10 +361,11 @@ function cloudHtml() {
   const cols = ['#0e6a63', '#2f6fdb', '#e2483d', '#d89a00', '#2c9a52', '#7b4bb7', '#16283c'];
   const order = []; arr.forEach((w, i) => i % 2 ? order.push(w) : order.unshift(w)); // 大字放中間
   const words = order.map(([k, w], i) => `<span data-k="${esc(k)}" onclick="hideWord(this.dataset.k)" title="點一下隱藏" style="font-size:calc(var(--u)*${(1.4 + 4.2 * Math.sqrt(w.n / max)).toFixed(2)});color:${cols[[...k].reduce((h, c) => h + c.codePointAt(0), 0) % cols.length]}">${esc(w.t)}</span>`).join('');
-  const btns = st.phase === 'reveal' ? `<button class="btn" onclick="goHome()">回簽到畫面</button>${nextBtn()}` : `<button class="btn" onclick="reveal()">收題</button>`;
-  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${Object.keys(a).length}</b> / ${joined()}</span><span class="muted" style="font-size:calc(var(--u)*1)">點文字可隱藏不當內容</span><span class="sp"></span>${btns}</div>
+  const btns = st.phase === 'reveal' ? `<button class="btn" onclick="goHome()">回簽到畫面</button>${nextBtn()}` : `${cdHtml()}<button class="btn" onclick="reveal()">收題</button>`;
+  return `${qHead()}<div class="bar"><span class="cnt">已作答 <b>${Object.keys(a).length}</b> / ${joined()}</span>${timeUpTag()}<span class="muted" style="font-size:calc(var(--u)*1)">點文字可隱藏不當內容</span><span class="sp"></span>${btns}</div>
     <div class="cloud">${words || '<span class="muted" style="font-size:calc(var(--u)*1.6);cursor:default">等待回答…</span>'}</div>`;
 }
+const timeUpTag = () => st.phase === 'reveal' && st.timeUp ? '<span class="ng" style="font-size:calc(var(--u)*1.6);font-weight:800">時間到！</span>' : '';
 function hideWord(k) { hidden[st.qk + '|' + k] = 1; LS.set('liveHidden_' + sess, hidden); lastView = ''; render(); }
 function toggleDist() { showDist = !showDist; lastView = ''; render(); }
 function nextQ() { return Q.find(q => !log[q.id] && q.period === (st.period || 1)); }
@@ -279,14 +376,19 @@ async function setPeriod(p) { await R('state/period').set(p); }
 async function goHome() { showDist = false; await R('state').set({ phase: 'idle', period: st.period || 1 }); }
 async function openQ(id, adhoc) {
   const q = adhoc || Q.find(x => x.id === id); if (!q) return;
-  closeLayer(); showDist = false;
+  audioInit(); closeLayer(); showDist = false;
   const period = log[q.id] ? log[q.id].period : (st.period || 1);
   if (!log[q.id]) await R(`log/${q.id}`).set({ period, type: q.type, cat: q.cat || '', text: q.text, opts: q.opts, correct: q.correct || '', slot: q.slot || '', src: q.src || '', openedAt: TS });
-  await R('state').set({ phase: 'open', period: st.period || 1, qk: q.id, q: { type: q.type, text: q.text, opts: q.type === 'cloud' ? [] : q.opts } });
+  const dur = q.dur != null && q.dur !== '' ? +q.dur : DEF_DUR[q.type];
+  await R('state').set({ phase: 'open', period: st.period || 1, qk: q.id, startAt: TS, dur, q: { type: q.type, text: q.text, opts: q.type === 'cloud' ? [] : q.opts } });
 }
-async function reveal() { await R('state').update({ phase: 'reveal', correct: (Q.find(x => x.id === st.qk) || log[st.qk] || {}).correct || '' }); }
+async function reveal(timeUp) {
+  if (st.phase !== 'open') return;
+  await R('state').update({ phase: 'reveal', timeUp: !!timeUp, correct: (Q.find(x => x.id === st.qk) || log[st.qk] || {}).correct || '' });
+}
 async function endSession() {
   if (!confirm('結束課堂？\n學生手機會顯示「互動結束」並斷線，之後不能再作答。\n（建議先按「匯出」）')) return;
+  stopMusic(); musicKey = '';
   await R('state').set({ phase: 'ended', period: st.period || 1 });
   LS.set('liveHostSess', null);
   ['state', 'players', 'ids', 'ans', 'log'].forEach(p => R(p).off());
@@ -299,13 +401,14 @@ function openDrawer() {
   layer.innerHTML = `<div class="drawer" onclick="if(event.target===this)closeLayer()"><div id="dr"></div></div>`; refreshLayer();
 }
 function drawerHtml() {
-  const rows = Q.map(q => `<tr class="${log[q.id] ? 'opened' : ''}"><td>${esc(q.id)}</td><td>${q.period}</td><td>${esc(q.slot)}</td><td>${q.type === 'cloud' ? '文字雲' : '選擇'}</td><td>${esc(q.cat)}</td>
+  const rows = Q.map(q => `<tr class="${log[q.id] ? 'opened' : ''}"><td>${esc(q.id)}</td><td>${q.period}</td><td>${esc(q.slot)}</td><td>${q.type === 'cloud' ? '文字雲' : '選擇'}</td><td>${(q.dur ?? DEF_DUR[q.type]) || '不限'}</td><td>${esc(q.cat)}</td>
      <td>${esc(q.text)}${q.correct ? `<div class="muted" style="font-size:12px">正解 ${q.correct}</div>` : ''}</td>
      <td><button class="btn${log[q.id] ? ' ghost' : ''}" onclick="openQ('${q.id}')">${log[q.id] ? '再開' : '開題'}</button></td></tr>`).join('');
   return `<div style="display:flex;align-items:center;gap:10px"><h2 style="font-size:22px">題目清單</h2><span class="muted">目前：${st.period === 2 ? '第二堂' : '第一堂'}（開題會記在目前堂次）</span><span class="sp"></span><button class="btn ghost" onclick="closeLayer()">關閉</button></div>
-    ${Q.length ? `<table><tr><th>題號</th><th>堂</th><th>時機</th><th>題型</th><th>類別</th><th>題目</th><th></th></tr>${rows}</table>` : '<p class="muted" style="margin-top:12px">沒有載入題目檔，可用下方臨時出題。</p>'}
+    ${Q.length ? `<table><tr><th>題號</th><th>堂</th><th>時機</th><th>題型</th><th>秒數</th><th>類別</th><th>題目</th><th></th></tr>${rows}</table>` : '<p class="muted" style="margin-top:12px">沒有載入題目檔，可用下方臨時出題。</p>'}
     <div class="adhoc"><b>臨時出題</b>
-      <div style="margin:6px 0"><select id="ahT" onchange="document.getElementById('ahO').style.display=this.value==='cloud'?'none':''"><option value="choice">選擇題</option><option value="cloud">文字雲</option></select></div>
+      <div style="margin:6px 0"><select id="ahT" onchange="document.getElementById('ahO').style.display=this.value==='cloud'?'none':''"><option value="choice">選擇題</option><option value="cloud">文字雲</option></select>
+        倒數 <input id="ahD" type="number" min="0" step="5" style="width:70px" placeholder="預設"> 秒（空白＝選擇 ${DEF_DUR.choice}／文字雲 ${DEF_DUR.cloud}；0＝不限時）</div>
       <textarea id="ahQ" placeholder="題目"></textarea>
       <div id="ahO"><div class="g">${LET.map(l => `<input id="ah${l}" placeholder="選項 ${l}（可留空）">`).join('')}</div>
       正解 <select id="ahC"><option value="">無（意見調查）</option>${LET.map(l => `<option>${l}</option>`).join('')}</select></div>
@@ -316,7 +419,7 @@ function adhoc() {
   if (!text) return alert('請輸入題目');
   const opts = LET.map(l => document.getElementById('ah' + l).value.trim());
   if (type === 'choice' && opts.filter(Boolean).length < 2) return alert('選擇題至少兩個選項');
-  const q = { id: 'X' + Date.now().toString(36).toUpperCase().slice(-5), type, text, opts, correct: type === 'choice' ? document.getElementById('ahC').value : '', cat: '臨時', slot: '', src: '' };
+  const q = { id: 'X' + Date.now().toString(36).toUpperCase().slice(-5), type, text, opts, correct: type === 'choice' ? document.getElementById('ahC').value : '', cat: '臨時', slot: '', src: '', dur: document.getElementById('ahD').value === '' ? null : Math.max(0, +document.getElementById('ahD').value || 0) };
   openQ(q.id, q);
 }
 function closeLayer() { layer.innerHTML = ''; }
